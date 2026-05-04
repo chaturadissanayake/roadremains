@@ -1,0 +1,30 @@
+{
+  "id": "w4_transition",
+  "week": 4,
+  "location": "transition",
+  "background": "bg_main_menu",
+  "lines": [
+    {
+      "id": "w4_tr_01",
+      "type": "narration",
+      "text": "Week 3 of 6",
+      "advance": "auto"
+    },
+    {
+      "id": "w4_tr_02",
+      "type": "narration",
+      "text": "Registration is closed. Whatever you did — or did not do — in the last four weeks is now fixed. The election is three weeks away.",
+      "advance": "click"
+    },
+    {
+      "id": "w4_tr_03",
+      "type": "narration",
+      "text": "Next: The official candidate list has been posted. Uncle Sirisena has a different version.",
+      "advance": "click"
+    }
+  ],
+  "on_complete": {
+    "goto": "w3_ec_board_candidates",
+    "week_set": 3
+  }
+}

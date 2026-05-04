@@ -1,0 +1,45 @@
+{
+  "id": "w4_registration_deadline_missed",
+  "week": 4,
+  "location": "grama_office",
+  "background": "bg_grama_office",
+  "portraits": {
+    "left": "char_karunasena_worried",
+    "right": "npc_nandadasa_neutral"
+  },
+  "flags_set_on_enter": [
+    "registrationDeadlineMissed"
+  ],
+  "gauges_on_enter": {
+    "ih": -20,
+    "vp": -30
+  },
+  "achievement": "the_door_was_right_there",
+  "lines": [
+    {
+      "id": "w4_rdm_01",
+      "type": "dialogue",
+      "speaker": "Nandadasa Mahaththaya",
+      "portrait_state": "npc_nandadasa_neutral",
+      "text": "The registration period has closed. If you did not complete your registration before today, you will not be able to vote as a new registrant in this election.",
+      "advance": "click"
+    },
+    {
+      "id": "w4_rdm_02",
+      "type": "dialogue",
+      "speaker": "Nandadasa Mahaththaya",
+      "portrait_state": "npc_nandadasa_neutral",
+      "text": "If you were already registered in a previous cycle, check your polling division assignment on the notice board. That may still be valid.",
+      "advance": "click"
+    },
+    {
+      "id": "w4_rdm_03",
+      "type": "narration",
+      "text": "The door was open every week. It is closed now. The game does not stop. But something permanent has changed.",
+      "advance": "click"
+    }
+  ],
+  "on_complete": {
+    "goto": "w4_map"
+  }
+}

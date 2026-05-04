@@ -1,0 +1,41 @@
+{
+  "id": "w5_ec_board_verify",
+  "week": 5,
+  "location": "ec_board",
+  "background": "bg_ec_board",
+  "portraits": {
+    "left": "char_karunasena_neutral",
+    "right": null
+  },
+  "flags_increment_on_enter": {
+    "verifiedAtBoardCount": 1
+  },
+  "gauges_on_enter": {
+    "ct": 10,
+    "ih": 15,
+    "vp": 5
+  },
+  "lines": [
+    {
+      "id": "w5_ecv_01",
+      "type": "notice",
+      "card": {
+        "header": "ELECTIONS COMMISSION OF SRI LANKA",
+        "title": "POLLING STATION ASSIGNMENT",
+        "body": "All voters must attend their ASSIGNED polling station on election day.\n\nYou cannot vote at any station of your choice. Your polling station is determined by your registered address.\n\nYour polling station assignment is printed on your voter registration confirmation or can be checked at the Grama Sevaka Office.",
+        "footer": "Elections Commission of Sri Lanka — Official Notice"
+      },
+      "advance": "click"
+    },
+    {
+      "id": "w5_ecv_02",
+      "type": "narration",
+      "text": "The voice note was false. Voters must go to their assigned station. Anyone who believed it and went to a different station on election day would be turned away.",
+      "advance": "click"
+    }
+  ],
+  "achievement": "the_algorithm_would_hate_you",
+  "on_complete": {
+    "goto": "w5_map"
+  }
+}

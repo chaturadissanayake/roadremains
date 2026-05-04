@@ -1,0 +1,29 @@
+{
+  "id": "w6_boutique_listen",
+  "week": 6,
+  "location": "boutique",
+  "background": "bg_boutique",
+  "portraits": {
+    "left": "char_karunasena_neutral",
+    "right": "npc_mudalali_talking"
+  },
+  "lines": [
+    {
+      "id": "w6_bl_01",
+      "type": "dialogue",
+      "speaker": "Mudalali Perera",
+      "portrait_state": "npc_mudalali_talking",
+      "text": "I have voted for the same party since 1977. You know why? Consistency. This country needs consistency. Not all this changing every five years.",
+      "advance": "click"
+    },
+    {
+      "id": "w6_bl_02",
+      "type": "narration",
+      "text": "He said this while handing you a Milo. You did not ask for a Milo. He has already charged you for it.",
+      "advance": "click"
+    }
+  ],
+  "on_complete": {
+    "goto": "w6_map"
+  }
+}

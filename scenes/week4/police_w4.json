@@ -1,0 +1,55 @@
+{
+  "id": "w4_police",
+  "week": 4,
+  "location": "police",
+  "background": "bg_police",
+  "portraits": {
+    "left": "char_karunasena_neutral",
+    "right": "npc_sergeant_talking"
+  },
+  "lines": [
+    {
+      "id": "w4_p_01",
+      "type": "dialogue",
+      "speaker": "Sergeant Wickramasinghe",
+      "portrait_state": "npc_sergeant_talking",
+      "text": "What can I do for you?",
+      "advance": "click"
+    },
+    {
+      "id": "w4_p_4am",
+      "type": "dialogue",
+      "speaker": "Sergeant Wickramasinghe",
+      "portrait_state": "npc_sergeant_amused",
+      "condition": "flags.sharedFake4amMessage",
+      "text": "The 4am message. I have had three calls about it this morning. The polling station opens at 7am. The EC logo on the real notices has the Sinha on the left and a reference number in the footer. That notice had neither. A detail. But details are the point.",
+      "advance": "click"
+    },
+    {
+      "id": "w4_p_choice",
+      "type": "choice",
+      "prompt": "Is there anything you want to report?",
+      "choices": [
+        {
+          "id": "w4_p_choice_a",
+          "label": "Report campaign posters on the Grama Sevaka Office wall.",
+          "goto": "w4_police_report_posters",
+          "flags_set": [
+            "reportedIllegalPosters"
+          ],
+          "gauges": {
+            "ct": 15,
+            "ih": 5,
+            "vp": 10
+          }
+        },
+        {
+          "id": "w4_p_choice_b",
+          "label": "Nothing to report right now.",
+          "goto": "w4_map",
+          "gauges": {}
+        }
+      ]
+    }
+  ]
+}

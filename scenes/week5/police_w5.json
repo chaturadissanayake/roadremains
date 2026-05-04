@@ -1,0 +1,49 @@
+{
+  "id": "w5_police_optional",
+  "week": 5,
+  "location": "police",
+  "background": "bg_police",
+  "portraits": {
+    "left": "char_karunasena_neutral",
+    "right": "npc_sergeant_talking"
+  },
+  "lines": [
+    {
+      "id": "w5_po_01",
+      "type": "dialogue",
+      "speaker": "Sergeant Wickramasinghe",
+      "portrait_state": "npc_sergeant_talking",
+      "text": "What can I do for you?",
+      "advance": "click"
+    },
+    {
+      "id": "w5_po_02",
+      "type": "dialogue",
+      "speaker": "Sergeant Wickramasinghe",
+      "portrait_state": "npc_sergeant_neutral",
+      "text": "Election law. Campaign violations. Electoral procedure. That is what I am here for. If you have a question, ask it.",
+      "advance": "click"
+    },
+    {
+      "id": "w5_po_choice",
+      "type": "choice",
+      "prompt": "Do you have anything to report or ask?",
+      "choices": [
+        {
+          "id": "w5_po_choice_a",
+          "label": "Ask about voter intimidation — what counts as a violation?",
+          "goto": "w5_police_intimidation_info",
+          "gauges": {
+            "ih": 10
+          }
+        },
+        {
+          "id": "w5_po_choice_b",
+          "label": "Nothing specific right now. Just getting familiar.",
+          "goto": "w5_map",
+          "gauges": {}
+        }
+      ]
+    }
+  ]
+}
