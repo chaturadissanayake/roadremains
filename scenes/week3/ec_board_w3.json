@@ -1,0 +1,69 @@
+{
+  "id": "w3_ec_board_candidates",
+  "week": 3,
+  "location": "ec_board",
+  "background": "bg_ec_board",
+  "portraits": {
+    "left": "char_karunasena_neutral",
+    "right": null
+  },
+  "flags_increment_on_enter": {
+    "verifiedAtBoardCount": 1
+  },
+  "gauges_on_enter": {
+    "ct": 5,
+    "ih": 10,
+    "vp": 5
+  },
+  "lines": [
+    {
+      "id": "w3_ecb_01",
+      "type": "narration",
+      "text": "The notice board has been updated. A new printed sheet — the official candidate list — has been laminated and added.",
+      "advance": "click"
+    },
+    {
+      "id": "w3_ecb_02",
+      "type": "notice",
+      "card": {
+        "header": "ELECTIONS COMMISSION OF SRI LANKA",
+        "title": "OFFICIAL CANDIDATE LIST — Alupotha Electoral Division",
+        "body": "1. Mahinda Bandara\n2. R.M. Sumedha Kumari\n3. T. Velupillai\n4. W.A. Chandrasiri",
+        "footer": "Elections Commission of Sri Lanka — Reference No. EC/2025/CL/12"
+      },
+      "advance": "click"
+    },
+    {
+      "id": "w3_ecb_compare",
+      "type": "narration",
+      "condition": "flags.sharedFakeCandidateList_w3",
+      "text": "The list Uncle Sirisena shared had 'Pradeep Fernando' and 'Lalith Herath' on it. Neither name is here. And there is a W.A. Chandrasiri on the official list who was not in Uncle Sirisena's version at all.",
+      "advance": "click"
+    },
+    {
+      "id": "w3_ecb_sandya_prompt",
+      "type": "narration",
+      "text": "You notice something in the bottom corner of the board — small, easy to miss. Not from the Elections Commission.",
+      "advance": "click"
+    },
+    {
+      "id": "w3_ecb_choice",
+      "type": "choice",
+      "prompt": "There is a small handwritten note pinned to the corner of the board.",
+      "choices": [
+        {
+          "id": "w3_ecb_choice_a",
+          "label": "Read the handwritten note.",
+          "goto": "w3_ec_board_sandya_note",
+          "gauges": {}
+        },
+        {
+          "id": "w3_ecb_choice_b",
+          "label": "Leave it. It is not an official notice.",
+          "goto": "w3_map",
+          "gauges": {}
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "id": "w0.kumu.polling.01",
+  "npc": "Presiding Officer",
+  "portrait": "Assets/npcs/npc_nandadasa_neutral.png",
+  "initials": "PO",
+  "dialogue": [
+    "<em>The presiding officer is giving verbal instructions in rapid Sinhala. You catch most of it. The word for 'preference vote' — he uses a term you have not heard before.</em>",
+    "<em>He mispronounced your name on the register. 'Kumaran' became something three syllables wrong.</em>",
+    "<em>It is still you. You correct it gently. He notes it, stamps it, nods.</em>"
+  ],
+  "options": [
+    {
+      "text": "Ask him to repeat the instructions more slowly.",
+      "effect": { "ih": 10, "vp": 5 },
+      "redirect": "scenes/week0/polling_vote.json",
+      "consequence": "He does. He appreciates being asked. You understand the instructions clearly now."
+    },
+    {
+      "text": "You think you understood. Proceed.",
+      "effect": { "ih": -5 },
+      "redirect": "scenes/week0/polling_vote.json",
+      "consequence": "You nod and take the ballot, hoping you caught the details right."
+    }
+  ]
+}

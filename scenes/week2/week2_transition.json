@@ -1,0 +1,30 @@
+{
+  "id": "w2_transition",
+  "week": 2,
+  "location": "transition",
+  "background": "bg_main_menu",
+  "lines": [
+    {
+      "id": "w2_tr_01",
+      "type": "narration",
+      "text": "Week 1 of 6 — Campaign closes.",
+      "advance": "auto"
+    },
+    {
+      "id": "w2_tr_02",
+      "type": "narration",
+      "text": "After this week, Mahinda Bandara no longer gives interviews. His manifesto can still be read. But the conversation about his promises is no longer available.",
+      "advance": "click"
+    },
+    {
+      "id": "w2_tr_03",
+      "type": "narration",
+      "text": "Next: One last message from Uncle Sirisena. This one is about how to fold your ballot.",
+      "advance": "click"
+    }
+  ],
+  "on_complete": {
+    "goto": "w1_uncle_ballotfold",
+    "week_set": 1
+  }
+}

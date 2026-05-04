@@ -1,0 +1,45 @@
+{
+  "id": "w3_ec_board_sandya_note",
+  "week": 3,
+  "location": "ec_board",
+  "background": "bg_ec_board",
+  "portraits": {
+    "left": "char_karunasena_surprised",
+    "right": null
+  },
+  "flags_set_on_enter": [
+    "foundSandyaNote"
+  ],
+  "gauges_on_enter": {
+    "ct": 5,
+    "ih": 5
+  },
+  "lines": [
+    {
+      "id": "w3_esn_01",
+      "type": "notice",
+      "card": {
+        "style": "handwritten",
+        "header": null,
+        "body": "My name is not on the list.\nHas anyone else had this problem.\nPlease contact Sandya.\n[phone number]",
+        "footer": null
+      },
+      "advance": "click"
+    },
+    {
+      "id": "w3_esn_02",
+      "type": "narration",
+      "text": "The phone number is handwritten in careful capital letters. The note is not from the Elections Commission. It is from someone who found a problem and did not know who else to tell.",
+      "advance": "click"
+    },
+    {
+      "id": "w3_esn_03",
+      "type": "narration",
+      "text": "Come back to this board each week. The note will change.",
+      "advance": "click"
+    }
+  ],
+  "on_complete": {
+    "goto": "w3_map"
+  }
+}

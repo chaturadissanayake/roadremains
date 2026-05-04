@@ -1,0 +1,30 @@
+{
+  "id": "w1_transition",
+  "week": 1,
+  "location": "transition",
+  "background": "bg_main_menu",
+  "lines": [
+    {
+      "id": "w1_tr_01",
+      "type": "narration",
+      "text": "Week 0 — Election Day.",
+      "advance": "auto"
+    },
+    {
+      "id": "w1_tr_02",
+      "type": "narration",
+      "text": "The campaign is over. Mahinda Bandara's posters are still on every wall. The jingle has stopped. The town is quieter than it has been in five weeks.",
+      "advance": "click"
+    },
+    {
+      "id": "w1_tr_03",
+      "type": "narration",
+      "text": "Rivisanda Maha Vidyalaya. Queue from 7am.",
+      "advance": "click"
+    }
+  ],
+  "on_complete": {
+    "goto": "w0_town_map_narration",
+    "week_set": 0
+  }
+}

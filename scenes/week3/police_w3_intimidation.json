@@ -1,0 +1,36 @@
+{
+  "id": "w3_police_voter_intimidation",
+  "week": 3,
+  "location": "police",
+  "background": "bg_police",
+  "portraits": {
+    "left": "char_karunasena_neutral",
+    "right": "npc_sergeant_talking"
+  },
+  "gauges_on_enter": {
+    "ct": 20,
+    "ih": 5,
+    "vp": 20
+  },
+  "lines": [
+    {
+      "id": "w3_pvi_01",
+      "type": "dialogue",
+      "speaker": "Sergeant Wickramasinghe",
+      "portrait_state": "npc_sergeant_talking",
+      "text": "Describe it. Where, when, who was involved.",
+      "advance": "click"
+    },
+    {
+      "id": "w3_pvi_02",
+      "type": "dialogue",
+      "speaker": "Sergeant Wickramasinghe",
+      "portrait_state": "npc_sergeant_neutral",
+      "text": "Noted. This goes into the incident log. If it continues, we escalate. Thank you for reporting it.",
+      "advance": "click"
+    }
+  ],
+  "on_complete": {
+    "goto": "w3_map"
+  }
+}

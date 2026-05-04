@@ -1,0 +1,35 @@
+{
+  "id": "w3_boutique_1977_receipt",
+  "week": 3,
+  "location": "boutique",
+  "background": "bg_boutique",
+  "portraits": {
+    "left": "char_karunasena_surprised",
+    "right": "npc_mudalali_neutral"
+  },
+  "flags_set_on_enter": [
+    "found1977Receipt"
+  ],
+  "gauges_on_enter": {
+    "ct": 5,
+    "ih": 10
+  },
+  "achievement": "pol_roti_and_politics",
+  "lines": [
+    {
+      "id": "w3_b1977_01",
+      "type": "narration",
+      "text": "A framed receipt from 1977. A food order from a political rally. Mudalali's father ran this boutique before him — he catered the rally for the party that won that election. The party Mudalali has voted for in every election since.",
+      "advance": "click"
+    },
+    {
+      "id": "w3_b1977_02",
+      "type": "narration",
+      "text": "He did not choose it for ideological reasons. The game says nothing about what this means. You decide.",
+      "advance": "click"
+    }
+  ],
+  "on_complete": {
+    "goto": "w3_map"
+  }
+}

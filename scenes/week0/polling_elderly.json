@@ -1,0 +1,49 @@
+{
+  "id": "w0_polling_elderly",
+  "week": 0,
+  "location": "polling_station",
+  "background": "bg_polling_station",
+  "portraits": {
+    "left": "char_karunasena_neutral",
+    "right": "npc_elderly_confused"
+  },
+  "lines": [
+    {
+      "id": "w0_pe_01",
+      "type": "dialogue",
+      "speaker": "Elderly Woman",
+      "portrait_state": "npc_elderly_confused",
+      "text": "Putha… putha, can you help me? My name — I cannot find it on this sheet. They gave me this paper but I don't know which queue.",
+      "advance": "click"
+    },
+    {
+      "id": "w0_pe_choice",
+      "type": "choice",
+      "prompt": "She has voted in every election since 1971. She has not missed one.",
+      "choices": [
+        {
+          "id": "w0_pe_choice_a",
+          "label": "Help her find her name on the voter register.",
+          "goto": "w0_polling_elderly_helped",
+          "flags_set": [
+            "helpedElderlyWoman"
+          ],
+          "gauges": {
+            "ct": 10,
+            "ih": 5,
+            "vp": 25
+          },
+          "achievement": "not_your_job"
+        },
+        {
+          "id": "w0_pe_choice_b",
+          "label": "You are in a rush. Move through the queue.",
+          "goto": "w0_polling_youngman",
+          "gauges": {
+            "ct": -5
+          }
+        }
+      ]
+    }
+  ]
+}

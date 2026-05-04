@@ -1,0 +1,45 @@
+{
+  "id": "w0_check_sandya",
+  "week": 0,
+  "location": "polling_station",
+  "background": "bg_polling_station",
+  "portraits": {
+    "left": "char_karunasena_neutral",
+    "right": null
+  },
+  "lines": [
+    {
+      "id": "w0_cs_01",
+      "type": "narration",
+      "condition": "flags.foundSandyaNote",
+      "text": "You check the voter register before going in. You look for your name. Then — you look for Sandya. She followed the note on the board. She called the numbers she was given. She came in person. Her name is here.",
+      "advance": "click"
+    },
+    {
+      "id": "w0_cs_02",
+      "type": "narration",
+      "condition": "flags.foundSandyaNote",
+      "text": "Sandya made it.",
+      "advance": "click"
+    }
+  ],
+  "flags_set_on_enter_condition": {
+    "condition": "flags.foundSandyaNote",
+    "flags": [
+      "sandyaOnRegister"
+    ]
+  },
+  "gauges_on_enter_condition": {
+    "condition": "flags.foundSandyaNote",
+    "gauges": {
+      "ct": 10,
+      "ih": 10,
+      "vp": 15
+    }
+  },
+  "achievement_condition": "flags.sandyaOnRegister",
+  "achievement": "sandya_made_it",
+  "on_complete": {
+    "goto": "w0_casting_ballot"
+  }
+}

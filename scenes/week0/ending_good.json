@@ -1,0 +1,52 @@
+{
+  "id": "ending_good",
+  "week": 0,
+  "location": "ending",
+  "background": "bg_ending_good",
+  "portraits": {
+    "left": "char_karunasena_happy",
+    "right": "npc_soma_warm"
+  },
+  "flags_set_on_enter": [
+    "endingReached"
+  ],
+  "achievement": "the_road_remains",
+  "lines": [
+    {
+      "id": "eg_01",
+      "type": "narration",
+      "text": "Outside the polling station, Aunty Soma is waiting.",
+      "advance": "click"
+    },
+    {
+      "id": "eg_02",
+      "type": "narration",
+      "text": "No dialogue. Just the two of them on the street after an election.",
+      "advance": "click"
+    },
+    {
+      "id": "eg_03",
+      "type": "narration",
+      "condition": "flags.helpedElderlyWoman",
+      "text": "The elderly woman's granddaughter registered to vote for the next cycle. This fact is noted quietly on the statistics screen.",
+      "advance": "click"
+    },
+    {
+      "id": "eg_04",
+      "type": "stats",
+      "advance": "click"
+    }
+  ],
+  "on_complete": {
+    "conditional": [
+      {
+        "condition": "gauges.ct >= 75 && gauges.ih >= 75 && gauges.vp >= 75 && flags.manifestoComparisonDone && flags.foundRoadFile && flags.helpedElderlyWoman && flags.helpedNICYoungMan && flags.helpedLostCouple",
+        "goto": "ending_secret"
+      },
+      {
+        "default": true,
+        "goto": "screen_main_menu"
+      }
+    ]
+  }
+}

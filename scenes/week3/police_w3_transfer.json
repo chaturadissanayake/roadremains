@@ -1,0 +1,61 @@
+{
+  "id": "w3_police_sergeant_transfer",
+  "week": 3,
+  "location": "police",
+  "background": "bg_police",
+  "portraits": {
+    "left": "char_karunasena_neutral",
+    "right": "npc_sergeant_neutral"
+  },
+  "flags_set_on_enter": [
+    "foundSergeantTransferThread"
+  ],
+  "achievement": "somebody_had_to_ask",
+  "lines": [
+    {
+      "id": "w3_pst_01",
+      "type": "dialogue",
+      "speaker": "Sergeant Wickramasinghe",
+      "portrait_state": "npc_sergeant_neutral",
+      "text": "2016.",
+      "advance": "click"
+    },
+    {
+      "id": "w3_pst_02",
+      "type": "narration",
+      "text": "He pauses longer than usual.",
+      "advance": "click"
+    },
+    {
+      "id": "w3_pst_03",
+      "type": "dialogue",
+      "speaker": "Sergeant Wickramasinghe",
+      "portrait_state": "npc_sergeant_neutral",
+      "text": "I arrived at this posting in 2017. I don't know the specific history of every infrastructure project from before my time.",
+      "advance": "click"
+    },
+    {
+      "id": "w3_pst_04",
+      "type": "narration",
+      "text": "He is quiet. If you wait — just wait, without clicking past — he adds one more line.",
+      "advance": "click"
+    },
+    {
+      "id": "w3_pst_05",
+      "type": "dialogue",
+      "speaker": "Sergeant Wickramasinghe",
+      "portrait_state": "npc_sergeant_neutral",
+      "text": "I requested this posting specifically. I am not going to explain why.",
+      "advance": "click"
+    },
+    {
+      "id": "w3_pst_06",
+      "type": "narration",
+      "text": "That thread does not resolve. It is simply there, for people who are paying attention.",
+      "advance": "click"
+    }
+  ],
+  "on_complete": {
+    "goto": "w3_map"
+  }
+}

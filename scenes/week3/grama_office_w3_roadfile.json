@@ -1,0 +1,63 @@
+{
+  "id": "w3_grama_roadfile",
+  "week": 3,
+  "location": "grama_office",
+  "background": "bg_grama_office",
+  "portraits": {
+    "left": "char_karunasena_surprised",
+    "right": "npc_nandadasa_talking"
+  },
+  "flags_set_on_enter": [
+    "foundRoadFile"
+  ],
+  "gauges_on_enter": {
+    "ct": 5,
+    "ih": 25
+  },
+  "achievement": "thirty_years_in_the_same_room",
+  "lines": [
+    {
+      "id": "w3_grf_01",
+      "type": "narration",
+      "text": "The filing cabinet. It is full. Very full. You pull out a folder at random. It says: 'Road Repair — Main Road Alupotha — Applications 2007–2024.'",
+      "advance": "click"
+    },
+    {
+      "id": "w3_grf_02",
+      "type": "narration",
+      "text": "Every application was processed. Every one was forwarded. Every one was received and filed by the next office. The road is not fixed because the budget was reallocated at a level above Nandadasa's jurisdiction. He has known this since 2009.",
+      "advance": "click"
+    },
+    {
+      "id": "w3_grf_03",
+      "type": "narration",
+      "text": "There is a thinner folder behind the thick one. Personal correspondence. Nandadasa's own letters — seventeen years of them — attempting to escalate the issue. He has never mentioned this to anyone. It is not his place.",
+      "advance": "click"
+    },
+    {
+      "id": "w3_grf_04",
+      "type": "dialogue",
+      "speaker": "Nandadasa Mahaththaya",
+      "portrait_state": "npc_nandadasa_talking",
+      "text": "That is my correspondence file. Seventeen years. Everything was done correctly.",
+      "advance": "click"
+    },
+    {
+      "id": "w3_grf_05",
+      "type": "dialogue",
+      "speaker": "Nandadasa Mahaththaya",
+      "portrait_state": "npc_nandadasa_neutral",
+      "text": "Would you like to continue with your registration question, or—",
+      "advance": "click"
+    },
+    {
+      "id": "w3_grf_06",
+      "type": "narration",
+      "text": "He does not finish the sentence. He goes back to stamping. The road file goes back in the cabinet.",
+      "advance": "click"
+    }
+  ],
+  "on_complete": {
+    "goto": "w3_map"
+  }
+}

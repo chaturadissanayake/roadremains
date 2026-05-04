@@ -1,0 +1,28 @@
+{
+  "id": "w0_polling_couple_helped",
+  "week": 0,
+  "location": "polling_station",
+  "background": "bg_polling_station",
+  "portraits": {
+    "left": "char_karunasena_happy",
+    "right": null
+  },
+  "gauges_on_enter": {
+    "ct": 10,
+    "ih": 5,
+    "vp": 15
+  },
+  "achievement_condition": "helpedElderlyWoman && helpedNICYoungMan && helpedLostCouple",
+  "achievement": "at_least_someone_asked",
+  "lines": [
+    {
+      "id": "w0_pch_01",
+      "type": "narration",
+      "text": "You helped them check their polling division assignments. They are in different queues — both correct. They separate. One of them thanks you. The other one was already moving.",
+      "advance": "click"
+    }
+  ],
+  "on_complete": {
+    "goto": "w0_check_sandya"
+  }
+}

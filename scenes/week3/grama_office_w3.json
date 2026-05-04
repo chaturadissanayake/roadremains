@@ -1,0 +1,49 @@
+{
+  "id": "w3_grama_office",
+  "week": 3,
+  "location": "grama_office",
+  "background": "bg_grama_office",
+  "portraits": {
+    "left": "char_karunasena_neutral",
+    "right": "npc_nandadasa_neutral"
+  },
+  "flags_set_on_enter": [
+    "gremaOfficeVisited"
+  ],
+  "lines": [
+    {
+      "id": "w3_go_01",
+      "type": "dialogue",
+      "speaker": "Nandadasa Mahaththaya",
+      "portrait_state": "npc_nandadasa_neutral",
+      "text": "Registration is closed. If you need your polling division assignment, check the notice board or ask me directly.",
+      "advance": "click"
+    },
+    {
+      "id": "w3_go_cabinet",
+      "type": "narration",
+      "text": "You notice the filing cabinet. You have never clicked on it before. There is no label on this one. Nothing invites you to look.",
+      "advance": "click"
+    },
+    {
+      "id": "w3_go_choice",
+      "type": "choice",
+      "prompt": "Do you want to look at the filing cabinet?",
+      "choices": [
+        {
+          "id": "w3_go_choice_a",
+          "label": "Open the filing cabinet.",
+          "condition": "!flags.foundRoadFile",
+          "goto": "w3_grama_roadfile",
+          "gauges": {}
+        },
+        {
+          "id": "w3_go_choice_b",
+          "label": "Leave it. Talk to Nandadasa instead.",
+          "goto": "w3_nandadasa_dialogue",
+          "gauges": {}
+        }
+      ]
+    }
+  ]
+}

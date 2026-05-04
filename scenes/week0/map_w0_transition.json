@@ -1,0 +1,27 @@
+{
+  "id": "w0_town_map_narration",
+  "week": 0,
+  "location": "town_map",
+  "background": "bg_town_map",
+  "portraits": {
+    "left": null,
+    "right": null
+  },
+  "lines": [
+    {
+      "id": "w0_tmn_01",
+      "type": "narration",
+      "text": "Election day. The bus is running. The kovil and the temple both have fewer cars than usual — people are somewhere else today. The Rivisanda Maha Vidyalaya sign has a handmade arrow pointing to the entrance.",
+      "advance": "click"
+    },
+    {
+      "id": "w0_tmn_02",
+      "type": "narration",
+      "text": "All other locations are now read-only. The polling station is open.",
+      "advance": "click"
+    }
+  ],
+  "on_complete": {
+    "goto": "w0_polling_arrival"
+  }
+}

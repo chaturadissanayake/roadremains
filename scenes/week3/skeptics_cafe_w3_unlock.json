@@ -1,0 +1,22 @@
+{
+  "id": "w3_skeptics_cafe_unlock",
+  "week": 3,
+  "location": "town_map",
+  "background": "bg_town_map",
+  "condition": "verifiedAtBoardCount >= 3 && !flags.skepticsCafeUnlocked",
+  "flags_set_on_enter": [
+    "skepticsCafeUnlocked"
+  ],
+  "achievement": "you_found_the_cafe",
+  "lines": [
+    {
+      "id": "w3_scu_01",
+      "type": "narration",
+      "text": "Something has changed on the map. Near the Elections Commission notice board — a small unlabelled icon has appeared. No notification. No announcement. It was not there before.",
+      "advance": "click"
+    }
+  ],
+  "on_complete": {
+    "goto": "w3_map"
+  }
+}

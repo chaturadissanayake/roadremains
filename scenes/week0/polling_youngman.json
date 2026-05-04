@@ -1,0 +1,45 @@
+{
+  "id": "w0_polling_youngman",
+  "week": 0,
+  "location": "polling_station",
+  "background": "bg_polling_station",
+  "portraits": {
+    "left": "char_karunasena_neutral",
+    "right": null
+  },
+  "lines": [
+    {
+      "id": "w0_pym_01",
+      "type": "narration",
+      "text": "A young man near you checks his pockets for the fourth time. The contents are the same as the third time. He did not bring his NIC.",
+      "advance": "click"
+    },
+    {
+      "id": "w0_pym_choice",
+      "type": "choice",
+      "prompt": "He has not realised yet that he can still speak to the presiding officer.",
+      "choices": [
+        {
+          "id": "w0_pym_choice_a",
+          "label": "\"Did you forget your NIC? You can still try — speak to the presiding officer.\"",
+          "goto": "w0_polling_youngman_helped",
+          "flags_set": [
+            "helpedNICYoungMan"
+          ],
+          "gauges": {
+            "ct": 5,
+            "ih": 5,
+            "vp": 10
+          },
+          "achievement_progress": "at_least_someone_asked"
+        },
+        {
+          "id": "w0_pym_choice_b",
+          "label": "Do not get involved.",
+          "goto": "w0_polling_couple",
+          "gauges": {}
+        }
+      ]
+    }
+  ]
+}
