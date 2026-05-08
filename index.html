@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Tale of Alupota A civic education project for Sri Lanka.">
+    <meta name="description" content="Voting Matters A civic education project for Sri Lanka.">
     <link rel="icon" href="data:;base64,iVBORw0KGgo="> <!-- Prevents missing favicon error -->
-    <title>Tale of Alupota</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Voting Matters</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Noto+Sans+Sinhala:wght@400;500&family=Noto+Sans+Tamil:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Noto+Sans+Sinhala:wght@400;500;600&family=Noto+Sans+Tamil:wght@400;500;600&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
@@ -22,10 +24,11 @@
     <div id="screen-loading" class="screen">
         <div class="screen-bg-container" id="bg-loading"></div>
         <div class="loading-content">
-            <div id="loading-logo" data-i18n="title">Tale of Alupota</div>
+            <div id="loading-logo" data-i18n="title">Voting Matters</div>
             <div id="loading-tagline" data-i18n="loading.tagline">An election is coming. Alupotha is not ready. Neither are you.</div>
             <div id="loading-prompt" data-i18n="loading.begin">Click anywhere to begin</div>
         </div>
+        <div class="copyright-notice">© 2026 Chatura Dissanayake - All rights reserved.</div>
     </div>
 
     <!-- Screen 2: Language -->
@@ -39,8 +42,8 @@
             </div>
             <div class="lang-buttons">
                 <button class="lang-btn" onclick="selectLanguage('en')">English</button>
-                <button class="lang-btn" onclick="selectLanguage('si')" lang="si" style="font-family: var(--font-si);">සිංහල</button>
-                <button class="lang-btn" onclick="selectLanguage('ta')" lang="ta" style="font-family: var(--font-ta);">தமிழ்</button>
+                <button class="lang-btn" disabled lang="si" style="font-family: var(--font-si); opacity: 0.3; cursor: not-allowed;">සිංහල</button>
+                <button class="lang-btn" disabled lang="ta" style="font-family: var(--font-ta); opacity: 0.3; cursor: not-allowed;">தமிழ்</button>
             </div>
         </div>
     </div>
@@ -50,14 +53,16 @@
         <div class="screen-bg-container" id="bg-main-menu"></div> <!-- Background for Menu -->
         <div class="menu-center-layout">
             <div class="menu-title-block">
-                <h1 class="menu-title" data-i18n="title">Tale of Alupota</h1>
-                <p class="menu-subtitle" data-i18n="menu.subtitle">Alupotha is waiting.</p>
+                <h1 class="menu-title" data-i18n="title">Voting Matters</h1>
+                <p id="menu-subtitle" class="menu-subtitle" data-i18n="menu.subtitle">Alupotha is waiting.</p>
             </div>
             <div class="menu-actions">
-                <button class="menu-btn primary" onclick="showScreen('screen-character')" data-i18n="menu.newgame">New Game</button>
-                <button class="menu-btn" id="btn-continue" onclick="loadGame()" disabled data-i18n="menu.continue">Continue</button>
+                <button id="btn-continue" class="menu-btn primary" onclick="loadGame()" style="display: none;" data-i18n="menu.continue">Continue</button>
+                <button id="btn-newgame" class="menu-btn" onclick="checkNewGame()" data-i18n="menu.newgame">New Game</button>
                 <button class="menu-btn" onclick="openModal('modal-settings')" data-i18n="menu.settings">Settings</button>
                 <button class="menu-btn" onclick="openModal('modal-about')" data-i18n="menu.about">About</button>
+                <button class="menu-btn" onclick="openModal('modal-credits')" data-i18n="menu.credits">Credits</button>
+                <button class="menu-btn achievements-menu-btn" onclick="showAchievementsScreen()" data-i18n="menu.achievements">Achievements</button>
             </div>
         </div>
     </div>
@@ -65,7 +70,7 @@
     <!-- Game Paused Overlay (Aligned with game principles) -->
     <div id="overlay-pause" class="pause-overlay" role="dialog" aria-modal="true" aria-label="Game paused">
         <div class="pause-content">
-            <h1 class="menu-title" style="font-size: 3rem; margin-bottom: 2rem; letter-spacing:-0.02em;">Paused</h1>
+            <h1 class="menu-title" style="font-size: 3rem; margin-bottom: 2rem; letter-spacing:-0.02em; text-align: left;">Paused</h1>
             <div class="menu-actions">
                 <button class="menu-btn primary" onclick="togglePause()">Resume</button>
                 <button class="menu-btn" onclick="togglePause(); openModal('modal-settings')">Settings</button>
@@ -85,8 +90,50 @@
     <div id="modal-about" class="modal-overlay">
         <div class="modal-content" role="dialog" aria-labelledby="about-title" aria-modal="true">
             <h2 id="about-title" data-i18n="menu.about">About the Project</h2>
-            <p data-i18n="about.text" class="modal-text">Tale of Alupota is a civic education project developed to improve voter education and counter election-related misinformation in Sri Lanka. Developed with support from LIRNEasia. Available free in English, Sinhala, and Tamil. The game does not tell you who to vote for. That part is entirely yours. All characters and parties depicted are fictional.</p>
+            <p data-i18n="about.text" class="modal-text">Voting Matters is a civic education project developed to improve voter education and counter election-related misinformation in Sri Lanka. Developed with support from LIRNEasia. Available free in English, Sinhala, and Tamil. The game does not tell you who to vote for. That part is entirely yours. All characters and parties depicted are fictional.</p>
             <button class="modal-close" onclick="closeModal('modal-about')" data-i18n="ui.back">Back to Menu</button>
+        </div>
+    </div>
+
+    
+
+    <!-- Credits Modal -->
+    <div id="modal-credits" class="modal-overlay">
+        <div class="modal-content" role="dialog" aria-labelledby="credits-title" aria-modal="true">
+            <h2 id="credits-title" data-i18n="menu.credits">Credits</h2>
+            <div class="credits-block">
+                <div class="credits-section-label">PROJECT</div>
+                <p class="modal-text">Play. Learn. Vote — a civic education project for Sri Lanka.</p>
+            </div>
+            <div class="credits-block">
+                <div class="credits-section-label">SUPPORTED BY</div>
+                <p class="modal-text">LIRNEasia</p>
+            </div>
+            <div class="credits-block">
+                <div class="credits-section-label">GAME DESIGN &amp; DEVELOPMENT</div>
+                <p class="modal-text">Chatura Dissanayake</p>
+            </div>
+            <div class="credits-block">
+                <div class="credits-section-label">AVAILABLE IN</div>
+                <p class="modal-text">English · සිංහල · தமிழ்</p>
+            </div>
+            <div class="credits-block">
+                <div class="credits-section-label">LEGAL</div>
+                <p class="modal-text" style="font-size:0.8rem;">All characters, candidates, and political parties depicted are fictional. The Elections Commission of Sri Lanka is referenced as a public institution only. Electoral procedures depicted reflect Sri Lankan law as of 2024.</p>
+            </div>
+            <button class="modal-close" onclick="closeModal('modal-credits')" data-i18n="ui.close">Close</button>
+        </div>
+    </div>
+
+    <!-- Overwrite Save Modal -->
+    <div id="modal-overwrite" class="modal-overlay">
+        <div class="modal-content" role="dialog" aria-labelledby="overwrite-title" aria-modal="true">
+            <h2 id="overwrite-title">Start New Game?</h2>
+            <p class="modal-text">This will overwrite your current saved game. All progress will be lost. Are you sure you want to continue?</p>
+            <div style="display:flex; flex-direction:column; gap:10px; margin-top:1.5rem;">
+                <button class="menu-btn primary" style="color:var(--red); border-color:rgba(181,101,118,0.5);" onclick="closeModal('modal-overwrite'); localStorage.removeItem('plv_save'); showScreen('screen-character'); checkContinueBtn();">Overwrite Game</button>
+                <button class="menu-btn" onclick="closeModal('modal-overwrite')">Cancel</button>
+            </div>
         </div>
     </div>
 
@@ -112,111 +159,166 @@
                     </label>
                 </div>
             </div>
-            <div class="setting-group" style="margin-top: 2rem;">
+            <div class="setting-group">
+                <label class="setting-label" data-i18n="settings.music">Music Volume</label>
+                <div class="volume-row">
+                    <span class="volume-icon">♫</span>
+                    <input type="range" id="setting-music" class="game-slider" min="0" max="100" value="70" oninput="updateSettings()">
+                    <span class="volume-val" id="val-music">70</span>
+                </div>
+            </div>
+            <div class="setting-group">
+                <label class="setting-label" data-i18n="settings.sfx">Sound Effects</label>
+                <div class="volume-row">
+                    <span class="volume-icon">◉</span>
+                    <input type="range" id="setting-sfx" class="game-slider" min="0" max="100" value="80" oninput="updateSettings(true)">
+                    <span class="volume-val" id="val-sfx">80</span>
+                </div>
+            </div>
+            <div class="setting-divider"></div>
+            <div class="setting-group">
                 <button class="text-link" onclick="closeModal('modal-settings'); showScreen('screen-language');" data-i18n="settings.changelang">Change Language</button>
             </div>
-            <button class="modal-close" onclick="closeModal('modal-settings')" data-i18n="ui.close">Close</button>
+            <button class="modal-close" onclick="closeModal('modal-settings'); if(window.gameState.screen === 'screen-game') document.getElementById('overlay-pause').classList.add('active');" data-i18n="ui.close">Close</button>
+        </div>
+    </div>
+
+    <!-- Character Confirmation Modal -->
+    <div id="modal-char-confirm" class="modal-overlay">
+        <div class="modal-content char-confirm-modal" role="dialog" aria-modal="true">
+            <div class="char-confirm-eyebrow">You will play as</div>
+            <h2 class="char-confirm-name" id="confirm-char-name">Name</h2>
+            <div class="char-confirm-tagline">
+                <span class="char-confirm-counter">6</span> weeks until election day.
+            </div>
+            <div class="char-confirm-traits" id="confirm-traits">
+                <!-- Populated by JS -->
+            </div>
+            <div class="char-confirm-gauges" id="confirm-gauges">
+                <!-- Populated by JS -->
+            </div>
+            <p class="char-confirm-warning">Once you enter Alupotha, you cannot switch characters.</p>
+            <div class="char-confirm-actions">
+                <button class="menu-btn" onclick="closeModal('modal-char-confirm')">Choose Someone Else</button>
+                <button class="menu-btn primary" id="confirm-char-btn" onclick="">Begin — Enter Alupotha</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen: Achievements -->
+    <div id="screen-achievements" class="screen">
+        <div class="screen-bg-container" id="bg-achievements"></div>
+        <button class="screen-back-btn" onclick="showScreen('screen-mainmenu')" aria-label="Back to Menu">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 5l-7 7 7 7"/></svg>
+            Back to Menu
+        </button>
+        <div class="achievements-screen-layout">
+            <div class="achievements-screen-header">
+                <div class="editorial-line"></div>
+                <h1 class="achievements-screen-title">Achievements</h1>
+                <div class="achievements-counter" id="ach-counter">0 / 25 Unlocked</div>
+            </div>
+            <div class="achievements-grid" id="achievements-grid">
+                <!-- Populated by renderAchievementsScreen() -->
+            </div>
         </div>
     </div>
 
     <!-- Screen 4: Character Selection -->
     <div id="screen-character" class="screen">
         <div class="screen-bg-container" id="bg-char-select"></div>
+        <button class="screen-back-btn" onclick="showScreen('screen-mainmenu')" aria-label="Back to Menu">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 5l-7 7 7 7"/></svg>
+            Back to Menu
+        </button>
+        
         <div class="char-header-area">
             <h1 data-i18n="char.header">Who are you?</h1>
-            <p class="char-subheader" data-i18n="char.subheader">Choose carefully. You will carry their story.</p>
+            <p class="char-subheader">Click a character to begin. You will carry their story.</p>
         </div>
+
         <div class="char-grid">
-            <!-- Atakatus -->
-            <div class="char-card">
+            <!-- Karunasena -->
+            <div class="char-card clickable-card" onclick="promptCharacterConfirm('Karunasena')" role="button" tabindex="0">
                 <div class="char-img-wrapper">
-                    <img src="Assets/characters/char_Atakatus_neutral.jpeg" alt="Atakatus" data-initials="K" onerror="imgFallback(this)">
+                    <img src="Assets/characters/char_Karunasena_neutral.jpeg" alt="Karunasena" data-initials="A" onerror="imgFallback(this)">
                 </div>
                 <div class="char-info">
-                    <div class="char-name" data-i18n="char.k.name">Atakatus</div>
+                    <div class="char-name" data-i18n="char.k.name">Karunasena</div>
                     <div class="char-role" data-i18n="char.k.role">Age 19. First-time voter.</div>
                     <div class="char-desc" data-i18n="char.k.desc">Just moved to Alupotha from Kurunegala. Doesn't know anyone yet. His uncle won't stop sending WhatsApp messages.</div>
                     
                     <div class="char-traits">
                         <div class="char-trait perk">
                             <span class="trait-label">PERK</span>
-                            <span class="trait-text">Curiosity: At every location, Atakatus has one extra dialogue option no other character gets — he can ask why something works the way it does, and someone will actually explain it.</span>
+                            <span class="trait-text">Curiosity: He can ask why something works the way it does, and someone will explain it.</span>
                         </div>
                         <div class="char-trait disadvantage">
                             <span class="trait-label">DISADVANTAGE</span>
-                            <span class="trait-text">Exposure: Uncle Sirisena is family. Ignoring his messages has a social cost that Imali and Kumaran do not face.</span>
+                            <span class="trait-text">Exposure: Uncle Sirisena is family. Ignoring his messages has a social cost.</span>
                         </div>
                     </div>
-                    
                     <div class="char-gauges-preview">
-                        <div class="mini-gauge ct"><span>CT</span><div class="mini-bar"><div class="mini-fill" style="width:60%"></div></div><span>60</span></div>
-                        <div class="mini-gauge ih"><span>IH</span><div class="mini-bar"><div class="mini-fill" style="width:70%"></div></div><span>70</span></div>
-                        <div class="mini-gauge vp"><span>VP</span><div class="mini-bar"><div class="mini-fill" style="width:50%"></div></div><span>50</span></div>
+                        <div class="mini-gauge ct"><span>Civic Trust</span><div class="mini-bar"><div class="mini-fill" style="width:60%"></div></div><span>60</span></div>
+                        <div class="mini-gauge ih"><span>Info Health</span><div class="mini-bar"><div class="mini-fill" style="width:70%"></div></div><span>70</span></div>
+                        <div class="mini-gauge vp"><span>Voter Participation</span><div class="mini-bar"><div class="mini-fill" style="width:50%"></div></div><span>50</span></div>
                     </div>
-
-                    <button class="char-play-btn" onclick="selectCharacter('Atakatus')" data-i18n="char.k.btn">Play as Atakatus</button>
                 </div>
             </div>
             
-            <!-- Imali -->
-            <div class="char-card">
+            <!-- Kamala -->
+            <div class="char-card clickable-card" onclick="promptCharacterConfirm('Kamala')" role="button" tabindex="0">
                 <div class="char-img-wrapper">
-                    <img src="Assets/characters/char_Imali_neutral.jpeg" alt="Imali" data-initials="Ka" onerror="imgFallback(this)">
+                    <img src="Assets/characters/char_Kamala_neutral.jpeg" alt="Kamala" data-initials="I" onerror="imgFallback(this)">
                 </div>
                 <div class="char-info">
-                    <div class="char-name" data-i18n="char.ka.name">Imali</div>
+                    <div class="char-name" data-i18n="char.ka.name">Kamala</div>
                     <div class="char-role" data-i18n="char.ka.role">Age 34. Community leader.</div>
                     <div class="char-desc" data-i18n="char.ka.desc">Professional, confident, warm. She already knows how this town works — but the town is changing.</div>
                     
                     <div class="char-traits">
                         <div class="char-trait perk">
                             <span class="trait-label">PERK</span>
-                            <span class="trait-text">Network: Imali has social capital everywhere in Alupotha. Queues move faster. People share information more readily. She occasionally gets warned about problems before they reach her.</span>
+                            <span class="trait-text">Network: Queues move faster. She occasionally gets warned about problems before they reach her.</span>
                         </div>
                         <div class="char-trait disadvantage">
                             <span class="trait-label">DISADVANTAGE</span>
-                            <span class="trait-text">Assumption: The game will sometimes give Imali information she believes she already knows — but has slightly wrong. Correcting these assumptions is worth it. Ignoring them is not.</span>
+                            <span class="trait-text">Assumption: She believes she already knows things — but has them slightly wrong. Correcting them is worth it.</span>
                         </div>
                     </div>
-
                     <div class="char-gauges-preview">
-                        <div class="mini-gauge ct"><span>CT</span><div class="mini-bar"><div class="mini-fill" style="width:75%"></div></div><span>75</span></div>
-                        <div class="mini-gauge ih"><span>IH</span><div class="mini-bar"><div class="mini-fill" style="width:65%"></div></div><span>65</span></div>
-                        <div class="mini-gauge vp"><span>VP</span><div class="mini-bar"><div class="mini-fill" style="width:65%"></div></div><span>65</span></div>
+                        <div class="mini-gauge ct"><span>Civic Trust</span><div class="mini-bar"><div class="mini-fill" style="width:75%"></div></div><span>75</span></div>
+                        <div class="mini-gauge ih"><span>Info Health</span><div class="mini-bar"><div class="mini-fill" style="width:65%"></div></div><span>65</span></div>
+                        <div class="mini-gauge vp"><span>Voter Participation</span><div class="mini-bar"><div class="mini-fill" style="width:65%"></div></div><span>65</span></div>
                     </div>
-
-                    <button class="char-play-btn" onclick="selectCharacter('Imali')" data-i18n="char.ka.btn">Play as Imali</button>
                 </div>
             </div>
             
             <!-- Kumaran -->
-            <div class="char-card">
+            <div class="char-card clickable-card" onclick="promptCharacterConfirm('Kumaran')" role="button" tabindex="0">
                 <div class="char-img-wrapper">
                     <img src="Assets/characters/char_kumaran_neutral.jpeg" alt="Kumaran" data-initials="Ku" onerror="imgFallback(this)">
                 </div>
                 <div class="char-info">
                     <div class="char-name" data-i18n="char.ku.name">Kumaran</div>
-                    <div class="char-role" data-i18n="char.ku.role">Age 28. Migrant worker from the North.</div>
-                    <div class="char-desc" data-i18n="char.ku.desc">Tamil-speaking, navigating a bilingual bureaucracy in a town where most signs are in Sinhala. Every form is a small obstacle.</div>
+                    <div class="char-role" data-i18n="char.ku.role">Age 28. Migrant worker.</div>
+                    <div class="char-desc" data-i18n="char.ku.desc">Navigating a bilingual bureaucracy where most signs are in Sinhala. Every form is a small obstacle.</div>
                     
                     <div class="char-traits">
                         <div class="char-trait perk">
                             <span class="trait-label">PERK</span>
-                            <span class="trait-text">Persistence: Every step Kumaran completes earns him more than the same step earns the others, because every step costs him more. He also unlocks content the other characters cannot reach.</span>
+                            <span class="trait-text">Persistence: Every step Kumaran completes earns him more. He unlocks content others cannot reach.</span>
                         </div>
                         <div class="char-trait disadvantage">
                             <span class="trait-label">DISADVANTAGE</span>
-                            <span class="trait-text">Distance: Kumaran does not have Atakatus's family network or Imali's community connections. Accurate information is harder to find, and misinformation is slightly harder to counter without official sources.</span>
+                            <span class="trait-text">Distance: Accurate information is harder to find without a strong community network.</span>
                         </div>
                     </div>
-
                     <div class="char-gauges-preview">
-                        <div class="mini-gauge ct"><span>CT</span><div class="mini-bar"><div class="mini-fill" style="width:50%"></div></div><span>50</span></div>
-                        <div class="mini-gauge ih"><span>IH</span><div class="mini-bar"><div class="mini-fill" style="width:75%"></div></div><span>75</span></div>
-                        <div class="mini-gauge vp"><span>VP</span><div class="mini-bar"><div class="mini-fill" style="width:40%"></div></div><span>40</span></div>
+                        <div class="mini-gauge ct"><span>Civic Trust</span><div class="mini-bar"><div class="mini-fill" style="width:50%"></div></div><span>50</span></div>
+                        <div class="mini-gauge ih"><span>Info Health</span><div class="mini-bar"><div class="mini-fill" style="width:75%"></div></div><span>75</span></div>
+                        <div class="mini-gauge vp"><span>Voter Participation</span><div class="mini-bar"><div class="mini-fill" style="width:40%"></div></div><span>40</span></div>
                     </div>
-
-                    <button class="char-play-btn" onclick="selectCharacter('kumaran')" data-i18n="char.ku.btn">Play as Kumaran</button>
                 </div>
             </div>
         </div>
@@ -295,120 +397,127 @@
             </div>
         </div>
         <div id="objective-bar" aria-live="polite" aria-atomic="true">
-            <span id="objective-icon" aria-hidden="true">📌</span>
+            <span id="objective-icon" aria-hidden="true">◆</span>
             <span id="objective-text"></span>
         </div>
 
-        <div id="map-svg-container">
-            <svg viewBox="0 0 900 600" preserveAspectRatio="xMidYMid meet" width="100%" height="100%">
-                <rect width="100%" height="100%" fill="transparent" />
+<div id="map-svg-container">
+            <div id="map-inner-wrap">
+                <img src="assets/images/fullmap.png" class="background-map" alt="Alupotha" />
 
-                <!-- Background roads removed -->
-
-                <!-- Landmarks -->
-                <g transform="translate(50, 250)">
-                    <image x="0" y="0" width="100" height="100" href="Assets/map_icon_kovil.jpeg" class="map-asset" />
-                </g>
-                <g transform="translate(450, 20)">
-                    <image x="0" y="0" width="100" height="100" href="Assets/map_icon_temple.jpeg" class="map-asset" />
-                </g>
-
-                <!-- 100x100 Interactive Building Markers -->
-                
-                <g class="map-location" data-loc="loc1" transform="translate(150, 50)">
-                    <title>Grama Niladhari Office</title>
-                    <image x="0" y="0" width="100" height="100" href="Assets/map_marker_gramasevaka.jpeg" class="map-asset" />
-                    <circle class="base-dot" cx="50" cy="50" r="6" />
-                    <circle class="radar-ripple" cx="50" cy="50" r="6" />
-                </g>
-
-                <g class="map-location" data-loc="loc2" transform="translate(650, 80)">
-                    <title>Uncle's House</title>
-                    <image x="0" y="0" width="100" height="100" href="Assets/map_marker_uncle.jpeg" class="map-asset" />
-                    <circle class="base-dot" cx="50" cy="50" r="6" />
-                    <circle class="radar-ripple" cx="50" cy="50" r="6" />
-                </g>
-
-                <g class="map-location" data-loc="loc3" transform="translate(450, 300)">
-                    <title>Notice Board</title>
-                    <image x="0" y="0" width="100" height="100" href="Assets/map_marker_noticeboard.jpeg" class="map-asset" />
-                    <circle class="base-dot" cx="50" cy="50" r="6" />
-                    <circle class="radar-ripple" cx="50" cy="50" r="6" />
-                </g>
-
-                <g class="map-location" data-loc="loc4" transform="translate(200, 400)">
-                    <title>Mudalali's Shop</title>
-                    <image x="0" y="0" width="100" height="100" href="Assets/map_marker_mudalali.jpeg" class="map-asset" />
-                    <circle class="base-dot" cx="50" cy="50" r="6" />
-                    <circle class="radar-ripple" cx="50" cy="50" r="6" />
-                </g>
-
-                <g class="map-location" data-loc="loc5" transform="translate(750, 220)">
-                    <title>Community Hall</title>
-                    <image x="0" y="0" width="100" height="100" href="Assets/map_marker_hall.jpeg" class="map-asset" />
-                    <circle class="base-dot" cx="50" cy="50" r="6" />
-                    <circle class="radar-ripple" cx="50" cy="50" r="6" />
-                </g>
-
-                <g class="map-location" data-loc="loc6" transform="translate(350, 150)">
-                    <title>Police Station</title>
-                    <image x="0" y="0" width="100" height="100" href="Assets/map_marker_police.jpeg" class="map-asset" />
-                    <circle class="base-dot" cx="50" cy="50" r="6" />
-                    <circle class="radar-ripple" cx="50" cy="50" r="6" />
-                </g>
-
-                <g class="map-location" data-loc="loc7" transform="translate(500, 450)">
-                    <title>Skeptics Cafe</title>
-                    <image x="0" y="0" width="100" height="100" href="Assets/map_marker_cafe.jpeg" class="map-asset" />
-                    <circle class="base-dot" cx="50" cy="50" r="6" />
-                    <circle class="radar-ripple" cx="50" cy="50" r="6" />
-                </g>
-
-                <g class="map-location" data-loc="loc8" transform="translate(700, 380)">
-                    <title>Mahinda's Tent</title>
-                    <image x="0" y="0" width="100" height="100" href="Assets/map_marker_tent.jpeg" class="map-asset" />
-                    <circle class="base-dot" cx="50" cy="50" r="6" />
-                    <circle class="radar-ripple" cx="50" cy="50" r="6" />
-                </g>
-
-                <g class="map-location" data-loc="loc9" id="loc9-node" transform="translate(800, 480)" style="opacity:0.4; pointer-events:none;" aria-label="Polling Station — locked until Election Day">
-                    <title>Polling Station (Opens Election Day)</title>
-                    <image x="0" y="0" width="100" height="100" href="Assets/map_marker_polling.jpeg" class="map-asset" />
-                    <circle class="base-dot" cx="50" cy="50" r="6" />
-                    <circle class="radar-ripple" cx="50" cy="50" r="6" />
-                </g>
-            </svg> <!-- Closes the previously unclosed SVG -->
-        </div> <!-- Closes #map-svg-container -->
-
-        <!-- Location Background (Appears when entering a location) -->
-        <div id="location-bg-layer" class="location-bg-layer"></div>
-        <button id="location-back-btn" onclick="closeDialoguePanel()" aria-label="Return to map">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 5l-7 7 7 7"/></svg>
-            Return to Map
-        </button>
-        
-        <!-- Dialogue Panel -->
-        <div id="dialogue-overlay"></div>
-        <div id="dialogue-panel" role="dialog" aria-modal="true">
-            <button id="dialogue-close" onclick="closeDialoguePanel()" aria-label="Close dialogue">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6L6 18M6 6l12 12"></path></svg>
-            </button>
-            <div class="dialogue-content-wrapper">
-                <div class="dialogue-header">
-                    <div id="dialogue-pc-portrait-container" style="margin-right: -10px; z-index: 2;"></div>
-                    <div id="dialogue-portrait-container" style="z-index: 1;"></div>
-                    <div class="dialogue-meta">
-                        <div id="dialogue-npc-name"></div>
-                    </div>
+                <div class="map-location" data-loc="loc_kovil" style="left:1299px;top:55px;">
+                    <img src="assets/images/kovil.png" class="map-asset" style="width:345.27px;height:345.27px;" alt="Kovil" />
+                    <div class="base-dot"></div>
+                    <div class="radar-ripple"></div>
                 </div>
-                <div class="dialogue-body-grid">
-                    <div id="dialogue-text" style="cursor: pointer;"></div>
-                    <div id="dialogue-continue" style="display:none; cursor:pointer; color:var(--gold); margin-top:1rem; text-align:right; font-weight:600;">Click to continue ▸</div>
-                    <div id="dialogue-options" style="display:none;"></div>
+
+                <div class="map-location" data-loc="loc_temple" style="left:310px;top:21px;">
+                    <img src="assets/images/temple.png" class="map-asset" style="width:277.55px;height:277.55px;" alt="Temple" />
+                    <div class="base-dot"></div>
+                    <div class="radar-ripple"></div>
                 </div>
+
+                <div class="map-location" data-loc="loc1" style="left:836px;top:316px;">
+                    <img src="assets/images/gramasewaka.png" class="map-asset" style="width:254.65px;height:254.65px;" alt="Grama Niladhari Office" />
+                    <div class="base-dot"></div>
+                    <div class="radar-ripple"></div>
+                </div>
+
+                <div class="map-location" data-loc="loc2" style="left:1581px;top:270px;">
+                    <img src="assets/images/uncle.png" class="map-asset" style="width:278.52px;height:278.52px;" alt="Uncle's House" />
+                    <div class="base-dot"></div>
+                    <div class="radar-ripple"></div>
+                </div>
+
+                <div class="map-location" data-loc="loc3" style="left:1201px;top:514px;">
+                    <img src="assets/images/board.png" class="map-asset" style="width:190.14px;height:190.14px;" alt="Notice Board" />
+                    <div class="base-dot"></div>
+                    <div class="radar-ripple"></div>
+                </div>
+
+                <div class="map-location" data-loc="loc4" style="left:817px;top:557px;">
+                    <img src="assets/images/market.png" class="map-asset" style="width:286.67px;height:286.67px;" alt="Mudalali's Shop" />
+                    <div class="base-dot"></div>
+                    <div class="radar-ripple"></div>
+                </div>
+
+                <div class="map-location" data-loc="loc5" style="left:489px;top:779px;">
+                    <img src="assets/images/meeting.png" class="map-asset" style="width:320.16px;height:320.16px;" alt="Community Hall" />
+                    <div class="base-dot"></div>
+                    <div class="radar-ripple"></div>
+                </div>
+
+                <div class="map-location" data-loc="loc6" style="left:584px;top:397px;">
+                    <img src="assets/images/police.png" class="map-asset" style="width:270.81px;height:270.81px;" alt="Police Station" />
+                    <div class="base-dot"></div>
+                    <div class="radar-ripple"></div>
+                </div>
+
+                <div class="map-location" data-loc="loc7" style="left:66px;top:614px;">
+                    <img src="assets/images/cafe.png" class="map-asset" style="width:318.30px;height:318.30px;" alt="Skeptics Cafe" />
+                    <div class="base-dot"></div>
+                    <div class="radar-ripple"></div>
+                </div>
+
+                <div class="map-location" data-loc="loc8" style="left:1381px;top:519px;">
+                    <img src="assets/images/tent.png" class="map-asset" style="width:280.55px;height:280.55px;" alt="Mahinda's Tent" />
+                    <div class="base-dot"></div>
+                    <div class="radar-ripple"></div>
+                </div>
+
+                <div class="map-location" data-loc="loc9" id="loc9-node" style="left:892px;top:-12px;opacity:0.4;pointer-events:none;" aria-label="Polling Station — locked until Election Day">
+                    <img src="assets/images/school.png" class="map-asset" style="width:344.57px;height:344.57px;" alt="Polling Station" />
+                    <div class="base-dot"></div>
+                    <div class="radar-ripple"></div>
+                </div>
+
+                <div class="map-location" data-loc="loc_bar" style="left:0px;top:0px;">
+                    <img src="assets/images/bar.png" class="map-asset" style="width:228.34px;height:228.34px;" alt="Bar" />
+                    <div class="base-dot"></div>
+                    <div class="radar-ripple"></div>
+                </div>
+
+                <div class="map-location" data-loc="loc_boarding" style="left:1194px;top:707px;">
+                    <img src="assets/images/boarding.png" class="map-asset" style="width:301.25px;height:301.25px;" alt="Boarding House" />
+                    <div class="base-dot"></div>
+                    <div class="radar-ripple"></div>
+                </div>
+
             </div>
         </div>
-    </div>
+
+        <!-- Dialogue Scene Wrapper (handles VN style layouts) -->
+        <div id="dialogue-scene-wrapper" class="dialogue-scene-wrapper">
+            <div id="location-bg-layer" class="location-bg-layer"></div>
+            <div id="dialogue-overlay"></div>
+            
+            <!-- VN Portraits Container (Behind Dialogue Panel) -->
+            <div id="dialogue-portrait-container" class="vn-portrait-container vn-left"></div>
+            <div id="dialogue-pc-portrait-container" class="vn-portrait-container vn-right"></div>
+
+            <button id="location-back-btn" onclick="closeDialoguePanel()" aria-label="Return to map">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 5l-7 7 7 7"/></svg>
+                Return to Map
+            </button>
+            <div id="dialogue-panel" role="dialog" aria-modal="true">
+                <button id="dialogue-close" onclick="closeDialoguePanel()" aria-label="Close dialogue">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                </button>
+                <div class="dialogue-content-wrapper">
+                    <div class="dialogue-header">
+                        <div class="dialogue-meta">
+                            <div id="dialogue-npc-name"></div>
+                        </div>
+                    </div>
+                    <div class="dialogue-body-grid">
+                        <div id="dialogue-text" style="cursor: pointer;"></div>
+                        <button id="dialogue-continue" class="dialogue-continue-btn" style="display:none;">Click to continue ▸</button>
+                        <div id="dialogue-options" style="display:none;"></div>
+                    </div>
+                </div>
+        </div>
+        </div> <!-- Closes dialogue-scene-wrapper -->
+    </div> <!-- Closes screen-game -->
 
     <!-- Screen 7: Consequence -->
     <div id="screen-consequence" class="screen" role="alertdialog" aria-modal="true">
