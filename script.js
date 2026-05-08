@@ -6,62 +6,306 @@ window.gameState = {
     week: 6,
     gauges: { ct: 50, ih: 50, vp: 50 },
     flags: {
-        sharedFakeMessage: false,
-        registrationStarted: false,
-        cameFromUncle: false,
-        ignored: false,
-        skepticsCafeUnlocked: false,
-        uncleVisited: false,
-        verifiedCount: 0,
-        attendedHall: false,
-        joinedCafe: false,
-        dismissedMessages: 0,
+        // ── Core state ──────────────────────────────────────────
         visitedLocs: [],
         achievements: [],
+        endingReached: null,          // 'bad' | 'neutral' | 'good' | 'secret'
+        secretEndingReached: false,
+
+        // ── Uncle Sirisena messages ──────────────────────────────
+        uncleMsgWeek6Delivered: false,
+        uncleMsgWeek5Delivered: false,
+        uncleMsgWeek4Delivered: false,
+        uncleMsgWeek3Delivered: false,
+        uncleMsgWeek2Delivered: false,
+        uncleMsgWeek1Delivered: false,
+        sharedFakeMessage_w6: false,
+        sharedFakeVoicenote_w5: false,
+        sharedFake4amMessage: false,  // Week 4 screenshot
+        sharedFakeCandidateList: false,
+        sharedFakeBallotFold: false,
+        sharedAnyFakeMessage: false,
+        uncleVisited: false,
+
+        // ── Registration ─────────────────────────────────────────
+        registrationStarted: false,
         registrationComplete: false,
         registrationDeadlineMissed: false,
-        readCurrentManifesto: false,
+        gremaOfficeVisited: false,
+        verifiedAtBoardCount: 0,      // primary counter; also aliased as verifiedCount
+        verifiedCount: 0,             // keep both — some scenes use one or the other
+
+        // ── Secrets & hidden content ─────────────────────────────
+        foundRoadFile: false,
+        found1977Receipt: false,
         foundOldManifesto: false,
-        sharedFake4amMessage: false,
-        sharedFakeCandidateList: false,
+        manifestoComparisonDone: false,
+        foundSergeantTransferThread: false,
+        heardAbout2016Road: false,
+        foundSandyaNote: false,
+        sandyaOnRegister: false,
+
+        // ── Skeptics Cafe ─────────────────────────────────────────
+        skepticsCafeUnlocked: false,
+        joinedCafe: false,
+
+        // ── Civic actions ─────────────────────────────────────────
+        readCurrentManifesto: false,
         reportedIllegalPosters: false,
+        reportedVoterIntimidation: false,
         verifiedBallotFold: false,
-        ballotWillBeSpoiled: false,
-        ballotSpoiled: false,
+        willFoldInThirds: false,
+
+        // ── Kamala wrong assumption ───────────────────────────────
+        kamala_wrongAssumption_pollingStation: false,
+
+        // ── Polling station helpers (Week 0) ─────────────────────
+        helpedElderlyWoman: false,
+        helpedNICYoungMan: false,
+        helpedLostCouple: false,
+
+        // ── Voting outcome ────────────────────────────────────────
         votedSuccessfully: false,
+        ballotSpoiled: false,
+        ballotWillBeSpoiled: false,
+
+        // ── Clue delivery flags ───────────────────────────────────
+        clue_roadFile_delivered: false,
+        clue_manifesto_delivered: false,
+        clue_cafe_delivered: false,
+
+        // ── Character-specific counters ───────────────────────────
+        karunasena_dismissedCount: 0,
+        kamala_assumptionsCorrected: 0,
         kumaran_transferStepsComplete: 0,
-        foundSandyaNote: false
+
+        // ── Legacy flags (kept for compatibility) ─────────────────
+        sharedFakeMessage: false,
+        cameFromUncle: false,
+        ignored: false,
+        attendedHall: false,
+        dismissedMessages: 0,
     },
     dialogue: { active: false, currentLine: 0, lines: [], choices: null },
     history: [],
     currentLoc: null
 };
 
-const CHAR_KEY = { Atakatus: 'k', Imali: 'ka', kumaran: 'ku' };
+const CHAR_KEY = { Karunasena: 'k', Kamala: 'ka', Kumaran: 'ku' };
 
+// Maps character ID → display key for CONTENT lookups
+// safeCharId from promptCharacterConfirm will always be 'Karunasena', 'Kamala', or 'Kumaran'
 const CHAR_GAUGES = {
-    Atakatus: { ct: 60, ih: 70, vp: 50 },
-    Imali:     { ct: 75, ih: 65, vp: 65 },
-    kumaran:    { ct: 50, ih: 75, vp: 40 }
+    Karunasena: { ct: 60, ih: 70, vp: 50 },
+    Kamala:     { ct: 75, ih: 65, vp: 65 },
+    Kumaran:    { ct: 50, ih: 75, vp: 40 }
 };
 
 const ACHIEVEMENTS = {
-    // Core discoveries
-    'first_verify':         { title: 'Source Checked',           desc: 'Checked the Elections Commission Notice Board for the first time.' },
-    'curiosity_perk':       { title: 'Why Does It Work?',        desc: 'Used Atakatus\'s Curiosity perk.' },
-    'skeptics_found':       { title: 'You Found Us',             desc: 'Discovered the Skeptics Cafe.' },
-    'manifesto_read':       { title: 'Actually Read It',         desc: 'Read Mahinda Bandara\'s current manifesto in full.' },
-    'pol_roti':             { title: 'Pol Roti Accepted',        desc: 'Accepted Uncle Sirisena\'s pol roti.' },
-    'road_file':            { title: 'The File Exists',          desc: 'Found the Road Repair Request in the Grama Sevaka Office.' },
-    // Secrets — per GDD Section on secret content
-    'manifesto_compare':    { title: 'Actually Read the Fine Print', desc: 'Found the 2010 manifesto box and compared it to the current one. The road section was 94% identical.' },
-    'receipt_1977':         { title: 'Pol Roti and Politics',    desc: 'Clicked the wall behind Mudalali\'s counter and found the 1977 receipt.' },
-    'sandya_found':         { title: 'Sandya Made It',           desc: 'Followed Sandya\'s handwritten note from Week 3 all the way to the voter register on Election Day.' },
-    'not_your_job':         { title: 'Not Your Job',             desc: 'Helped the elderly woman find her name on the voter register at the polling station.' },
-    'had_to_ask':           { title: 'Somebody Had to Ask',      desc: 'Asked Sergeant Wickramasinghe about 2016 — after hearing about it from Mudalali Perera first.' },
-    // Misinformation flags (these unlock silently, used for endings)
-    'never_shared':         { title: 'Clean Hands',              desc: 'Completed the game without sharing a single piece of unverified information.' },
-    'verified_all':         { title: 'The Board Never Lied',     desc: 'Verified every message at the Elections Commission board before taking action.' }
+    // ─── YOU STARTED. BRAVE ───────────────────────────────────────
+    'big_mistake': {
+        title: 'Big Mistake',
+        desc: 'Started the game.',
+        category: 'You Started. Brave.',
+        hidden: false,
+        notificationType: 'popup'
+    },
+    'democracy_they_said': {
+        title: 'Democracy, They Said',
+        desc: 'Selected a character and began your first playthrough.',
+        category: 'You Started. Brave.',
+        hidden: false,
+        notificationType: 'silent'
+    },
+    // ─── YOU ARE LEARNING. SLOWLY ────────────────────────────────
+    'read_the_fine_print': {
+        title: 'Read the Fine Print',
+        desc: 'Read Mahinda Bandara\'s manifesto. The whole thing.',
+        category: 'You Are Learning.',
+        hidden: false,
+        notificationType: 'silent'
+    },
+    'actually_read_the_fine_print': {
+        title: 'Actually Read the Fine Print',
+        desc: 'Found and compared the 2010 manifesto to the current one. The road section was 94% identical.',
+        category: 'You Are Learning.',
+        hidden: false,
+        notificationType: 'silent'
+    },
+    'the_algorithm_would_hate_you': {
+        title: 'The Algorithm Would Hate You',
+        desc: 'Verified a message at the Elections Commission board instead of sharing it immediately.',
+        category: 'You Are Learning.',
+        hidden: false,
+        notificationType: 'silent'
+    },
+    'professional_skeptic': {
+        title: 'Professional Skeptic',
+        desc: 'Verified three or more messages in a single playthrough. Unlocked something.',
+        category: 'You Are Learning.',
+        hidden: false,
+        notificationType: 'silent'
+    },
+    'nandadasa_approved': {
+        title: 'Nandadasa Approved',
+        desc: 'Asked Nandadasa Mahaththaya before acting on information. He was right. He is always right.',
+        category: 'You Are Learning.',
+        hidden: false,
+        notificationType: 'silent'
+    },
+    // ─── YOU FOUND THINGS (4 are hidden until found) ─────────────
+    'thirty_years_in_the_same_room': {
+        title: 'Thirty Years in the Same Room',
+        desc: 'Found the Road File. You know why the road is not fixed. It is not the reason you expected.',
+        category: 'You Found Things.',
+        hidden: true,
+        notificationType: 'silent'
+    },
+    'pol_roti_and_politics': {
+        title: 'Pol Roti and Politics',
+        desc: 'Found the 1977 receipt behind Mudalali\'s counter. Political loyalty has stranger origins than you think.',
+        category: 'You Found Things.',
+        hidden: false,
+        notificationType: 'silent'
+    },
+    'sandya_made_it': {
+        title: 'Sandya Made It',
+        desc: 'Followed Sandya\'s handwritten note from Week 3 to Week 0. Her name is on the register.',
+        category: 'You Found Things.',
+        hidden: false,
+        notificationType: 'silent'
+    },
+    'somebody_had_to_ask': {
+        title: 'Somebody Had to Ask',
+        desc: 'Found the thread about Sergeant Wickramasinghe\'s 2016 transfer request. He still will not explain why.',
+        category: 'You Found Things.',
+        hidden: true,
+        notificationType: 'silent'
+    },
+    'you_found_the_cafe': {
+        title: 'You Found the Cafe',
+        desc: 'Found the Skeptics Cafe. It does not have a sign. Nandadasa was invited once. He did not reply.',
+        category: 'You Found Things.',
+        hidden: true,
+        notificationType: 'silent'
+    },
+    // ─── YOU HELPED PEOPLE ────────────────────────────────────────
+    'not_your_job': {
+        title: 'Not Your Job',
+        desc: 'Helped the elderly woman find her name on the voter register. It was not your job. You did it anyway.',
+        category: 'You Helped People.',
+        hidden: false,
+        notificationType: 'silent'
+    },
+    'at_least_someone_asked': {
+        title: 'At Least Someone Asked',
+        desc: 'Helped all three people in the polling station queue in a single playthrough. They noticed.',
+        category: 'You Helped People.',
+        hidden: false,
+        notificationType: 'popup'
+    },
+    'it_spreads_both_ways': {
+        title: 'It Spreads Both Ways',
+        desc: 'Shared accurate, verified information through Uncle Sirisena\'s WhatsApp chain. It works in both directions.',
+        category: 'You Helped People.',
+        hidden: false,
+        notificationType: 'silent'
+    },
+    // ─── YOU MADE THINGS WORSE ───────────────────────────────────
+    '847_members': {
+        title: '847 Members',
+        desc: 'Shared a false message through Uncle Sirisena\'s WhatsApp group. 847 people received it.',
+        category: 'You Made Things Worse.',
+        hidden: false,
+        notificationType: 'silent'
+    },
+    'you_were_so_confident': {
+        title: 'You Were So Confident',
+        desc: 'Acted on Mahinda Bandara\'s voting instructions without checking an official source. The fold was wrong.',
+        category: 'You Made Things Worse.',
+        hidden: false,
+        notificationType: 'silent'
+    },
+    'the_4am_people': {
+        title: 'The 4am People',
+        desc: 'Shared the fake voting time message. Twenty-three people came at 4am. Nandadasa has heard about it.',
+        category: 'You Made Things Worse.',
+        hidden: false,
+        notificationType: 'silent'
+    },
+    'blanket_policy': {
+        title: 'Blanket Policy',
+        desc: 'Ignored every single message Uncle Sirisena sent. Including the one that was true.',
+        category: 'You Made Things Worse.',
+        hidden: false,
+        notificationType: 'silent'
+    },
+    // ─── YOU MISSED THINGS ────────────────────────────────────────
+    'the_door_was_right_there': {
+        title: 'The Door Was Right There',
+        desc: 'Missed the voter registration deadline. The door to the Grama Sevaka Office was open every week.',
+        category: 'You Missed Things.',
+        hidden: false,
+        notificationType: 'silent'
+    },
+    'the_road_remains': {
+        title: 'The Road Remains',
+        desc: 'Reached any ending. The road is still not fixed.',
+        category: 'You Missed Things.',
+        hidden: false,
+        notificationType: 'silent'
+    },
+    // ─── YOU PLAYED WELL ─────────────────────────────────────────
+    'information_health_100': {
+        title: 'Information Health: 100',
+        desc: 'Reached Week 0 with perfect Information Health. You verified everything. You trusted no one blindly. You trusted no one not at all.',
+        category: 'You Played Well.',
+        hidden: false,
+        notificationType: 'silent'
+    },
+    'the_unbroken_chain': {
+        title: 'The Unbroken Chain',
+        desc: 'Found the secret ending. Aunty Soma\'s 1983 card. The road is still not fixed. She comes anyway.',
+        category: 'You Played Well.',
+        hidden: true,
+        notificationType: 'popup'
+    },
+    'you_finished_an_education_game': {
+        title: 'You Finished an Education Game',
+        desc: 'Reached any ending. Voluntarily. Most people do not.',
+        category: 'You Played Well.',
+        hidden: false,
+        notificationType: 'popup'
+    },
+    'three_perspectives': {
+        title: 'Three Perspectives',
+        desc: 'Completed at least one full playthrough with each of the three characters. You have seen Alupotha from every angle it has.',
+        category: 'You Played Well.',
+        hidden: false,
+        notificationType: 'popup'
+    },
+    // ─── CHARACTER-SPECIFIC ───────────────────────────────────────
+    'uncles_nephew': {
+        title: 'Uncle\'s Nephew',
+        desc: 'As Karunasena, dismissed more than 5 of Uncle Sirisena\'s messages. The family WhatsApp group still has 847 members.',
+        category: 'Character',
+        hidden: false,
+        notificationType: 'silent'
+    },
+    'she_was_mostly_right': {
+        title: 'She Was Mostly Right',
+        desc: 'As Kamala, identified and corrected all of her false assumptions in a single playthrough.',
+        category: 'Character',
+        hidden: false,
+        notificationType: 'silent'
+    },
+    'every_step_cost_more': {
+        title: 'Every Step Cost More',
+        desc: 'As Kumaran, completed every step of the district transfer process. The bilingual form. All of it.',
+        category: 'Character',
+        hidden: false,
+        notificationType: 'silent'
+    }
 };
 
 // --- UTILITIES ---
@@ -123,7 +367,28 @@ document.addEventListener('DOMContentLoaded', () => {
         g.addEventListener('click', () => openLocation(g.dataset.loc));
     });
 
+    scaleMap();
+    window.addEventListener('resize', scaleMap);
+
     // Modal Overlays
+
+// =============================================================================
+// MAP SCALING — Scales the 1920x1080 inner canvas to fit the viewport container.
+// Uses transform: translate + scale so pixel coordinates from map-data.json
+// remain accurate at any screen size. Called on load and on every resize.
+// =============================================================================
+function scaleMap() {
+    const container = document.getElementById('map-svg-container');
+    const inner = document.getElementById('map-inner-wrap');
+    if (!container || !inner) return;
+    const cw = container.clientWidth;
+    const ch = container.clientHeight;
+    if (!cw || !ch) return;
+    const scale = Math.min(cw / 1920, ch / 1080);
+    const offsetX = (cw - 1920 * scale) / 2;
+    const offsetY = (ch - 1080 * scale) / 2;
+    inner.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+}
     document.querySelectorAll('.modal-overlay').forEach(m => {
         m.addEventListener('click', (e) => {
             if(e.target === m) m.classList.remove('active');
@@ -132,32 +397,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
     renderStaticText();
     checkContinueBtn();
+    updateSettings(); // Initialize audio levels to match UI sliders
 });
 
 // --- I18N & CONTENT ---
 const CONTENT = {
     en: {
-        'title': 'Tale of Alupota.',
+        'title': 'Voting Matters',
         'loading.tagline': 'An election is coming. Alupotha is not ready. Neither are you.',
         'loading.begin': 'Press anywhere to begin',
         'menu.subtitle': 'Alupotha is waiting.',
-        'menu.newgame': 'New Game',
-        'menu.continue': 'Continue',
+        'menu.play': 'Play',
         'menu.settings': 'Settings',
         'menu.about': 'About',
+        'menu.credits': 'Credits',
+        'menu.achievements': 'Achievements',
+        'settings.music': 'Music Volume',
+        'settings.sfx': 'Sound Effects',
         'ui.close': 'Close',
         'ui.back': 'Back to Menu',
         'char.header': 'Who are you?',
         'char.subheader': 'Choose carefully. You will carry their story.',
-        'char.k.name': 'Atakatus', 'char.k.role': '19 years old · First-time voter · Arrived in Alupotha from Kurunegala last week', 'char.k.desc': "He is living with his uncle while attending a vocational training programme. He is not particularly political. He has opinions, but he is not sure yet where they come from. The WhatsApp group is not optional — Uncle Sirisena is family.", 'char.k.btn': 'Play as Atakatus',
-        'char.ka.name': 'Imali', 'char.ka.role': '34 years old · School teacher · Has lived in Alupotha for eight years', 'char.ka.desc': 'She has voted in the last two elections and filled in her ballot the way she always had — assuming she was doing it correctly. She was mostly right. Mostly. She knows almost everyone in Alupotha and most of them know her, which makes things easier. And occasionally more complicated.', 'char.ka.btn': 'Play as Imali',
+        'char.k.name': 'Karunasena', 'char.k.role': '19 years old · First-time voter · Arrived in Alupotha from Kurunegala last week', 'char.k.desc': "He is living with his uncle while attending a vocational training programme. He is not particularly political. He has opinions, but he is not sure yet where they come from. The WhatsApp group is not optional — Uncle Sirisena is family.", 'char.k.btn': 'Play as Karunasena',
+        'char.ka.name': 'Kamala', 'char.ka.role': '34 years old · School teacher · Has lived in Alupotha for eight years', 'char.ka.desc': 'She has voted in the last two elections and filled in her ballot the way she always had — assuming she was doing it correctly. She was mostly right. Mostly. She knows almost everyone in Alupotha and most of them know her, which makes things easier. And occasionally more complicated.', 'char.ka.btn': 'Play as Kamala',
         'char.ku.name': 'Kumaran', 'char.ku.role': '28 years old · Migrant worker · Moved to Alupotha from the Northern Province two years ago', 'char.ku.desc': 'He came for work. He stayed for reasons that accumulated over two years and are now harder to name. His voter registration is in his home district. It needs to be transferred. The process involves more steps than it should, and some of those steps are in a language that is not his first. His story is harder. It is also more complete.', 'char.ku.btn': 'Play as Kumaran',
         'opening.btn': 'Enter Alupotha', 'opening.skip': 'Click anywhere to skip',
         'gauge.ct': 'Civic Trust', 'gauge.ih': 'Info Health', 'gauge.vp': 'Voter Part.', 'game.week': 'WEEK',
         'loc1.name': 'Grama Sevaka Office', 'loc2.name': "Uncle Sirisena's House", 'loc3.name': 'Elections Commission Notice Board', 'loc4.name': "Mudalali Perera's Boutique", 'loc5.name': 'Community Hall', 'loc6.name': 'Police Station', 'loc7.name': 'Skeptics Cafe', 'loc8.name': "Mahinda Bandara's Campaign Tent",
         'cons.heading': 'What happened.', 'cons.btn': 'Return to Alupotha',
-        'settings.textsize': 'Text Size', 'settings.standard': 'Standard', 'settings.large': 'Large', 'settings.xlarge': 'Extra Large', 'settings.motion': 'Reduce Motion', 'settings.changelang': 'Change Language',
-        'about.text': 'Tale of Alupota is a civic education project developed to improve voter education and counter election-related misinformation in Sri Lanka. It was developed with support from LIRNEasia and is available free of charge in English, Sinhala, and Tamil. The game does not tell you who to vote for. That part is entirely yours. All characters, candidates, and political parties depicted are fictional. The Elections Commission of Sri Lanka is referenced as a public institution, but no real officials are depicted. Electoral law accuracy: All voter registration procedures, electoral rules, and ballot instructions depicted reflect Sri Lankan law and Elections Commission guidelines as of 2024. If procedures have changed, please verify at the Elections Commission of Sri Lanka official website.',
+        'menu.play': 'Play', 'menu.newgame': 'New Game', 'menu.continue': 'Continue', 'menu.credits': 'Credits', 'menu.achievements': 'Achievements',
+        'settings.textsize': 'Text Size', 'settings.standard': 'Standard', 'settings.large': 'Large', 'settings.xlarge': 'Extra Large', 'settings.motion': 'Reduce Motion', 'settings.changelang': 'Change Language', 'settings.music': 'Music Volume', 'settings.sfx': 'Sound Effects',
+        'about.text': 'Play. Learn. Vote is a civic education project developed to improve voter education and counter election-related misinformation in Sri Lanka. Developed with support from LIRNEasia and available free in English, Sinhala, and Tamil. The game does not tell you who to vote for. That part is entirely yours. All characters, candidates, and political parties depicted are fictional. The Elections Commission of Sri Lanka is referenced as a public institution only — no real officials are depicted. Electoral law accuracy: All voter registration procedures, electoral rules, and ballot instructions reflect Sri Lankan law and Elections Commission guidelines as of 2024.',
         'npc.nandadasa': 'Nandadasa Mahaththaya', 'npc.uncle': 'Uncle Sirisena', 'npc.board': 'Notice Board', 'npc.mudalali': 'Mudalali Perera', 'npc.hall': 'Announcer', 'npc.police': 'Sgt. Wickramasinghe', 'npc.cafe': 'Cafe Owner', 'npc.mahinda': 'Mahinda Bandara'
     },
     si: {
@@ -195,15 +465,39 @@ function applyLanguage(reRender = true) {
     if(reRender) renderStaticText();
 }
 
-function updateSettings() {
+function updateSettings(playSfxTest = false) {
     const size = document.getElementById('setting-textsize').value;
     document.body.classList.remove('text-large', 'text-xlarge');
-    if(size === 'large') document.body.classList.add('text-large');
-    if(size === 'xlarge') document.body.classList.add('text-xlarge');
+    if (size === 'large') document.body.classList.add('text-large');
+    if (size === 'xlarge') document.body.classList.add('text-xlarge');
 
     const motion = document.getElementById('setting-motion').checked;
-    if(motion) document.body.classList.add('reduce-motion');
+    if (motion) document.body.classList.add('reduce-motion');
     else document.body.classList.remove('reduce-motion');
+
+    // Music volume
+    const musicSlider = document.getElementById('setting-music');
+    if (musicSlider) {
+        const vol = parseInt(musicSlider.value) / 100;
+        const musicEl = document.getElementById('bgm-player');
+        if (musicEl) musicEl.volume = vol;
+        const valEl = document.getElementById('val-music');
+        if (valEl) valEl.textContent = musicSlider.value;
+    }
+
+    // SFX volume
+    const sfxSlider = document.getElementById('setting-sfx');
+    if (sfxSlider) {
+        const vol = parseInt(sfxSlider.value) / 100;
+        const sfxEl = document.getElementById('sfx-player');
+        if (sfxEl) sfxEl.volume = vol;
+        const valEl = document.getElementById('val-sfx');
+        if (valEl) valEl.textContent = sfxSlider.value;
+        
+        if (playSfxTest && sfxEl) {
+            playAudio('sfx', 'sfx_whatsapp_notification.wav');
+        }
+    }
 }
 
 function openModal(id) { document.getElementById(id).classList.add('active'); }
@@ -252,22 +546,30 @@ function _renderPauseAchievements() {
     const list = document.getElementById('pause-ach-list');
     if (!list) return;
     const earned = window.gameState.flags.achievements || [];
-    const allIds = Object.keys(ACHIEVEMENTS);
 
     if (earned.length === 0) {
-        list.innerHTML = '<div class="pause-ach-empty">No achievements yet. Keep exploring.</div>';
+        // Show 4 mystery locked dots — never dump the full locked list
+        const lockedCount = Math.min(Object.keys(ACHIEVEMENTS).length, 4);
+        list.innerHTML = Array(lockedCount).fill(0).map(() =>
+            `<div class="pause-ach-item">
+                <div class="pause-ach-dot locked"></div>
+                <div><div class="pause-ach-name">???</div></div>
+            </div>`
+        ).join('');
         return;
     }
 
-    list.innerHTML = allIds.map(id => {
+    // Only render EARNED achievements in the compact pause panel.
+    // The full list (earned + locked) belongs on the dedicated Achievements screen.
+    list.innerHTML = earned.map(id => {
         const ach = ACHIEVEMENTS[id];
-        const isEarned = earned.includes(id);
+        if (!ach) return '';
         return `
-            <div class="pause-ach-item ${isEarned ? 'earned' : ''}">
-                <div class="pause-ach-dot ${isEarned ? '' : 'locked'}"></div>
+            <div class="pause-ach-item earned">
+                <div class="pause-ach-dot"></div>
                 <div>
-                    <div class="pause-ach-name">${isEarned ? ach.title : '???'}</div>
-                    ${isEarned ? `<div class="pause-ach-desc">${ach.desc}</div>` : ''}
+                    <div class="pause-ach-name">${ach.title}</div>
+                    <div class="pause-ach-desc">${ach.desc}</div>
                 </div>
             </div>
         `;
@@ -278,36 +580,47 @@ function exitToMainMenu() {
     document.getElementById('overlay-pause').classList.remove('active');
     closeDialoguePanel(); // Ensure dialogue is closed if leaving mid-conversation
     saveGame(); // Save progress before leaving
-    showScreen('screen-mainmenu');
+    window.showScreen('screen-mainmenu');
 }
 
 // --- GAME FLOW ---
 function selectCharacter(charId) {
-    window.gameState.character = charId;
-    window.gameState.gauges = { ...CHAR_GAUGES[charId] };
-    saveGame();
+    // Normalise: always store as capitalised (Karunasena / Kamala / Kumaran)
+    const safeId = (charId === 'kumaran') ? 'Kumaran' : charId;
+    window.gameState.character = safeId;
+    window.gameState.gauges = { ...(CHAR_GAUGES[safeId] || { ct: 50, ih: 50, vp: 50 }) };
+    // Fire first-play achievements
+    unlockAchievement('big_mistake');
+    // 'democracy_they_said' only fires on the very first ever playthrough
+    try {
+        if (!localStorage.getItem('plv_ever_played')) {
+            localStorage.setItem('plv_ever_played', '1');
+            unlockAchievement('democracy_they_said');
+        }
+    } catch(e) { /* localStorage unavailable */ }
+    // saveGame() is already called inside unlockAchievement() — no need to repeat here
     showScreen('screen-opening');
     startOpeningSequence();
 }
 
 const OPENING_LINES = {
-    'Atakatus': [
+    'Karunasena': [
         "Six weeks until election day.",
         "Alupotha is not a city. It is not a village. It is the kind of place most Sri Lankans either come from or pass through.",
         "There is a kovil on one side of the main road and a temple on the other. One traffic light. A bus that comes when it comes. Coconut trees everywhere, including in places where coconut trees probably should not be.",
         "An election is coming.",
-        "You are Atakatus. You arrived last week. You do not know where anything is yet. Uncle Sirisena has already texted you three times.",
+        "You are Karunasena. You arrived last week. You do not know where anything is yet. Uncle Sirisena has already texted you three times.",
         "Welcome to Alupotha."
     ],
-    'Imali': [
+    'Kamala': [
         "Six weeks until election day.",
         "Alupotha is not a city. It is not a village. It is the kind of place most Sri Lankans either come from or pass through.",
         "There is a kovil on one side of the main road and a temple on the other. One traffic light. A bus that comes when it comes. Coconut trees everywhere, including in places where coconut trees probably should not be.",
         "An election is coming.",
-        "You are Imali. You have lived here for eight years. You know this town and it knows you. The last two elections, you voted. You think you did it correctly.",
+        "You are Kamala. You have lived here for eight years. You know this town and it knows you. The last two elections, you voted. You think you did it correctly.",
         "Welcome to Alupotha."
     ],
-    'kumaran': [
+    'Kumaran': [
         "Six weeks until election day.",
         "Alupotha is not a city. It is not a village. It is the kind of place most Sri Lankans either come from or pass through.",
         "There is a kovil on one side of the main road and a temple on the other. One traffic light. A bus that comes when it comes. Coconut trees everywhere, including in places where coconut trees probably should not be.",
@@ -332,9 +645,9 @@ function startOpeningSequence() {
     // Build lines: first line is the character name in a special style
     const charName = t(`char.${CHAR_KEY[window.gameState.character]}.name`);
     const subtitles = {
-        Atakatus: 'First time. Get it right.',
-        Imali: 'She thought she already knew.',
-        kumaran: 'Every form is a small obstacle.'
+        Karunasena: 'First time. Get it right.',
+        Kamala: 'She thought she already knew.',
+        Kumaran: 'Every form is a small obstacle.'
     };
     const introLine = charName + '. ' + (subtitles[window.gameState.character] || '');
     
@@ -444,11 +757,7 @@ function startGame() {
     document.getElementById('week-val').textContent = window.gameState.week;
     updateGauges();
     checkMapUnlocks();
-
-    // Show gauge tutorial on first play
-    if (!window.gameState.flags.gaugesTutorialSeen) {
-        setTimeout(() => showGaugeTutorial(), 900);
-    }
+    scaleMap();
 
     // Load and show the prologue scene, then enter the map
     fetch('scenes/prologue.json')
@@ -456,6 +765,12 @@ function startGame() {
         .then(sceneData => {
             // Override on_complete so after prologue it goes to the game map, not character select
             sceneData.on_complete = { goto: 'screen_map' };
+            const charBgMap = {
+                'Karunasena': 'bg_prologue_k',
+                'Kamala': 'bg_prologue_ka',
+                'Kumaran': 'bg_prologue_ku'
+            };
+            sceneData.background = charBgMap[window.gameState.character];
             renderDialogue(sceneData);
         })
         .catch(() => {
@@ -465,34 +780,88 @@ function startGame() {
 }
 
 function unlockAchievement(id) {
-    // Ensure achievements array exists (defensive — it is pre-initialised in gameState)
     if (!Array.isArray(window.gameState.flags.achievements)) {
         window.gameState.flags.achievements = [];
     }
     if (window.gameState.flags.achievements.includes(id)) return;
     window.gameState.flags.achievements.push(id);
     saveGame();
+
     const a = ACHIEVEMENTS[id];
     if (!a) return;
-    const toast = document.createElement('div');
-    toast.className = 'achievement-toast';
-    toast.setAttribute('role', 'status');
-    toast.setAttribute('aria-live', 'polite');
-    toast.innerHTML = `
-        <div class="ach-icon" aria-hidden="true">UNLOCKED</div>
-        <div class="ach-body">
-            <div class="ach-title">${a.title}</div>
-            <div class="ach-desc">${a.desc}</div>
-        </div>`;
-    document.body.appendChild(toast);
-    // Trigger entrance on next frame
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => toast.classList.add('visible'));
+
+    // Only show a popup for achievements marked 'popup'; silent ones are discovered on the Achievements screen
+    const showPopup = a.notificationType === 'popup';
+
+    if (showPopup) {
+        const toast = document.createElement('div');
+        toast.className = 'achievement-toast';
+        toast.setAttribute('role', 'status');
+        toast.setAttribute('aria-live', 'polite');
+        toast.innerHTML = `
+            <div class="ach-icon" aria-hidden="true">UNLOCKED</div>
+            <div class="ach-body">
+                <div class="ach-title">${a.title}</div>
+                <div class="ach-desc">${a.desc}</div>
+            </div>`;
+        document.body.appendChild(toast);
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => toast.classList.add('visible'));
+        });
+        setTimeout(() => {
+            toast.classList.remove('visible');
+            setTimeout(() => toast.remove(), 600);
+        }, 4500);
+    }
+    // Always update achievements screen counter if it's open
+    _updateAchievementCounter();
+}
+
+function _updateAchievementCounter() {
+    const el = document.getElementById('ach-counter');
+    if (!el) return;
+    const earned = (window.gameState.flags.achievements || []).length;
+    const total = Object.keys(ACHIEVEMENTS).length;
+    el.textContent = `${earned} / ${total} Unlocked`;
+}
+
+function showAchievementsScreen() {
+    renderAchievementsScreen();
+    showScreen('screen-achievements');
+}
+
+function renderAchievementsScreen() {
+    const grid = document.getElementById('achievements-grid');
+    if (!grid) return;
+    const earned = window.gameState.flags.achievements || [];
+
+    // Group achievements by category
+    const categories = {};
+    Object.entries(ACHIEVEMENTS).forEach(([id, ach]) => {
+        const cat = ach.category || 'Other';
+        if (!categories[cat]) categories[cat] = [];
+        categories[cat].push({ id, ...ach, isEarned: earned.includes(id) });
     });
-    setTimeout(() => {
-        toast.classList.remove('visible');
-        setTimeout(() => toast.remove(), 600);
-    }, 4500);
+
+    let html = '';
+    Object.entries(categories).forEach(([cat, achs]) => {
+        html += `<div class="ach-category-header">${cat}</div>`;
+        achs.forEach(ach => {
+            const isHiddenLocked = ach.hidden && !ach.isEarned;
+            html += `
+                <div class="ach-tile ${ach.isEarned ? 'earned' : ''} ${isHiddenLocked ? 'hidden-tile' : ''}">
+                    <div class="ach-tile-dot"></div>
+                    <div class="ach-tile-body">
+                        <div class="ach-tile-name">${isHiddenLocked ? '???' : ach.title}</div>
+                        <div class="ach-tile-desc">${ach.isEarned ? ach.desc : (isHiddenLocked ? '' : '—')}</div>
+                    </div>
+                </div>
+            `;
+        });
+    });
+
+    grid.innerHTML = html;
+    _updateAchievementCounter();
 }
 
 function showWeekBanner(week, isDeadline = false) {
@@ -502,7 +871,9 @@ function showWeekBanner(week, isDeadline = false) {
     banner.id = 'week-banner';
     banner.innerHTML = isDeadline
         ? `<strong>Week ${week}</strong> — Voter registration closes this week. If you are not registered, you cannot vote.`
-        : `<strong>Week ${week}</strong> — ${week === 1 ? '1 week' : week + ' weeks'} until the election.`;
+        : week === 0
+            ? `<strong>Election Day.</strong> The polling station is open. Go and vote.`
+            : `<strong>Week ${week}</strong> — ${week === 1 ? '1 week' : week + ' weeks'} until the election.`;
     document.getElementById('screen-game').appendChild(banner);
     setTimeout(() => banner.classList.add('visible'), 30);
     setTimeout(() => { banner.classList.remove('visible'); setTimeout(() => banner.remove(), 400); }, 4000);
@@ -516,6 +887,10 @@ function checkMapUnlocks() {
             || (window.gameState.flags.verifiedCount >= 3);
         if (shouldShow) {
             cafe.classList.add('unlocked');
+            if (!window.gameState.flags.skepticsCafeUnlocked) {
+                // First time unlocking — fire the discovery achievement
+                unlockAchievement('you_found_the_cafe');
+            }
             window.gameState.flags.skepticsCafeUnlocked = true; // persist the unlock
         } else {
             cafe.classList.remove('unlocked');
@@ -533,30 +908,59 @@ function checkMapUnlocks() {
     // Dynamic state checks since JSONs don't explicitly set "Resolved" boolean flags
     const w6UncleDone = isVisited('uncle_house_shared') || isVisited('uncle_house_ignore') || isVisited('ec_board_w6');
     const w5UncleDone = isVisited('uncle_house_w5_shared') || isVisited('uncle_house_w5_verify') || isVisited('ec_board_w5');
+    const w4UncleDone = isVisited('uncle_house_w4_shared') || isVisited('ec_board_w4');
+
+    // Glitch Fix: Determine if the week is complete so we can stop map pulses
+    let weekComplete = false;
+    if (week === 6) {
+        const w6GramaDone = flags.registrationStarted || isVisited('grama_office_w6_Kamala') || isVisited('grama_office_w6_kumaran') || isVisited('grama_office_w6') || isVisited('week6/grama_office');
+        weekComplete = (char === 'Karunasena') ? (w6UncleDone && w6GramaDone) : w6GramaDone;
+    } else if (week === 5) {
+        const w5MainDone = isVisited('ec_board_w5') || isVisited('police_w5'); // Boutique is optional — not a completion trigger
+        weekComplete = (char === 'Karunasena') ? (w5UncleDone && w5MainDone) : w5MainDone;
+    } else if (week === 4) {
+        const w4GramaDone = flags.registrationComplete || flags.registrationDeadlineMissed;
+        weekComplete = (char === 'Karunasena') ? (w4UncleDone && w4GramaDone) : w4GramaDone;
+    } else if (week === 3) {
+        weekComplete = isVisited('ec_board_w3'); // EC board (candidate list) is mandatory; cafe is optional bonus
+    } else if (week === 2) {
+        weekComplete = isVisited('campaign_tent') || flags.readCurrentManifesto;
+    } else if (week === 1) {
+        const w1MainDone = flags.verifiedBallotFold || isVisited('police_w1') || isVisited('grama_office_w1');
+        const w1UncleDone = isVisited('uncle_house_w1_shared') || w1MainDone;
+        weekComplete = (char === 'Karunasena') ? (w1UncleDone && w1MainDone) : w1MainDone;
+    }
 
     const OBJECTIVES = {
-        6: flags.registrationStarted || flags.registrationComplete || isVisited('grama_office_w6_Imali') || isVisited('grama_office_w6_kumaran')
-            ? "You have checked your registration. Explore Alupotha."
-            : (char === 'Atakatus' && !flags.uncleMsgWeek6Delivered)
-                ? "Visit Uncle Sirisena's house. He sent you something."
-                : (char === 'Atakatus' && !w6UncleDone)
-                    ? "You have a message waiting. Reply to Uncle Sirisena."
-                    : "Head to the Grama Sevaka Office to start your voter registration.",
-        5: (char === 'Atakatus' && !flags.uncleMsgWeek5Delivered)
+        6: (() => {
+            // For Karunasena: uncle must be resolved first, then grama
+            if (char === 'Karunasena') {
+                if (!flags.uncleMsgWeek6Delivered) return "Visit Uncle Sirisena's house. He sent you something.";
+                if (!w6UncleDone) return "You have a message from Uncle Sirisena. Decide what to do with it.";
+                if (!flags.registrationStarted && !flags.registrationComplete && !isVisited('grama_office_w6')) return "Head to the Grama Sevaka Office to check your voter registration.";
+                return "You are registered. Explore Alupotha if you like, or advance to the next week.";
+            }
+            // Kamala / Kumaran
+            if (!flags.registrationStarted && !flags.registrationComplete) return "Head to the Grama Sevaka Office to check your voter registration.";
+            return "You have checked your registration. Explore Alupotha or advance to the next week.";
+        })(),
+        5: (char === 'Karunasena' && !flags.uncleMsgWeek5Delivered)
             ? "A voice note is circulating. Uncle Sirisena has it."
-            : (char === 'Atakatus' && !w5UncleDone)
+            : (char === 'Karunasena' && !w5UncleDone)
                 ? "The voice note is unchecked. Visit the EC board to verify the claim."
                 : "Explore Alupotha. Check the EC board or Police Station.",
-        4: (!flags.registrationComplete && !flags.registrationDeadlineMissed)
-            ? "Voter registration closes this week. Go to the Grama Sevaka Office."
-            : (char === 'Atakatus' && !flags.uncleMsgWeek4Delivered)
-                ? "A suspicious screenshot is circulating. Visit Uncle Sirisena."
-                : "A suspicious screenshot is circulating. Check the EC board before acting.",
+        4: (() => {
+            if (!flags.registrationComplete && !flags.registrationDeadlineMissed) return "Voter registration closes this week. Go to the Grama Sevaka Office.";
+            if (char === 'Karunasena' && !flags.uncleMsgWeek4Delivered) return "A suspicious screenshot is circulating. Visit Uncle Sirisena.";
+            if (char === 'Karunasena' && !w4UncleDone) return "You have a screenshot from Uncle Sirisena. Check the EC board before deciding.";
+            if (!isVisited('ec_board_w4')) return "A suspicious screenshot is circulating. Verify it at the EC notice board.";
+            return "You have investigated the screenshot. Explore or advance to the next week.";
+        })(),
         3: flags.verifiedAtBoardCount >= 2
             ? "You have seen the candidate list. Explore what else is happening."
             : "The official candidate list has been posted. Check the EC notice board.",
         2: flags.readCurrentManifesto
-            ? "You have read the manifesto. Compare it with what people are saying."
+            ? "You have read the manifesto. Explore further or advance to the next week." // Note: weekComplete=true overrides this anyway
             : "Mahinda Bandara's campaign tent is open. Read the manifesto.",
         1: flags.verifiedBallotFold
             ? "You are ready. Election day is tomorrow."
@@ -566,43 +970,55 @@ function checkMapUnlocks() {
 
     const guidanceText = document.getElementById('objective-text');
     if (guidanceText) {
-        guidanceText.textContent = OBJECTIVES[week] || "Continue exploring Alupotha.";
+        // Glitch Fix: Override objective text if the week is completely done
+        if (weekComplete && week > 0) {
+            guidanceText.textContent = "You have completed your tasks. Advance to the next week.";
+        } else {
+            guidanceText.textContent = OBJECTIVES[week] || "Continue exploring Alupotha.";
+        }
     }
 
     // Character-aware pulse logic
     let pulseTarget = null;
-    if (week === 6) {
-        if (char === 'Atakatus') {
-            if (!flags.uncleMsgWeek6Delivered) pulseTarget = 'loc2';
-            else if (!w6UncleDone) pulseTarget = 'loc2';
-            else if (!flags.registrationStarted) pulseTarget = 'loc1';
+    
+    // Glitch Fix: Only pulse map locations if the week is NOT yet complete
+    if (!weekComplete) {
+        if (week === 6) {
+            if (char === 'Karunasena') {
+                if (!flags.uncleMsgWeek6Delivered) pulseTarget = 'loc2';
+                else if (!w6UncleDone) pulseTarget = 'loc2';
+                else if (!flags.registrationStarted) pulseTarget = 'loc1';
+                else pulseTarget = 'loc3';
+            } else {
+                if (!flags.registrationStarted && !flags.registrationComplete && !isVisited('grama_office')) pulseTarget = 'loc1';
+                // No else: after registration, weekComplete=true so no pulse needed
+            }
+        } else if (week === 5) {
+            if (char === 'Karunasena') {
+                if (!flags.uncleMsgWeek5Delivered) pulseTarget = 'loc2';
+                else if (!w5UncleDone) pulseTarget = 'loc3'; // loc2 is inactive after delivery; player must verify at EC board
+                else pulseTarget = 'loc3';
+            } else {
+                pulseTarget = 'loc3';
+            }
+        } else if (week === 4) {
+            if (!flags.registrationComplete && !flags.registrationDeadlineMissed) pulseTarget = 'loc1';
+            else if (char === 'Karunasena' && !w4UncleDone) pulseTarget = 'loc3'; // loc2 is inactive after delivery; player must verify at EC board
             else pulseTarget = 'loc3';
-        } else {
-            if (!flags.registrationStarted && !flags.registrationComplete && !isVisited('grama_office')) pulseTarget = 'loc1';
-            else pulseTarget = 'loc4';
-        }
-    } else if (week === 5) {
-        if (char === 'Atakatus') {
-            if (!flags.uncleMsgWeek5Delivered) pulseTarget = 'loc2';
-            else if (!w5UncleDone) pulseTarget = 'loc2';
+        } else if (week === 3) {
+            if (char === 'Kumaran' && flags.kumaran_transferStepsComplete === 2 && !flags.registrationComplete) pulseTarget = 'loc1';
             else pulseTarget = 'loc3';
-        } else {
-            pulseTarget = 'loc3';
+        } else if (week === 2) {
+            if (!flags.readCurrentManifesto) pulseTarget = 'loc8';
+            // No else: once manifesto is read, weekComplete=true and this block won't run anyway
+        } else if (week === 1) {
+            if (!flags.verifiedBallotFold) pulseTarget = 'loc6';
+            // No else: verifiedBallotFold=true means weekComplete=true; this block won't run
         }
-    } else if (week === 4) {
-        if (!flags.registrationComplete && !flags.registrationDeadlineMissed) pulseTarget = 'loc1';
-        else if (char === 'Atakatus' && !flags.uncleMsgWeek4Delivered) pulseTarget = 'loc2';
-        else pulseTarget = 'loc3';
-    } else if (week === 3) {
-        if (char === 'kumaran' && flags.kumaran_transferStepsComplete === 2 && !flags.registrationComplete) pulseTarget = 'loc1';
-        else pulseTarget = 'loc3';
-    } else if (week === 2) {
-        if (!flags.readCurrentManifesto) pulseTarget = 'loc8';
-        else pulseTarget = 'loc3';
-    } else if (week === 1) {
-        if (!flags.verifiedBallotFold) pulseTarget = 'loc6';
-        else pulseTarget = 'loc1';
-    } else if (week === 0) {
+    }
+
+    // Always pulse polling station on week 0
+    if (week === 0) {
         pulseTarget = 'loc9';
     }
 
@@ -619,23 +1035,33 @@ function checkWeekCompletion() {
     if (week === 0) return; // election day, no advance needed
     
     const flags = window.gameState.flags;
+    const char = window.gameState.character;
     const visited = flags.visitedLocs || [];
     const isVisited = (pathMatch) => visited.some(p => p.includes(pathMatch));
+    
+    const w6UncleDone = isVisited('uncle_house_shared') || isVisited('uncle_house_ignore') || isVisited('ec_board_w6');
+    const w5UncleDone = isVisited('uncle_house_w5_shared') || isVisited('uncle_house_w5_verify') || isVisited('ec_board_w5');
+    const w4UncleDone = isVisited('uncle_house_w4_shared') || isVisited('ec_board_w4');
     
     let weekComplete = false;
     
     if (week === 6) {
-        weekComplete = flags.registrationStarted || isVisited('grama_office_w6_Imali') || isVisited('grama_office_w6_kumaran') || isVisited('uncle_house_shared') || isVisited('uncle_house_ignore') || isVisited('ec_board_w6');
+        const w6GramaDone = flags.registrationStarted || isVisited('grama_office_w6_Kamala') || isVisited('grama_office_w6_kumaran') || isVisited('grama_office_w6') || isVisited('week6/grama_office');
+        weekComplete = (char === 'Karunasena') ? (w6UncleDone && w6GramaDone) : w6GramaDone;
     } else if (week === 5) {
-        weekComplete = isVisited('uncle_house_w5_shared') || isVisited('uncle_house_w5_verify') || isVisited('ec_board_w5') || isVisited('police_w5') || isVisited('boutique_w5');
+        const w5MainDone = isVisited('ec_board_w5') || isVisited('police_w5'); // Boutique is optional — not a completion trigger
+        weekComplete = (char === 'Karunasena') ? (w5UncleDone && w5MainDone) : w5MainDone;
     } else if (week === 4) {
-        weekComplete = flags.registrationComplete || flags.registrationDeadlineMissed || isVisited('uncle_house_w4_shared') || isVisited('ec_board_w4');
+        const w4GramaDone = flags.registrationComplete || flags.registrationDeadlineMissed;
+        weekComplete = (char === 'Karunasena') ? (w4UncleDone && w4GramaDone) : w4GramaDone;
     } else if (week === 3) {
-        weekComplete = isVisited('ec_board_w3') || isVisited('skeptics_cafe');
+        weekComplete = isVisited('ec_board_w3'); // EC board (candidate list) is mandatory; cafe is optional bonus
     } else if (week === 2) {
         weekComplete = isVisited('campaign_tent') || flags.readCurrentManifesto;
     } else if (week === 1) {
-        weekComplete = flags.verifiedBallotFold || isVisited('police_w1') || isVisited('grama_office_w1') || isVisited('uncle_house_w1_shared');
+        const w1MainDone = flags.verifiedBallotFold || isVisited('police_w1') || isVisited('grama_office_w1');
+        const w1UncleDone = isVisited('uncle_house_w1_shared') || w1MainDone;
+        weekComplete = (char === 'Karunasena') ? (w1UncleDone && w1MainDone) : w1MainDone;
     }
 
     if (weekComplete) {
@@ -665,18 +1091,20 @@ function showNextWeekPrompt(currentWeek) {
     const headline = isElectionDay
         ? 'The polling station is now open.'
         : `${nextWeek} week${nextWeek === 1 ? '' : 's'} until election day.`;
-    const advanceLbl = isElectionDay ? 'Go to Polling Station →' : `Continue to Week ${nextWeek} →`;
+    const advanceLbl = isElectionDay ? 'Go to Polling Station' : `Continue to Week ${nextWeek}`;
+    const stayLbl = isElectionDay ? 'Not yet' : 'Stay &amp; Explore';
     banner.innerHTML = `
         <div class="week-banner-left">
             <div class="week-banner-eyebrow">${eyebrow}</div>
             <div class="week-banner-headline">${headline}</div>
         </div>
         <div class="week-banner-actions">
-            <button class="week-banner-stay" onclick="dismissWeekBanner()">Stay &amp; Explore</button>
+            <button class="week-banner-stay" onclick="dismissWeekBanner()">${stayLbl}</button>
             <button class="week-banner-advance" onclick="advanceWeek()">${advanceLbl}</button>
         </div>
     `;
     document.getElementById('screen-game').appendChild(banner);
+    requestAnimationFrame(() => requestAnimationFrame(() => banner.classList.add('visible')));
 }
 
 function dismissWeekBanner() {
@@ -684,11 +1112,31 @@ function dismissWeekBanner() {
     if (banner) {
         banner.style.transition = 'opacity 300ms';
         banner.style.opacity = '0';
-        setTimeout(() => banner.remove(), 300);
+        setTimeout(() => {
+            banner.remove();
+            checkMapUnlocks(); // Re-evaluate pulse state after banner is dismissed
+        }, 300);
     }
 }
 
 function advanceWeek() {
+    // Safety re-check: only allow advance if the current week is genuinely complete
+    // This prevents the banner from advancing the week if it appeared prematurely
+    const _safetyWeek = window.gameState.week;
+    const _flags = window.gameState.flags;
+    const _char = window.gameState.character;
+    const _visited = _flags.visitedLocs || [];
+    const _isV = (m) => _visited.some(p => p.includes(m));
+    let _canAdvance = false;
+    if (_safetyWeek === 6) { const d = _flags.registrationStarted || _isV('grama_office_w6_Kamala') || _isV('grama_office_w6_kumaran') || _isV('grama_office_w6') || _isV('week6/grama_office'); _canAdvance = (_char === 'Karunasena') ? ((_isV('uncle_house_shared') || _isV('uncle_house_ignore') || _isV('ec_board_w6')) && d) : d; }
+    else if (_safetyWeek === 5) { const d = _isV('ec_board_w5') || _isV('police_w5'); _canAdvance = (_char === 'Karunasena') ? ((_isV('uncle_house_w5_shared') || _isV('uncle_house_w5_verify') || _isV('ec_board_w5')) && d) : d; }
+    else if (_safetyWeek === 4) { const d = _flags.registrationComplete || _flags.registrationDeadlineMissed; _canAdvance = (_char === 'Karunasena') ? ((_isV('uncle_house_w4_shared') || _isV('ec_board_w4')) && d) : d; }
+    else if (_safetyWeek === 3) { _canAdvance = _isV('ec_board_w3'); } // Must match checkWeekCompletion — cafe alone is not enough
+    else if (_safetyWeek === 2) { _canAdvance = _isV('campaign_tent') || _flags.readCurrentManifesto; }
+    else if (_safetyWeek === 1) { const d = _flags.verifiedBallotFold || _isV('police_w1') || _isV('grama_office_w1'); _canAdvance = (_char === 'Karunasena') ? ((_isV('uncle_house_w1_shared') || d) && d) : d; }
+    else { _canAdvance = true; } // week 0 or unknown
+    if (!_canAdvance) { console.warn('[PLV] advanceWeek blocked — week not yet complete.'); return; }
+
     const banner = document.getElementById('next-week-banner');
     if (banner) banner.remove();
     const newWeek = window.gameState.week - 1;
@@ -722,8 +1170,8 @@ function getScenePath(locId) {
 
     if (week === 6) {
         if (locId === 'loc1') {
-            if (char === 'Imali') targetSceneId = 'w6_grama_office_Imali';
-            else if (char === 'kumaran') targetSceneId = 'w6_grama_office_kumaran';
+            if (char === 'Kamala') targetSceneId = 'w6_grama_office_Kamala';
+            else if (char === 'Kumaran') targetSceneId = 'w6_grama_office_kumaran';
             else targetSceneId = 'w6_grama_office';
         }
         else if (locId === 'loc2') targetSceneId = flags.uncleMsgWeek6Delivered ? 'w6_uncle_ignore' : 'w6_uncle_entry';
@@ -731,38 +1179,40 @@ function getScenePath(locId) {
         else if (locId === 'loc4') targetSceneId = 'w6_boutique_optional';
     }
     else if (week === 5) {
-        if (locId === 'loc2') targetSceneId = flags.uncleMsgWeek5Delivered ? 'w5_map' : 'w5_uncle_voicenote';
+        if (locId === 'loc2') targetSceneId = flags.uncleMsgWeek5Delivered ? null : 'w5_uncle_voicenote';
         else if (locId === 'loc3') targetSceneId = 'w5_ec_board_verify';
         else if (locId === 'loc4') targetSceneId = 'w5_boutique';
         else if (locId === 'loc6') targetSceneId = 'w5_police_optional';
     }
     else if (week === 4) {
         if (locId === 'loc1') {
-            if (char === 'kumaran' && flags.kumaran_transferStepsComplete === 1) targetSceneId = 'w4_kumaran_transfer_step2';
+            if (char === 'Kumaran' && flags.kumaran_transferStepsComplete === 1) targetSceneId = 'w4_kumaran_transfer_step2';
             else targetSceneId = flags.registrationDeadlineMissed ? 'w4_registration_deadline_missed' : 'w4_grama_office';
         }
-        else if (locId === 'loc2') targetSceneId = flags.uncleMsgWeek4Delivered ? 'w4_map' : 'w4_uncle_screenshot';
+        else if (locId === 'loc2') targetSceneId = flags.uncleMsgWeek4Delivered ? null : 'w4_uncle_screenshot';
         else if (locId === 'loc3') targetSceneId = 'w4_ec_board_verify';
         else if (locId === 'loc6') targetSceneId = 'w4_police';
     }
     else if (week === 3) {
-        if (locId === 'loc1') targetSceneId = (char === 'kumaran' && flags.kumaran_transferStepsComplete === 2) ? 'w3_kumaran_transfer_step3' : 'w3_grama_office';
-        else if (locId === 'loc2') targetSceneId = flags.uncleMsgWeek3Delivered ? 'w3_map' : 'w3_uncle_videoclip';
+        if (locId === 'loc1') targetSceneId = (char === 'Kumaran' && flags.kumaran_transferStepsComplete === 2) ? 'w3_kumaran_transfer_step3' : 'w3_grama_office';
+        else if (locId === 'loc2') targetSceneId = flags.uncleMsgWeek3Delivered ? null : 'w3_uncle_videoclip';
         else if (locId === 'loc3') targetSceneId = 'w3_ec_board_candidates';
         else if (locId === 'loc4') targetSceneId = 'w3_boutique';
         else if (locId === 'loc6') targetSceneId = 'w3_police';
         else if (locId === 'loc7') targetSceneId = 'w3_skeptics_cafe';
-        else if (locId === 'loc8') targetSceneId = 'w3_map'; 
+        // loc8 (Campaign Tent) has no content in Week 3 — return null so openLocation shows the fallback narration
+        // else if (locId === 'loc8') targetSceneId = 'w3_map'; 
     }
     else if (week === 2) {
         if (locId === 'loc3') targetSceneId = 'w2_ec_board';
         else if (locId === 'loc4') targetSceneId = 'w2_boutique';
         else if (locId === 'loc6') targetSceneId = 'w2_police';
         else if (locId === 'loc8') targetSceneId = 'w2_campaign_tent_entry';
+        // loc1, loc2, loc5 intentionally return null — fallback narration handles them
     }
     else if (week === 1) {
         if (locId === 'loc1') targetSceneId = 'w1_grama_final';
-        else if (locId === 'loc2') targetSceneId = flags.uncleMsgWeek1Delivered ? 'w1_map' : 'w1_uncle_ballotfold';
+        else if (locId === 'loc2') targetSceneId = flags.uncleMsgWeek1Delivered ? null : 'w1_uncle_ballotfold';
         else if (locId === 'loc3') targetSceneId = 'w1_ec_board';
         else if (locId === 'loc6') targetSceneId = 'w1_police_ballotfold_verify';
         else if (locId === 'loc8') targetSceneId = 'w1_campaign_tent_readonly';
@@ -776,11 +1226,67 @@ function getScenePath(locId) {
 }
 
 function openLocation(locId) {
+    // Community Hall (loc5) has no active scenes in any week currently
+    if (locId === 'loc5') {
+        renderDialogue({
+            lines: [
+                { type: "narration", text: "The Community Hall is quiet. There is a notice on the door about an event next week, but nothing is happening here today.", advance: "choice" },
+                { type: "choice", prompt: " ", choices: [{ label: "Return to Map", goto: "screen_map" }] }
+            ],
+            on_complete: { goto: "screen_map" }
+        });
+        return;
+    }
+    // Kovil and Temple are decorative — give atmospheric flavour instead of dead silence
+    if (locId === 'loc_kovil') {
+        renderDialogue({
+            lines: [
+                { type: "narration", text: "The kovil is peaceful. Incense smoke drifts past the entrance. Whatever you came here for, it is not here.", advance: "choice" },
+                { type: "choice", prompt: " ", choices: [{ label: "Return to Map", goto: "screen_map" }] }
+            ],
+            on_complete: { goto: "screen_map" }
+        });
+        return;
+    }
+    if (locId === 'loc_bar') {
+        renderDialogue({
+            lines: [
+                { type: "narration", text: "The bar is quiet this time of day. A ceiling fan turns slowly overhead. Someone has left a newspaper on the counter. It is three days old. There is a handwritten sign near the door: 'No election talk. Owner's orders.'", advance: "choice" },
+                { type: "choice", prompt: " ", choices: [{ label: "Return to Map", goto: "screen_map" }] }
+            ],
+            on_complete: { goto: "screen_map" }
+        });
+        return;
+    }
+
+    if (locId === 'loc_boarding') {
+        if (window.gameState.character !== 'Kumaran') {
+            renderDialogue({
+                lines: [
+                    { type: "narration", text: "This is a boarding house. You have no reason to go in.", advance: "choice" },
+                    { type: "choice", prompt: " ", choices: [{ label: "Return to Map", goto: "screen_map" }] }
+                ],
+                on_complete: { goto: "screen_map" }
+            });
+            return;
+        }
+        renderDialogue({
+            lines: [
+                { type: "narration", text: "This is where you stay. A small room at the end of the corridor. The landlady has left a note on the door about the water being cut off tomorrow morning. There is a form on your desk you have not filled in yet.", advance: "choice" },
+                { type: "choice", prompt: " ", choices: [{ label: "Return to Map", goto: "screen_map" }] }
+            ],
+            on_complete: { goto: "screen_map" }
+        });
+        return;
+    }
     window.gameState.currentLoc = locId;
     const path = getScenePath(locId);
     
-    // Intercept map returns before attempting to fetch
-    if (!path || path.endsWith('_map') || path === 'screen_map') {
+    // Glitch Fix: Check if the player has already visited this specific scene path
+    const isAlreadyVisited = path && window.gameState.flags.visitedLocs && window.gameState.flags.visitedLocs.includes(path);
+    
+    // Intercept map returns and already visited scenes before attempting to fetch
+    if (!path || path.endsWith('_map') || path === 'screen_map' || isAlreadyVisited) {
         renderDialogue({
             lines: [
                 { type: "narration", text: "Nothing new is happening here right now. You should check elsewhere.", advance: "choice" },
@@ -799,14 +1305,25 @@ async function openScenePath(scenePath) {
     if (!Array.isArray(window.gameState.flags.visitedLocs)) {
         window.gameState.flags.visitedLocs = [];
     }
-    if (!window.gameState.flags.visitedLocs.includes(scenePath)) {
-        window.gameState.flags.visitedLocs.push(scenePath);
+
+    // Glitch Fix: Block execution if scene is already visited to prevent internal JSON goto loops and stat farming
+    if (window.gameState.flags.visitedLocs.includes(scenePath)) {
+        renderDialogue({
+            lines: [
+                { type: "narration", text: "Nothing new is happening here right now. You should check elsewhere.", advance: "choice" },
+                { type: "choice", prompt: " ", choices: [{ label: "Return to Map", goto: "screen_map" }] }
+            ],
+            on_complete: { goto: "screen_map" }
+        });
+        return;
     }
 
     try {
         const response = await fetch(scenePath);
         if (!response.ok) throw new Error(`Scene not found: ${scenePath}`);
         const sceneData = await response.json();
+        // Only mark as visited AFTER confirming the scene loaded successfully
+        window.gameState.flags.visitedLocs.push(scenePath);
         renderDialogue(sceneData);
     } catch (error) {
         console.warn('[PLV] Scene load failed:', error.message);
@@ -831,16 +1348,199 @@ async function openScenePath(scenePath) {
 //             document, comparison, video, choice, stats
 // =============================================================================
 
+// =============================================================================
+// ASSET REGISTRY — All asset paths in one place.
+// When artwork is created, place the file at the path listed here.
+// The game engine reads these constants — nothing else needs to change.
+// File naming convention from production spec (Complete_Production_File_Structure_v2.txt)
+// =============================================================================
+
+// ─── PLAYABLE CHARACTER PORTRAITS ────────────────────────────────────────────
+// Format: PNG with transparency, 450×660px, transparent background
+// States: neutral, talking, happy, worried, surprised
+// NOTE: Production file used 'Atakatus'/'Imali' as internal names.
+//       Canonical GDD v2.0 names are Karunasena/Kamala/Kumaran — use these.
+const CHARACTER_PORTRAITS = {
+    'Karunasena': {
+        neutral:   'Assets/characters/char_Karunasena_neutral.png',
+        talking:   'Assets/characters/char_Karunasena_talking.png',
+        happy:     'Assets/characters/char_Karunasena_happy.png',
+        worried:   'Assets/characters/char_Karunasena_worried.png',
+        surprised: 'Assets/characters/char_Karunasena_surprised.png',
+    },
+    'Kamala': {
+        neutral:   'Assets/characters/char_Kamala_neutral.png',
+        talking:   'Assets/characters/char_Kamala_talking.png',
+        happy:     'Assets/characters/char_Kamala_happy.png',
+        worried:   'Assets/characters/char_Kamala_worried.png',
+        surprised: 'Assets/characters/char_Kamala_surprised.png',
+    },
+    'Kumaran': {
+        neutral:   'Assets/characters/char_kumaran_neutral.png',
+        talking:   'Assets/characters/char_kumaran_talking.png',
+        happy:     'Assets/characters/char_kumaran_happy.png',
+        worried:   'Assets/characters/char_kumaran_worried.png',
+        surprised: 'Assets/characters/char_kumaran_surprised.png',
+    }
+};
+
+// ─── NPC PORTRAITS ───────────────────────────────────────────────────────────
+// Format: PNG with transparency
+// Naming: npc_{character}_{state}.png → stored in Assets/npcs/
+// These keys are used in scene JSON files as: "portrait": "npc_uncle_enthusiastic"
+const NPC_PORTRAITS = {
+    // Aunty Soma — prologue + endings
+    'npc_soma_neutral':          'Assets/npcs/npc_soma_neutral.png',
+    'npc_soma_talking':          'Assets/npcs/npc_soma_talking.png',
+    'npc_soma_warm':             'Assets/npcs/npc_soma_warm.png',
+    // Uncle Sirisena — Uncle's House, WhatsApp messages
+    'npc_uncle_neutral':         'Assets/npcs/npc_uncle_neutral.png',
+    'npc_uncle_talking':         'Assets/npcs/npc_uncle_talking.png',
+    'npc_uncle_enthusiastic':    'Assets/npcs/npc_uncle_enthusiastic.png',
+    // Nandadasa Mahaththaya — Grama Sevaka Office
+    'npc_nandadasa_neutral':     'Assets/npcs/npc_nandadasa_neutral.png',
+    'npc_nandadasa_talking':     'Assets/npcs/npc_nandadasa_talking.png',
+    'npc_nandadasa_annoyed':     'Assets/npcs/npc_nandadasa_annoyed.png',
+    // Sergeant Wickramasinghe — Police Station
+    'npc_sergeant_neutral':      'Assets/npcs/npc_sergeant_neutral.png',
+    'npc_sergeant_talking':      'Assets/npcs/npc_sergeant_talking.png',
+    'npc_sergeant_amused':       'Assets/npcs/npc_sergeant_amused.png',
+    // Mudalali Perera — Boutique
+    'npc_mudalali_neutral':      'Assets/npcs/npc_mudalali_neutral.png',
+    'npc_mudalali_talking':      'Assets/npcs/npc_mudalali_talking.png',
+    'npc_mudalali_loud':         'Assets/npcs/npc_mudalali_loud.png',
+    // Mahinda Bandara — Campaign Tent
+    'npc_mahinda_neutral':       'Assets/npcs/npc_mahinda_neutral.png',
+    'npc_mahinda_talking':       'Assets/npcs/npc_mahinda_talking.png',
+    'npc_mahinda_evasive':       'Assets/npcs/npc_mahinda_evasive.png',
+    // Elderly Woman — Polling Station queue (Week 0)
+    'npc_elderly_neutral':       'Assets/npcs/npc_elderly_neutral.png',
+    'npc_elderly_confused':      'Assets/npcs/npc_elderly_confused.png',
+    'npc_elderly_relieved':      'Assets/npcs/npc_elderly_relieved.png',
+};
+
+// ─── BACKGROUND SCENES ───────────────────────────────────────────────────────
+// Format: JPEG, 1920×1080px
+// These are already used in LOC_BGS and BG_MAP below — listed here for reference
+const BACKGROUND_ASSETS = {
+    'bg_loading':         'Assets/backgrounds/bg_loading.jpeg',
+    'bg_language':        'Assets/backgrounds/bg_language.jpeg',
+    'bg_main_menu':       'Assets/backgrounds/bg_main_menu.png',   // PNG — uses transparency layer
+    'bg_char_select':     'Assets/backgrounds/bg_char_select.jpeg',
+    'bg_opening':         'Assets/backgrounds/bg_opening.jpeg',
+    'bg_consequence':     'Assets/backgrounds/bg_consequence.jpeg',
+    'bg_uncle_house':     'Assets/backgrounds/bg_uncle_house.jpeg',
+    'bg_grama_office':    'Assets/backgrounds/bg_grama_office.jpeg',
+    'bg_boutique':        'Assets/backgrounds/bg_boutique.jpeg',
+    'bg_police':          'Assets/backgrounds/bg_police.jpeg',
+    'bg_campaign_tent':   'Assets/backgrounds/bg_campaign_tent.jpeg',
+    'bg_ec_board':        'Assets/backgrounds/bg_ec_board.jpeg',
+    'bg_polling_station': 'Assets/backgrounds/bg_polling_station.jpeg',
+    'bg_skeptics_cafe':   'Assets/backgrounds/bg_skeptics_cafe.jpeg',
+    'bg_ending_positive': 'Assets/backgrounds/bg_ending_positive.jpeg',
+    'bg_ending_negative': 'Assets/backgrounds/bg_ending_negative.jpeg',
+    'bg_ending_neutral':  'Assets/backgrounds/bg_ending_neutral.jpeg',
+    'bg_kovil':           'Assets/backgrounds/bg_kovil.jpeg',
+    'bg_temple':          'Assets/backgrounds/bg_temple.jpeg',
+    'bg_prologue_k':      'Assets/backgrounds/bg_prologue_k.jpeg',
+    'bg_prologue_ka':     'Assets/backgrounds/bg_prologue_ka.jpeg',
+    'bg_prologue_ku':     'Assets/backgrounds/bg_prologue_ku.jpeg',
+};
+
+// ─── MAP LOCATION ASSETS ─────────────────────────────────────────────────────
+// Format: PNG with transparency (mix-blend-mode: multiply removes white bg)
+// Currently stored in Assets/ root — subfolder Assets/map/ is the canonical target
+// Update the HTML SVG hrefs when you move them to Assets/map/
+const MAP_ASSETS = {
+    // Decorative landmarks (non-clickable)
+    'map_kovil':          'Assets/map_icon_kovil.jpeg',         // → rename to .png when ready
+    'map_temple':         'Assets/map_icon_temple.jpeg',        // → rename to .png when ready
+    // Interactive location markers — loc IDs match map SVG data-loc attributes
+    'loc1_grama':         'Assets/map_marker_gramasevaka.jpeg', // → Assets/map/map_grama_office.png
+    'loc2_uncle':         'Assets/map_marker_uncle.jpeg',       // → Assets/map/map_uncle_house.png
+    'loc3_ecboard':       'Assets/map_marker_noticeboard.jpeg', // → Assets/map/map_ec_board.png
+    'loc4_boutique':      'Assets/map_marker_mudalali.jpeg',    // → Assets/map/map_boutique.png
+    'loc5_hall':          'Assets/map_marker_hall.jpeg',        // → Assets/map/map_community_hall.png
+    'loc6_police':        'Assets/map_marker_police.jpeg',      // → Assets/map/map_police.png
+    'loc7_cafe':          'Assets/map_marker_cafe.jpeg',        // → Assets/map/map_skeptics_cafe.png (missing)
+    'loc8_tent':          'Assets/map_marker_tent.jpeg',        // → Assets/map/map_campaign_tent.png
+    'loc9_polling':       'Assets/map_marker_polling.jpeg',     // → Assets/map/map_polling_station.png
+};
+
+// ─── UI ELEMENT ASSETS ───────────────────────────────────────────────────────
+// Format: PNG (whatsapp elements), SVG (icons)
+// Stored in Assets/ui/
+// Used in: WhatsApp message cards, dialogue panel decorations, gauge icons
+const UI_ASSETS = {
+    // WhatsApp message card chrome
+    'whatsapp_bubble':    'Assets/ui/whatsapp_bubble.png',       // WhatsApp UI frame
+    'phone_frame':        'Assets/ui/phone_frame.png',           // Phone outer frame
+    'voice_waveform':     'Assets/ui/voice_waveform.png',        // Voice note waveform graphic
+    'video_play_still':   'Assets/ui/video_play_still.png',      // Video clip placeholder still
+    // Elections Commission visual elements
+    'ec_stamp':           'Assets/ui/ec_stamp.png',              // Official EC stamp
+    'ec_logo_real':       'Assets/ui/ec_logo_real.png',          // Correct EC logo (Week 6 board)
+    'ec_logo_fake':       'Assets/ui/ec_logo_fake.png',          // Subtly wrong EC logo (Week 4)
+    // HUD gauge icons
+    'icon_ct':            'Assets/ui/icon_ct.svg',               // Civic Trust gauge icon
+    'icon_ih':            'Assets/ui/icon_ih.svg',               // Information Health gauge icon
+    'icon_vp':            'Assets/ui/icon_vp.svg',               // Voter Participation gauge icon
+    // Achievements
+    'achievement_locked': 'Assets/ui/achievement_locked.svg',    // Hidden achievement tile
+    // Sandya's handwritten note texture
+    'sandya_note':        'Assets/ui/sandya_note.png',           // EC board note background
+};
+
+// ─── PROP DOCUMENT ASSETS ────────────────────────────────────────────────────
+// Format: PNG, rendered as full-width document cards inside the dialogue panel
+// Stored in Assets/props/
+// Used in: scene JSONs as { type: "document", image: "manifesto_2025" }
+const PROP_ASSETS = {
+    'manifesto_2025':          'Assets/props/manifesto_2025.png',        // Mahinda current manifesto
+    'manifesto_2010':          'Assets/props/manifesto_2010.png',        // 2010 manifesto (secret)
+    'manifesto_comparison':    'Assets/props/manifesto_comparison.png',  // Side-by-side comparison
+    'ec_notice_registration':  'Assets/props/ec_notice_registration.png',// Week 6 EC board notice
+    'ec_notice_candidates':    'Assets/props/ec_notice_candidates.png',  // Week 3 candidate list
+    'ec_notice_correction':    'Assets/props/ec_notice_correction.png',  // Correction after fake shared
+    'receipt_1977':            'Assets/props/receipt_1977.png',          // Mudalali's 1977 receipt (secret)
+    'road_file_folder':        'Assets/props/road_file_folder.png',      // Road File folder (secret)
+    'voter_card_1983':         'Assets/props/voter_card_1983.png',       // Aunty Soma's card (secret ending)
+};
+
+// ─── AUDIO ASSETS ────────────────────────────────────────────────────────────
+// Ambient: OGG (compressed, loopable)   SFX: WAV (short, uncompressed)
+// Stored in Assets/audio/
+// The audioMap in openDialoguePanel() maps bg names → ambient files automatically
+const AUDIO_ASSETS = {
+    // Ambient background loops — auto-play when entering each location
+    'ambient_uncle_house':    'Assets/audio/ambient_uncle_house.ogg',
+    'ambient_grama_office':   'Assets/audio/ambient_grama_office.ogg',
+    'ambient_boutique':       'Assets/audio/ambient_boutique.ogg',
+    'ambient_police':         'Assets/audio/ambient_police.ogg',
+    'ambient_tent':           'Assets/audio/ambient_tent.ogg',
+    'ambient_ec_board':       'Assets/audio/ambient_ec_board.ogg',
+    'ambient_polling':        'Assets/audio/ambient_polling.ogg',
+    // Sound effects — triggered by game events
+    'sfx_whatsapp':           'Assets/audio/sfx_whatsapp_notification.wav',  // Uncle message arrives
+    'sfx_advance':            'Assets/audio/sfx_dialogue_advance.wav',       // Dialogue click
+    'sfx_gauge_up':           'Assets/audio/sfx_gauge_up.wav',               // Positive gauge change
+    'sfx_gauge_down':         'Assets/audio/sfx_gauge_down.wav',             // Negative gauge change
+    'sfx_achievement':        'Assets/audio/sfx_achievement.wav',            // Achievement unlocked
+    'sfx_week_transition':    'Assets/audio/sfx_week_transition.wav',        // Week advance card
+};
+
 const LOC_BGS = {
     'loc1': 'Assets/backgrounds/bg_grama_office.jpeg',
     'loc2': 'Assets/backgrounds/bg_uncle_house.jpeg',
     'loc3': 'Assets/backgrounds/bg_ec_board.jpeg',
     'loc4': 'Assets/backgrounds/bg_boutique.jpeg',
-    'loc5': 'Assets/backgrounds/bg_main_menu.jpeg',
+    'loc5': 'Assets/backgrounds/bg_community_hall.jpeg', // PLACEHOLDER — create bg_community_hall.jpeg for Aunty Soma / Community Hall scene
     'loc6': 'Assets/backgrounds/bg_police.jpeg',
     'loc7': 'Assets/backgrounds/bg_skeptics_cafe.jpeg',
     'loc8': 'Assets/backgrounds/bg_campaign_tent.jpeg',
-    'loc9': 'Assets/backgrounds/bg_polling_station.jpeg'
+    'loc9': 'Assets/backgrounds/bg_polling_station.jpeg',
+    'loc_kovil': 'Assets/backgrounds/bg_kovil.jpeg',
+    'loc_temple': 'Assets/backgrounds/bg_temple.jpeg'
 };
 
 const BG_MAP = {
@@ -852,7 +1552,7 @@ const BG_MAP = {
     'bg_campaign_tent':  'Assets/backgrounds/bg_campaign_tent.jpeg',
     'bg_skeptics_cafe':  'Assets/backgrounds/bg_skeptics_cafe.jpeg',
     'bg_polling_station':'Assets/backgrounds/bg_polling_station.jpeg',
-    'bg_main_menu':      'Assets/backgrounds/bg_main_menu.jpeg',
+    'bg_main_menu':      'Assets/backgrounds/bg_main_menu.png',
     'bg_town_map':       'Assets/backgrounds/bg_town_map.jpeg',
     /* Master Scene File uses these keys — map to the positive/negative files */
     'bg_ending_good':    'Assets/backgrounds/bg_ending_positive.jpeg',
@@ -860,13 +1560,18 @@ const BG_MAP = {
     /* Legacy aliases kept for backward compat */
     'bg_ending_positive':'Assets/backgrounds/bg_ending_positive.jpeg',
     'bg_ending_negative':'Assets/backgrounds/bg_ending_negative.jpeg',
-    'bg_ending_neutral': 'Assets/backgrounds/bg_ending_neutral.jpeg'
+    'bg_ending_neutral': 'Assets/backgrounds/bg_ending_neutral.jpeg',
+    'bg_kovil':          'Assets/backgrounds/bg_kovil.jpeg',
+    'bg_temple':         'Assets/backgrounds/bg_temple.jpeg',
+    'bg_prologue_k':     'Assets/backgrounds/bg_prologue_k.jpeg',
+    'bg_prologue_ka':    'Assets/backgrounds/bg_prologue_ka.jpeg',
+    'bg_prologue_ku':    'Assets/backgrounds/bg_prologue_ku.jpeg'
 };
 
 // --- PANEL OPEN / CLOSE ---
 
 function openDialoguePanel() {
-    document.getElementById('dialogue-overlay').classList.add('open');
+    document.getElementById('dialogue-scene-wrapper').classList.add('active');
     document.getElementById('dialogue-panel').classList.add('open');
     // Show the explicit back-to-map button whenever we enter a location
     const backBtn = document.getElementById('location-back-btn');
@@ -876,9 +1581,9 @@ function openDialoguePanel() {
     const sceneBg = window.gameState.dialogue._sceneBg;
     const bgUrl = (sceneBg && BG_MAP[sceneBg])
         || (window.gameState.currentLoc && LOC_BGS[window.gameState.currentLoc] ? LOC_BGS[window.gameState.currentLoc] : null);
+    document.getElementById('objective-bar').style.opacity = '0';
     if (bgUrl) {
         bgLayer.style.backgroundImage = `url('${bgUrl}')`;
-        bgLayer.classList.add('active');
         
         // Map background to ambient audio file
         const bgName = bgUrl.split('/').pop().split('.')[0]; 
@@ -898,16 +1603,22 @@ function openDialoguePanel() {
 }
 
 function closeDialoguePanel() {
-    document.getElementById('dialogue-overlay').classList.remove('open');
+    document.getElementById('dialogue-scene-wrapper').classList.remove('active');
     document.getElementById('dialogue-panel').classList.remove('open');
-    document.getElementById('location-bg-layer').classList.remove('active');
     // Hide the back button when we return to the map
     const backBtn = document.getElementById('location-back-btn');
     if (backBtn) backBtn.classList.remove('visible');
+    document.getElementById('objective-bar').style.opacity = '1';
     stopBGM();
     // Now that the panel is gone, safely check if the week's goal is complete
     if (window.gameState.screen === 'screen-game') {
         checkWeekCompletion();
+        checkMapUnlocks(); // Re-run AFTER week completion check so pulse clears immediately
+        
+        // Show gauge tutorial ONLY after prologue conversation ends (Week 6 starts)
+        if (window.gameState.week === 6 && !window.gameState.flags.gaugesTutorialSeen) {
+            setTimeout(() => showGaugeTutorial(), 800);
+        }
     }
 }
 
@@ -933,15 +1644,34 @@ function stopBGM() {
 
 // --- PORTRAIT HELPERS ---
 
-function _setNpcPortrait(portraitKey, speakerName) {
+function _setNpcPortrait(portraitKey, speakerName, flip) {
     const cont = document.getElementById('dialogue-portrait-container');
+    const pcCont = document.getElementById('dialogue-pc-portrait-container');
     const nameEl = document.getElementById('dialogue-npc-name');
+    
+    const isPCSpeaking = (speakerName === window.gameState.character);
+
     if (portraitKey) {
-        const src = `Assets/npcs/${portraitKey}.png`;
-        cont.innerHTML = `<img src="${src}" data-initials="${(speakerName||'NPC').substring(0,2).toUpperCase()}" onerror="imgFallback(this)" alt="${speakerName || 'NPC'}">`;
-    } else {
+        const src = (NPC_PORTRAITS && NPC_PORTRAITS[portraitKey])
+            ? NPC_PORTRAITS[portraitKey]
+            : `Assets/npcs/${portraitKey}.png`;
+        const flipClass = flip ? ' npc-flipped' : '';
+        cont.innerHTML = `<img src="${src}" data-initials="${(speakerName||'NPC').substring(0,2).toUpperCase()}" onerror="imgFallback(this)" alt="${speakerName || 'NPC'}" class="npc-portrait-img${flipClass}">`;
+    } else if (!isPCSpeaking) {
         cont.innerHTML = '';
     }
+
+    const pcImg = pcCont ? pcCont.querySelector('img') : null;
+    const npcImg = cont ? cont.querySelector('img') : null;
+
+    if (isPCSpeaking) {
+        if (pcImg) pcImg.classList.remove('portrait-inactive');
+        if (npcImg) npcImg.classList.add('portrait-inactive');
+    } else {
+        if (pcImg) pcImg.classList.add('portrait-inactive');
+        if (npcImg) npcImg.classList.remove('portrait-inactive');
+    }
+
     if (nameEl) nameEl.textContent = speakerName || '';
 }
 
@@ -950,8 +1680,44 @@ function _setPcPortrait(emotion) {
     const cont = document.getElementById('dialogue-pc-portrait-container');
     if (cont && state.character) {
         const em = emotion || state.flags.latestEmotion || 'neutral';
-        cont.innerHTML = `<img src="Assets/characters/char_${state.character}_${em}.png" data-initials="PC" onerror="imgFallback(this)" alt="Player character">`;
+        // Use CHARACTER_PORTRAITS registry — falls back to path construction if not found
+        const charPortraits = CHARACTER_PORTRAITS && CHARACTER_PORTRAITS[state.character];
+        const src = (charPortraits && charPortraits[em])
+            ? charPortraits[em]
+            : `Assets/characters/char_${state.character}_${em}.png`;
+        cont.innerHTML = `<img src="${src}" data-initials="PC" onerror="imgFallback(this)" alt="Player character" class="pc-portrait-img">`;
+        if (em !== 'neutral') state.flags.latestEmotion = em;
     }
+}
+
+// ─── PROP/DOCUMENT RENDERER ──────────────────────────────────────────────────
+// Called by advanceDialogue() when line.type === 'document' or 'notice'
+function _renderPropLine(line) {
+    const textEl = document.getElementById('dialogue-text');
+    const imageKey = line.image || line.prop;
+    const src = (PROP_ASSETS && PROP_ASSETS[imageKey])
+        ? PROP_ASSETS[imageKey]
+        : (imageKey ? `Assets/props/${imageKey}.png` : null);
+
+    let html = '';
+    if (src) {
+        html += `<div class="prop-document-card">
+            <img src="${src}" alt="${line.alt || imageKey || 'Document'}" class="prop-document-img" onerror="this.style.display='none'">
+        </div>`;
+    }
+    if (line.caption) {
+        html += `<p class="prop-caption">${line.caption}</p>`;
+    }
+    if (line.text) {
+        html += `<p>${line.text}</p>`;
+    }
+    textEl.innerHTML = html;
+}
+
+// ─── UI ASSET RESOLVER ───────────────────────────────────────────────────────
+// Resolves a UI asset key to its path — used in WhatsApp card rendering
+function _getUIAsset(key) {
+    return (UI_ASSETS && UI_ASSETS[key]) ? UI_ASSETS[key] : `Assets/ui/${key}.png`;
 }
 
 // --- CONDITION EVALUATOR ---
@@ -1051,9 +1817,10 @@ function _renderLine(line) {
 
         case 'dialogue': {
             textEl.classList.add('line-dialogue');
-            _setNpcPortrait(line.portrait_state || null, line.speaker || '');
-            _setPcPortrait('neutral');
-            textEl.innerHTML = `<span class="speaker-name">${line.speaker || ''}</span><br>${line.text || ''}`;
+            _setPcPortrait('neutral'); 
+            _setNpcPortrait(line.portrait_state || null, line.speaker || '', line.npc_flip || false);
+            document.getElementById('dialogue-panel').classList.remove('panel-expanded');
+            textEl.innerHTML = line.text || '';
             contBtn.style.display = 'block';
             break;
         }
@@ -1084,12 +1851,8 @@ function _renderLine(line) {
                     ${c.forwarded_count ? `<div class="media-forwarded">⟳ Forwarded ${c.forwarded_count} times</div>` : ''}
                     <div class="media-card-body">${c.message || ''}</div>
                 </div>`;
-            // If advance is "choice", the NEXT line must be a choice line — fall through
-            if (line.advance === 'choice') {
-                contBtn.style.display = 'block';
-            } else {
-                contBtn.style.display = 'block';
-            }
+            // Always show continue button — player taps to proceed to the next line (which may be a choice)
+            contBtn.style.display = 'block';
             break;
         }
 
@@ -1245,7 +2008,8 @@ function _renderLine(line) {
             // Choice lines display a prompt and render option buttons.
             // Engine halts until player selects.
             textEl.classList.add('line-choice');
-            _setNpcPortrait(line.portrait_state || null, line.speaker || '');
+            _setNpcPortrait(line.portrait_state || null, line.speaker || '', line.npc_flip || false);
+            document.getElementById('dialogue-panel').classList.add('panel-expanded');
             textEl.innerHTML = `<span class="choice-prompt">${line.prompt || line.text || ''}</span>`;
 
             const choices = line.choices || [];
@@ -1308,6 +2072,75 @@ function _applySceneChoice(opt) {
     // 4. Unlock achievement
     if (opt.achievement) unlockAchievement(opt.achievement);
 
+    // 4b. Auto-achievements based on flag state after increments
+    // Fire 'the_algorithm_would_hate_you' on first EC board verification
+    const vc = state.flags.verifiedCount || 0;
+    const vabc = state.flags.verifiedAtBoardCount || 0;
+    if ((vc >= 1 || vabc >= 1) && !state.flags._ach_alg_fired) {
+        state.flags._ach_alg_fired = true;
+        unlockAchievement('the_algorithm_would_hate_you');
+    }
+    // Fire 'professional_skeptic' when verifiedCount reaches 3
+    if ((vc >= 3 || vabc >= 3) && !state.flags._ach_skeptic_fired) {
+        state.flags._ach_skeptic_fired = true;
+        unlockAchievement('professional_skeptic');
+    }
+    // Fire 'at_least_someone_asked' when all three polling helpers done
+    if (state.flags.helpedElderlyWoman && state.flags.helpedNICYoungMan && state.flags.helpedLostCouple && !state.flags._ach_helpers_fired) {
+        state.flags._ach_helpers_fired = true;
+        unlockAchievement('at_least_someone_asked');
+    }
+    // Fire 'information_health_100' if ih gauge is at 100
+    if (state.gauges.ih >= 100 && !state.flags._ach_ih100_fired) {
+        state.flags._ach_ih100_fired = true;
+        unlockAchievement('information_health_100');
+    }
+    // Fire 'it_spreads_both_ways' when player shares verified info back to uncle
+    if (state.flags.sharedVerifiedInfo && !state.flags._ach_spreads_fired) {
+        state.flags._ach_spreads_fired = true;
+        unlockAchievement('it_spreads_both_ways');
+    }
+    // Fire 'sandya_made_it' when Sandya's note is found AND she is confirmed on register
+    if (state.flags.foundSandyaNote && state.flags.sandyaOnRegister && !state.flags._ach_sandya_fired) {
+        state.flags._ach_sandya_fired = true;
+        unlockAchievement('sandya_made_it');
+    }
+    // Fire 'thirty_years_in_the_same_room' when road file is found
+    if (state.flags.foundRoadFile && !state.flags._ach_roadfile_fired) {
+        state.flags._ach_roadfile_fired = true;
+        unlockAchievement('thirty_years_in_the_same_room');
+    }
+    // Fire 'pol_roti_and_politics' when 1977 receipt is found
+    if (state.flags.found1977Receipt && !state.flags._ach_receipt_fired) {
+        state.flags._ach_receipt_fired = true;
+        unlockAchievement('pol_roti_and_politics');
+    }
+    // Fire 'somebody_had_to_ask' when sergeant transfer thread is found
+    if (state.flags.foundSergeantTransferThread && !state.flags._ach_sergeant_fired) {
+        state.flags._ach_sergeant_fired = true;
+        unlockAchievement('somebody_had_to_ask');
+    }
+    // Fire 'nandadasa_approved' when player asked Nandadasa before acting
+    if (state.flags.askedNandadasa && !state.flags._ach_nandadasa_fired) {
+        state.flags._ach_nandadasa_fired = true;
+        unlockAchievement('nandadasa_approved');
+    }
+    // Fire 'actually_read_the_fine_print' when manifesto comparison is done
+    if (state.flags.manifestoComparisonDone && !state.flags._ach_manifesto_fired) {
+        state.flags._ach_manifesto_fired = true;
+        unlockAchievement('actually_read_the_fine_print');
+    }
+    // Fire 'read_the_fine_print' when current manifesto is read
+    if (state.flags.readCurrentManifesto && !state.flags._ach_readmanifesto_fired) {
+        state.flags._ach_readmanifesto_fired = true;
+        unlockAchievement('read_the_fine_print');
+    }
+    // Fire 'not_your_job' when elderly woman is helped at polling station
+    if (state.flags.helpedElderlyWoman && !state.flags._ach_elderly_fired) {
+        state.flags._ach_elderly_fired = true;
+        unlockAchievement('not_your_job');
+    }
+
     // 5. Curiosity perk achievement
     if (opt.perk === 'curiosity') unlockAchievement('curiosity_perk');
 
@@ -1336,7 +2169,13 @@ function _applySceneChoice(opt) {
     // Week completion checked when dialogue fully closes, not mid-scene
 
     // 8. Navigate
-    _navigateGoto(opt.goto);
+    if (opt.goto) {
+        _navigateGoto(opt.goto);
+    } else if (state.dialogue.on_complete) {
+        _resolveOnComplete(state.dialogue.on_complete);
+    } else {
+        closeDialoguePanel();
+    }
 }
 
 // Stores the pending goto when a consequence screen is shown mid-choice.
@@ -1362,8 +2201,8 @@ function _resolveOnComplete(onComplete) {
     updateGauges(false);
     saveGame();
     checkMapUnlocks();
-    // Note: checkWeekCompletion is NOT called here.
-    // Week advancement is triggered only by player action via advanceWeek().
+    // checkWeekCompletion IS called indirectly via closeDialoguePanel() above.
+    // Week advancement banner is shown by checkWeekCompletion(); actual advance requires player to click advanceWeek().
 
     if (!onComplete) return;
 
@@ -1396,9 +2235,8 @@ function _navigateGoto(target) {
 
     // Gracefully handle returning to map state
     if (target.endsWith('_map') || target === 'screen_map') { 
-        closeDialoguePanel(); 
+        closeDialoguePanel(); // Also triggers checkWeekCompletion and checkMapUnlocks internally
         showScreen('screen-game');
-        checkMapUnlocks();
         return; 
     }
 
@@ -1408,9 +2246,17 @@ function _navigateGoto(target) {
     if (target === 'triggerEnding')            { triggerEnding(); return; }
     if (target === 'checkWeekCompletion')      { checkWeekCompletion(); return; }
 
-    // Ending scene IDs
+    // Ending scene IDs — always run triggerEnding() first to fire achievements and dynamic text,
+    // then attempt to load the ending JSON for any additional scene content
     if (['ending_good', 'ending_bad', 'ending_neutral', 'ending_secret'].includes(target)) {
-        openScenePath(`scenes/week0/${target}.json`);
+        triggerEnding(); // Fires achievements, sets dynamic ending text, shows consequence screen
+        // Optionally load additional ending scene JSON if it exists (non-blocking)
+        const endingPath = `scenes/week0/${target}.json`;
+        fetch(endingPath).then(r => {
+            if (r.ok) return r.json();
+        }).then(sceneData => {
+            if (sceneData) renderDialogue(sceneData);
+        }).catch(() => { /* No additional ending scene — triggerEnding() content is sufficient */ });
         return;
     }
 
@@ -1456,9 +2302,9 @@ function _sceneIdToPath(sceneId) {
         'w6_grama_office':                 'scenes/week6/grama_office_w6.json',
         'w6_grama_curiosity':              'scenes/week6/grama_office_curiosity.json',
         'w6_grama_registration_started':   'scenes/week6/grama_office_reg_started.json',
-        'w6_grama_office_Imali':          'scenes/week6/grama_office_w6_Imali.json',
-        'w6_Imali_wrong_assumption':      'scenes/week6/grama_office_Imali_wrong.json',
-        'w6_Imali_assumption_corrected':  'scenes/week6/grama_office_Imali_corrected.json',
+        'w6_grama_office_Kamala':          'scenes/week6/grama_office_w6_Kamala.json',
+        'w6_Kamala_wrong_assumption':      'scenes/week6/grama_office_Kamala_wrong.json',
+        'w6_Kamala_assumption_corrected':  'scenes/week6/grama_office_Kamala_corrected.json',
         'w6_grama_office_kumaran':         'scenes/week6/grama_office_w6_kumaran.json',
         'w6_boutique_optional':            'scenes/week6/boutique_w6.json',
         'w6_boutique_listen':              'scenes/week6/boutique_w6_listen.json',
@@ -1583,7 +2429,7 @@ function applyChoice(choice) {
     } else if (choice.consequence) {
         showConsequence(choice.consequence, deltas, prev);
     }
-    checkWeekCompletion();
+    // checkWeekCompletion() is handled by closeDialoguePanel() — do not call here
 }
 
 function showConsequence(text, deltas, prev) {
@@ -1608,7 +2454,7 @@ function returnToGame() {
     _resumeAfterConsequence();
     updateGauges();
     checkMapUnlocks();
-    checkWeekCompletion();
+    setTimeout(() => checkWeekCompletion(), 100); // Defer so screen-consequence 'active' class is removed first
 }
 
 function triggerEnding() {
@@ -1668,9 +2514,48 @@ function triggerEnding() {
     
     updateGauges(true);
     showScreen('screen-consequence');
-    
-    // Replace return button with "Play Again"
-    const returnBtn = document.querySelector('#screen-consequence button');
+
+    // Fire end-of-game achievements
+    unlockAchievement('the_road_remains');
+    unlockAchievement('you_finished_an_education_game');
+    if (endingType === 'good') {
+        // Check secret ending condition: Sandya's note was found AND she's on register
+        if (window.gameState.flags.foundSandyaNote && window.gameState.flags.sandyaOnRegister) {
+            unlockAchievement('the_unbroken_chain');
+        }
+    }
+    if (window.gameState.flags.registrationDeadlineMissed) {
+        unlockAchievement('the_door_was_right_there');
+    }
+    // Character-specific ending achievements
+    const _char = window.gameState.character;
+    const _flags = window.gameState.flags;
+    if (_char === 'Karunasena' && (_flags.karunasena_dismissedCount || 0) > 5) {
+        unlockAchievement('uncles_nephew');
+    }
+    if (_char === 'Kamala' && (_flags.kamala_assumptionsCorrected || 0) >= 1) {
+        unlockAchievement('she_was_mostly_right');
+    }
+    if (_char === 'Kumaran' && (_flags.kumaran_transferStepsComplete || 0) >= 3) {
+        unlockAchievement('every_step_cost_more');
+    }
+    // Blanket policy: all uncle messages delivered but ALL were dismissed/ignored
+    const allUncleDelivered = _flags.uncleMsgWeek6Delivered && _flags.uncleMsgWeek5Delivered && _flags.uncleMsgWeek4Delivered;
+    const allUncleIgnored = !_flags.uncleVisited && (_flags.karunasena_dismissedCount || 0) === 0 && !_flags.sharedAnyFakeMessage;
+    if (_char === 'Karunasena' && allUncleDelivered && allUncleIgnored) {
+        unlockAchievement('blanket_policy');
+    }
+    // Fake message achievements
+    if (_flags.sharedFake4amMessage) unlockAchievement('the_4am_people');
+    if (_flags.sharedFakeMessage_w6 || _flags.sharedFakeVoicenote_w5 || _flags.sharedFake4amMessage || _flags.sharedFakeCandidateList) {
+        unlockAchievement('847_members');
+    }
+    if (_flags.sharedFakeBallotFold || _flags.ballotWillBeSpoiled) {
+        unlockAchievement('you_were_so_confident');
+    }
+
+    // Replace the return button with "Play Again" using its stable data-i18n attribute
+    const returnBtn = document.querySelector('#screen-consequence .cons-btn');
     if (returnBtn) {
         returnBtn.textContent = 'Play Again';
         returnBtn.onclick = () => {
@@ -1679,6 +2564,19 @@ function triggerEnding() {
         };
     }
     
+    // Track completed characters for 'three_perspectives' achievement (cross-playthrough)
+    try {
+        const completedChars = JSON.parse(localStorage.getItem('plv_completed_chars') || '[]');
+        const currentChar = window.gameState.character;
+        if (currentChar && !completedChars.includes(currentChar)) {
+            completedChars.push(currentChar);
+            localStorage.setItem('plv_completed_chars', JSON.stringify(completedChars));
+        }
+        if (completedChars.length >= 3) {
+            unlockAchievement('three_perspectives');
+        }
+    } catch(e) { /* localStorage unavailable */ }
+
     saveGame();
 }
 
@@ -1777,16 +2675,258 @@ function loadGame() {
     const s = localStorage.getItem('plv_save');
     if (!s) return;
     window.gameState = JSON.parse(s);
+
+    // If the game was saved while a dialogue was active, the last visited scene
+    // path may have been pushed before the dialogue completed. Remove it so the
+    // player can re-enter that scene on Continue rather than hitting "Nothing here."
+    if (window.gameState.dialogue && window.gameState.dialogue.active) {
+        const locs = window.gameState.flags.visitedLocs;
+        if (Array.isArray(locs) && locs.length > 0) {
+            locs.pop(); // Remove the scene that was interrupted
+        }
+        window.gameState.dialogue.active = false; // Reset dialogue state
+    }
+
     applyLanguage(true);
     updateGauges(false);
     checkMapUnlocks();
+    scaleMap();
     
     document.getElementById('week-val').textContent = window.gameState.week || 6;
     showScreen('screen-game');
+    // Restore week completion banner if the player saved after completing a week's tasks
+    setTimeout(() => checkWeekCompletion(), 300);
 }
 
 function checkContinueBtn() {
-    const btn = document.getElementById('btn-continue');
-    if (!btn) return;
-    btn.disabled = !localStorage.getItem('plv_save');
+    const save = localStorage.getItem('plv_save');
+    const btnContinue = document.getElementById('btn-continue');
+    const btnNewGame = document.getElementById('btn-newgame');
+    const subtitleEl = document.getElementById('menu-subtitle');
+    
+    if (save) {
+        const saveData = JSON.parse(save);
+        if (btnContinue) btnContinue.style.display = 'block';
+        if (btnNewGame) btnNewGame.classList.remove('primary'); 
+        
+        // Personalize the subtitle if a character is active
+        if (subtitleEl && saveData.character) {
+            const charName = t(`char.${CHAR_KEY[saveData.character]}.name`);
+            subtitleEl.textContent = `${charName}, Alupotha is waiting for you.`;
+        }
+    } else {
+        if (btnContinue) btnContinue.style.display = 'none';
+        if (btnNewGame) btnNewGame.classList.add('primary');
+        
+        // Revert to default text if no save exists
+        if (subtitleEl) subtitleEl.textContent = t('menu.subtitle');
+    }
 }
+
+function checkNewGame() {
+    if (localStorage.getItem('plv_save')) {
+        openModal('modal-overwrite'); // Warn user before destroying save
+    } else {
+        showScreen('screen-character'); // Safe to proceed immediately
+    }
+}
+
+// =============================================================================
+// KEYBOARD NAVIGATION SYSTEM
+// Supports: Arrow keys/Tab for menu focus, Enter/Space to select,
+//           Escape to pause, 1-9 for dialogue choices, WASD for future use.
+// Compatible with itch.io and Steam (no conflicts with browser shortcuts).
+// =============================================================================
+let _kbFocusedIndex = 0;
+
+function _getActiveFocusableButtons() {
+    // Get all visible, non-disabled buttons in the currently active screen or modal
+    const activeModal = document.querySelector('.modal-overlay.active');
+    const activeScreen = document.querySelector('.screen.active');
+    const pauseOverlay = document.getElementById('overlay-pause');
+    const dialoguePanel = document.getElementById('dialogue-panel');
+    let container = activeScreen;
+
+    if (activeModal) {
+        container = activeModal;
+    } else if (pauseOverlay && pauseOverlay.classList.contains('active')) {
+        container = pauseOverlay;
+    } else if (dialoguePanel && dialoguePanel.classList.contains('open')) {
+        container = dialoguePanel;
+    }
+    if (!container) return [];
+
+    return Array.from(container.querySelectorAll(
+        'button:not([disabled]), [role="button"]:not([disabled])'
+    )).filter(el => {
+        const rect = el.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0;
+    });
+}
+
+function _kbNavigate(direction) {
+    const buttons = _getActiveFocusableButtons();
+    if (!buttons.length) return;
+    _kbFocusedIndex = (_kbFocusedIndex + direction + buttons.length) % buttons.length;
+    buttons[_kbFocusedIndex].focus();
+}
+
+document.addEventListener('keydown', (e) => {
+    const screen = window.gameState.screen;
+    const pauseActive = document.getElementById('overlay-pause')?.classList.contains('active');
+    const dialogueOpen = document.getElementById('dialogue-panel')?.classList.contains('open');
+    const tutorialOpen = !!document.getElementById('gauge-tutorial');
+
+    // --- Prevent default for game keys (stops page scroll etc.) ---
+    const gameKeys = ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' ','Enter','Escape'];
+    if (gameKeys.includes(e.key)) {
+        // Only prevent default if we're in game context, not a text input
+        if (document.activeElement.tagName !== 'INPUT' &&
+            document.activeElement.tagName !== 'SELECT' &&
+            document.activeElement.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+        }
+    }
+
+    // --- ESCAPE: Pause / Unpause ---
+    if (e.key === 'Escape') {
+        if (screen === 'screen-opening') {
+            skipOpening();
+            return;
+        }
+        if (tutorialOpen) {
+            dismissGaugeTutorial();
+        } else if (pauseActive) {
+            togglePause();
+        } else if (dialogueOpen) {
+            closeDialoguePanel();
+        } else if (screen === 'screen-game') {
+            togglePause();
+        }
+        return;
+    }
+
+    // --- ARROW KEYS: Navigate menu buttons ---
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'Tab') {
+        if (!e.shiftKey) _kbNavigate(1);
+        return;
+    }
+    if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || (e.key === 'Tab' && e.shiftKey)) {
+        _kbNavigate(-1);
+        return;
+    }
+
+    // --- ENTER / SPACE: Activate focused button or advance dialogue ---
+    if (e.key === 'Enter' || e.key === ' ') {
+        // If a button is focused, click it
+        const focused = document.activeElement;
+        if (focused && (focused.tagName === 'BUTTON' || focused.getAttribute('role') === 'button')) {
+            focused.click();
+            return;
+        }
+        // Otherwise, advance dialogue
+        if (dialogueOpen && !window.gameState.dialogue._waiting) {
+            advanceDialogue();
+        }
+        return;
+    }
+
+    // --- NUMBER KEYS 1-9: Select dialogue choices ---
+    if (dialogueOpen && window.gameState.dialogue._waiting) {
+        const num = parseInt(e.key);
+        if (!isNaN(num) && num >= 1) {
+            const options = document.querySelectorAll('#dialogue-options button');
+            if (options[num - 1]) {
+                options[num - 1].click();
+            }
+        }
+        return;
+    }
+});
+
+// Reset focus index when screen changes
+const _origShowScreen = showScreen;
+window.showScreen = function(id) {
+    _origShowScreen(id);
+    _kbFocusedIndex = 0;
+};
+
+// Keyboard focus styles handled in style.css cleanly
+
+// Open Character Confirmation Modal
+// Character trait/perk data for the confirmation modal
+const CHAR_CONFIRM_DATA = {
+    Karunasena: {
+        perk: 'Curiosity',
+        perkDesc: 'Can ask why something works the way it does and receive a deeper explanation.',
+        dis: 'Exposure',
+        disDesc: 'Uncle Sirisena is family. Ignoring his messages carries a social cost.'
+    },
+    Kamala: {
+        perk: 'Network',
+        perkDesc: 'Queues move faster. Characters share information more readily with her.',
+        dis: 'Assumption',
+        disDesc: 'She believes she already knows things — but has some of them subtly wrong.'
+    },
+    Kumaran: {
+        perk: 'Persistence',
+        perkDesc: 'Every completed step earns more. He unlocks content others cannot reach.',
+        dis: 'Distance',
+        disDesc: 'Fewer informal information sources. Accurate information is harder to find.'
+    }
+};
+
+window.promptCharacterConfirm = function(charId) {
+    // Always use capitalised Kumaran — no lowercase alias needed
+    const safeCharId = (charId === 'kumaran') ? 'Kumaran' : charId;
+
+    // Name
+    document.getElementById('confirm-char-name').textContent = safeCharId;
+
+    // Traits block
+    const data = CHAR_CONFIRM_DATA[safeCharId] || {};
+    const traitsEl = document.getElementById('confirm-traits');
+    if (traitsEl && data.perk) {
+        traitsEl.innerHTML = `
+            <div class="char-confirm-trait perk">
+                <div class="char-confirm-trait-label">Perk</div>
+                <div class="char-confirm-trait-text"><strong>${data.perk}:</strong> ${data.perkDesc}</div>
+            </div>
+            <div class="char-confirm-trait dis">
+                <div class="char-confirm-trait-label">Challenge</div>
+                <div class="char-confirm-trait-text"><strong>${data.dis}:</strong> ${data.disDesc}</div>
+            </div>
+        `;
+    }
+
+    // Starting gauges block
+    const gauges = CHAR_GAUGES[safeCharId] || { ct: 50, ih: 50, vp: 50 };
+    const gaugesEl = document.getElementById('confirm-gauges');
+    if (gaugesEl) {
+        gaugesEl.innerHTML = `
+            <div class="mini-gauge ct">
+                <span>Civic Trust</span>
+                <div class="mini-bar"><div class="mini-fill" style="width:${gauges.ct}%"></div></div>
+                <span>${gauges.ct}</span>
+            </div>
+            <div class="mini-gauge ih">
+                <span>Info Health</span>
+                <div class="mini-bar"><div class="mini-fill" style="width:${gauges.ih}%"></div></div>
+                <span>${gauges.ih}</span>
+            </div>
+            <div class="mini-gauge vp">
+                <span>Voter Participation</span>
+                <div class="mini-bar"><div class="mini-fill" style="width:${gauges.vp}%"></div></div>
+                <span>${gauges.vp}</span>
+            </div>
+        `;
+    }
+
+    // Wire the confirm button
+    document.getElementById('confirm-char-btn').onclick = function() {
+        closeModal('modal-char-confirm');
+        selectCharacter(safeCharId);
+    };
+
+    openModal('modal-char-confirm');
+};
