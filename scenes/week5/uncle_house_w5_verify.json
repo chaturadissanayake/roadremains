@@ -1,0 +1,50 @@
+{
+  "id": "w5_uncle_voicenote_skeptic",
+  "week": 5,
+  "location": "uncle_house",
+  "background": "bg_uncle_house",
+  "portraits": {
+    "left": "char_karunasena_neutral",
+    "right": "npc_uncle_neutral"
+  },
+  "gauges_on_enter": {
+    "ih": 5
+  },
+  "lines": [
+    {
+      "id": "w5_uvsk_01",
+      "type": "dialogue",
+      "speaker": "Uncle Sirisena",
+      "portrait_state": "npc_uncle_neutral",
+      "text": "That is true… but Jayantha is reliable. And his cousin—",
+      "advance": "click"
+    },
+    {
+      "id": "w5_uvsk_02",
+      "type": "dialogue",
+      "speaker": "Uncle Sirisena",
+      "portrait_state": "npc_uncle_talking",
+      "text": "Well. Maybe you are right to check. But check quickly. This is important information if it is true.",
+      "advance": "click"
+    },
+    {
+      "id": "w5_uvsk_choice",
+      "type": "choice",
+      "prompt": "He is less certain now. What do you do?",
+      "choices": [
+        {
+          "id": "w5_uvsk_choice_a",
+          "label": "Go verify it at the EC notice board.",
+          "goto": "w5_ec_board_verify",
+          "gauges": {}
+        },
+        {
+          "id": "w5_uvsk_choice_b",
+          "label": "Leave it. You have raised enough doubt.",
+          "goto": "w5_map",
+          "gauges": {}
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "id": "w3_police",
+  "week": 3,
+  "location": "police",
+  "background": "bg_police",
+  "portraits": {
+    "left": "char_karunasena_neutral",
+    "right": "npc_sergeant_talking"
+  },
+  "lines": [
+    {
+      "id": "w3_p_01",
+      "type": "dialogue",
+      "speaker": "Sergeant Wickramasinghe",
+      "portrait_state": "npc_sergeant_talking",
+      "text": "Week 3. Three weeks left. The campaign gets louder from here.",
+      "advance": "click"
+    },
+    {
+      "id": "w3_p_choice",
+      "type": "choice",
+      "prompt": "Do you have anything to report?",
+      "choices": [
+        {
+          "id": "w3_p_choice_a",
+          "label": "Report a voter intimidation incident you witnessed.",
+          "goto": "w3_police_voter_intimidation",
+          "flags_set": [
+            "reportedVoterIntimidation"
+          ],
+          "gauges": {
+            "ct": 20,
+            "ih": 5,
+            "vp": 20
+          }
+        },
+        {
+          "id": "w3_p_choice_b",
+          "label": "Ask about 2016 specifically.",
+          "condition": "flags.heardAbout2016Road",
+          "goto": "w3_police_sergeant_transfer",
+          "gauges": {}
+        },
+        {
+          "id": "w3_p_choice_c",
+          "label": "Nothing to report.",
+          "goto": "w3_map",
+          "gauges": {}
+        }
+      ]
+    }
+  ]
+}

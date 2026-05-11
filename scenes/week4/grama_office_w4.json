@@ -1,0 +1,74 @@
+{
+  "id": "w4_grama_office",
+  "week": 4,
+  "location": "grama_office",
+  "background": "bg_grama_office",
+  "portraits": {
+    "left": "char_karunasena_neutral",
+    "right": "npc_nandadasa_neutral"
+  },
+  "flags_set_on_enter": [
+    "gremaOfficeVisited"
+  ],
+  "lines": [
+    {
+      "id": "w4_go_01",
+      "type": "narration",
+      "condition": "flags.sharedFake4amMessage",
+      "text": "Twenty-three people arrived at 4am this morning. The queue outside now extends past the coconut tree and around the corner. Nandadasa has been fielding questions since 4:12am. He is not amused. He is being thorough, which in this context is indistinguishable from not being amused.",
+      "advance": "click"
+    },
+    {
+      "id": "w4_go_02",
+      "type": "dialogue",
+      "speaker": "Nandadasa Mahaththaya",
+      "portrait_state": "npc_nandadasa_annoyed",
+      "condition": "flags.sharedFake4amMessage",
+      "text": "A message was circulating. 4am voting. It was false. Polling is at 7am. It has always been at 7am. I processed forty phone calls before my morning tea.",
+      "advance": "click"
+    },
+    {
+      "id": "w4_go_03",
+      "type": "dialogue",
+      "speaker": "Nandadasa Mahaththaya",
+      "portrait_state": "npc_nandadasa_neutral",
+      "text": "Registration closes today. If your form is not submitted today, it cannot be accepted.",
+      "advance": "click"
+    },
+    {
+      "id": "w4_go_choice",
+      "type": "choice",
+      "prompt": "Have you submitted your registration form?",
+      "choices": [
+        {
+          "id": "w4_go_choice_a",
+          "label": "Submit the completed ER-1 form now.",
+          "condition": "flags.registrationStarted && !flags.registrationComplete",
+          "goto": "w4_registration_complete",
+          "flags_set": [
+            "registrationComplete"
+          ],
+          "gauges": {
+            "ct": 10,
+            "ih": 15,
+            "vp": 20
+          }
+        },
+        {
+          "id": "w4_go_choice_b",
+          "label": "I have not registered yet. Can I still do it?",
+          "condition": "!flags.registrationStarted",
+          "goto": "w4_registration_last_chance",
+          "gauges": {}
+        },
+        {
+          "id": "w4_go_choice_c",
+          "label": "My registration is already complete.",
+          "condition": "flags.registrationComplete",
+          "goto": "w4_map",
+          "gauges": {}
+        }
+      ]
+    }
+  ]
+}

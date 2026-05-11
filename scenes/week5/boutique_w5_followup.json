@@ -1,0 +1,20 @@
+{
+  "id": "w5.mudalali.followup.01",
+  "npc": "Mudalali Perera",
+  "portrait": "Assets/npcs/npc_mudalali_talking.png",
+  "initials": "MP",
+  "dialogue": [
+    "Delivered? The road — yes, the road is still bad. But everything else — more or less. Look, nobody is perfect.",
+    "You want perfect, go to Singapore. Here, we work with what we have.",
+    "<em>He looks away, arranging something behind the counter.</em>",
+    "You know Nandadasa has been in that Grama Sevaka office since 1994. Thirty years. You would think a man in the same room for thirty years would run out of things to look at. He never has."
+  ],
+  "options": [
+    {
+      "text": "Leave the boutique.",
+      "effect": { "ih": 5 },
+      "flag": { "heardRoadFileClue": true },
+      "consequence": "He does not explain what he means. But he has given you a piece of the puzzle regarding Nandadasa and the road."
+    }
+  ]
+}

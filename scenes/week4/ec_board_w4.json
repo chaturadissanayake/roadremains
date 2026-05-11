@@ -1,0 +1,47 @@
+{
+  "id": "w4_ec_board_verify",
+  "week": 4,
+  "location": "ec_board",
+  "background": "bg_ec_board",
+  "portraits": {
+    "left": "char_karunasena_neutral",
+    "right": null
+  },
+  "flags_increment_on_enter": {
+    "verifiedAtBoardCount": 1
+  },
+  "gauges_on_enter": {
+    "ct": 10,
+    "ih": 15,
+    "vp": 5
+  },
+  "lines": [
+    {
+      "id": "w4_ecv_01",
+      "type": "notice",
+      "card": {
+        "header": "ELECTIONS COMMISSION OF SRI LANKA",
+        "title": "OFFICIAL POLLING HOURS",
+        "body": "Polling will be conducted on election day from:\n\n7:00 AM to 5:00 PM\n\nPolling stations will NOT open before 7:00 AM.\nAny notice stating otherwise is not issued by this Commission.\n\nIf you receive unofficial communications about polling hours, please disregard them and refer to this board.",
+        "footer": "Elections Commission of Sri Lanka — Reference No. EC/2025/GN/47"
+      },
+      "advance": "click"
+    },
+    {
+      "id": "w4_ecv_02",
+      "type": "narration",
+      "text": "7am. Not 4am. The screenshot was fabricated. The EC logo on the real notice has the correct layout and a reference number. The fake notice had neither.",
+      "advance": "click"
+    },
+    {
+      "id": "w4_ecv_03",
+      "type": "narration",
+      "text": "You checked before acting. That is the whole exercise.",
+      "advance": "click"
+    }
+  ],
+  "achievement": "professional_skeptic_progress",
+  "on_complete": {
+    "goto": "w4_map"
+  }
+}

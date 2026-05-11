@@ -1,0 +1,30 @@
+{
+  "id": "w5_transition",
+  "week": 5,
+  "location": "transition",
+  "background": "bg_main_menu",
+  "lines": [
+    {
+      "id": "w5_tr_01",
+      "type": "narration",
+      "text": "Week 4 of 6 — Registration closes this week.",
+      "advance": "auto"
+    },
+    {
+      "id": "w5_tr_02",
+      "type": "narration",
+      "text": "Five weeks have passed. If you have not completed your registration, this is your last chance. The door closes at the end of Week 4.",
+      "advance": "click"
+    },
+    {
+      "id": "w5_tr_03",
+      "type": "narration",
+      "text": "Next: Uncle Sirisena has a screenshot. It looks official. It is not.",
+      "advance": "click"
+    }
+  ],
+  "on_complete": {
+    "goto": "w4_uncle_screenshot",
+    "week_set": 4
+  }
+}

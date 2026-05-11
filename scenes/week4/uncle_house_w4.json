@@ -1,0 +1,90 @@
+{
+  "id": "w4_uncle_screenshot",
+  "week": 4,
+  "location": "uncle_house",
+  "background": "bg_uncle_house",
+  "portraits": {
+    "left": "char_karunasena_surprised",
+    "right": "npc_uncle_enthusiastic"
+  },
+  "flags_set_on_enter": [
+    "uncleMsgWeek4Delivered"
+  ],
+  "lines": [
+    {
+      "id": "w4_us_01",
+      "type": "dialogue",
+      "speaker": "Uncle Sirisena",
+      "portrait_state": "npc_uncle_enthusiastic",
+      "text": "Karu! Look at this! I just got this from the Patriots group. Official notice from the Elections Commission!",
+      "advance": "click"
+    },
+    {
+      "id": "w4_us_02",
+      "type": "screenshot",
+      "card": {
+        "group": "Alupotha Patriots",
+        "member_count": 847,
+        "sender": "Uncle Sirisena",
+        "time": "8:02 AM",
+        "forwarded_count": 87,
+        "caption": "CONFIRMED: EC changed voting hours",
+        "image_description": "Screenshot of what appears to be an official Elections Commission notice. The header reads 'ELECTIONS COMMISSION OF SRI LANKA'. The logo is present but slightly wrong — the Sinha figure is on the wrong side. The footer is missing entirely. The notice states: 'URGENT NOTICE — Polling hours changed. Voting will begin at 4:00 AM due to security concerns. Please arrive before 4:30 AM. — Elections Commission'",
+        "visual_cues": [
+          "Logo spacing incorrect",
+          "Footer missing",
+          "No reference number",
+          "No official stamp"
+        ]
+      },
+      "advance": "choice"
+    },
+    {
+      "id": "w4_us_choice",
+      "type": "choice",
+      "speaker": "Uncle Sirisena",
+      "portrait_state": "npc_uncle_enthusiastic",
+      "prompt": "4am! We have to wake up very early. Shall I call your cousins?",
+      "choices": [
+        {
+          "id": "w4_us_choice_a",
+          "label": "Share it. Better to be safe than miss voting.",
+          "goto": "w4_uncle_screenshot_shared",
+          "flags_set": [
+            "sharedFake4amMessage",
+            "sharedAnyFakeMessage"
+          ],
+          "gauges": {
+            "ct": -20,
+            "ih": -15,
+            "vp": -20
+          },
+          "achievement": "the_4am_people"
+        },
+        {
+          "id": "w4_us_choice_b",
+          "label": "\"The EC logo looks wrong. And there is no footer. Let me check the notice board.\"",
+          "goto": "w4_ec_board_verify",
+          "gauges": {}
+        },
+        {
+          "id": "w4_us_choice_c",
+          "label": "Look up the Elections Commission on your phone right now.",
+          "goto": "w4_ec_board_verify",
+          "gauges": {
+            "ih": 5
+          }
+        },
+        {
+          "id": "w4_us_choice_d",
+          "label": "Ignore it and say nothing.",
+          "goto": "w4_map",
+          "flags_increment": {
+            "karunasena_dismissedCount": 1
+          },
+          "gauges": {}
+        }
+      ]
+    }
+  ]
+}
