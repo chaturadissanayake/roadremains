@@ -1,4 +1,11 @@
 // --- GLOBAL STATE ---
+// Read global achievements on boot to prevent loss across sessions
+let globalAchievements = [];
+try {
+    const storedAchs = localStorage.getItem('plv_achievements');
+    if (storedAchs) globalAchievements = JSON.parse(storedAchs);
+} catch(e) {}
+
 window.gameState = {
     lang: 'en',
     screen: 'screen-loading',
@@ -8,7 +15,8 @@ window.gameState = {
     flags: {
         // ── Core state ──────────────────────────────────────────
         visitedLocs: [],
-        achievements: [],
+        completedLocs: [], // scenes that fully resolved — these are truly locked
+        achievements: globalAchievements,
         endingReached: null,          // 'bad' | 'neutral' | 'good' | 'secret'
         secretEndingReached: false,
 
@@ -320,6 +328,7 @@ function imgFallback(img) {
 
 // --- SCREEN SYSTEM ---
 function showScreen(id) {
+    _kbFocusedIndex = 0;
     document.querySelectorAll('.screen').forEach(s => {
         s.classList.remove('active');
         s.setAttribute('aria-hidden', 'true');
@@ -331,6 +340,25 @@ function showScreen(id) {
     window.gameState.screen = id;
     
     if (id === 'screen-mainmenu') checkContinueBtn();
+    if (id === 'screen-game') scaleMap();
+}
+
+// =============================================================================
+// MAP SCALING — Scales the 1920x1080 inner canvas to fit the viewport container.
+// Uses transform: translate + scale so pixel coordinates from map-data.json
+// remain accurate at any screen size. Called on load and on every resize.
+// =============================================================================
+function scaleMap() {
+    const container = document.getElementById('map-svg-container');
+    const inner = document.getElementById('map-inner-wrap');
+    if (!container || !inner) return;
+    const cw = container.clientWidth;
+    const ch = container.clientHeight;
+    if (!cw || !ch) return;
+    const scale = Math.min(cw / 1920, ch / 1080);
+    const offsetX = (cw - 1920 * scale) / 2;
+    const offsetY = (ch - 1080 * scale) / 2;
+    inner.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
 }
 
 // --- INITIALIZATION ---
@@ -370,30 +398,12 @@ document.addEventListener('DOMContentLoaded', () => {
     scaleMap();
     window.addEventListener('resize', scaleMap);
 
-    // Modal Overlays
-
-// =============================================================================
-// MAP SCALING — Scales the 1920x1080 inner canvas to fit the viewport container.
-// Uses transform: translate + scale so pixel coordinates from map-data.json
-// remain accurate at any screen size. Called on load and on every resize.
-// =============================================================================
-function scaleMap() {
-    const container = document.getElementById('map-svg-container');
-    const inner = document.getElementById('map-inner-wrap');
-    if (!container || !inner) return;
-    const cw = container.clientWidth;
-    const ch = container.clientHeight;
-    if (!cw || !ch) return;
-    const scale = Math.min(cw / 1920, ch / 1080);
-    const offsetX = (cw - 1920 * scale) / 2;
-    const offsetY = (ch - 1080 * scale) / 2;
-    inner.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
-}
-    document.querySelectorAll('.modal-overlay').forEach(m => {
+    // Modal Overlays (Backdrop click disabled for game stability — use Escape or UI Close buttons)
+    /* document.querySelectorAll('.modal-overlay').forEach(m => {
         m.addEventListener('click', (e) => {
             if(e.target === m) m.classList.remove('active');
         });
-    });
+    }); */
 
     renderStaticText();
     checkContinueBtn();
@@ -403,7 +413,7 @@ function scaleMap() {
 // --- I18N & CONTENT ---
 const CONTENT = {
     en: {
-        'title': 'Voting Matters',
+        'title': 'Road Remains',
         'loading.tagline': 'An election is coming. Alupotha is not ready. Neither are you.',
         'loading.begin': 'Press anywhere to begin',
         'menu.subtitle': 'Alupotha is waiting.',
@@ -422,12 +432,12 @@ const CONTENT = {
         'char.ka.name': 'Kamala', 'char.ka.role': '34 years old · School teacher · Has lived in Alupotha for eight years', 'char.ka.desc': 'She has voted in the last two elections and filled in her ballot the way she always had — assuming she was doing it correctly. She was mostly right. Mostly. She knows almost everyone in Alupotha and most of them know her, which makes things easier. And occasionally more complicated.', 'char.ka.btn': 'Play as Kamala',
         'char.ku.name': 'Kumaran', 'char.ku.role': '28 years old · Migrant worker · Moved to Alupotha from the Northern Province two years ago', 'char.ku.desc': 'He came for work. He stayed for reasons that accumulated over two years and are now harder to name. His voter registration is in his home district. It needs to be transferred. The process involves more steps than it should, and some of those steps are in a language that is not his first. His story is harder. It is also more complete.', 'char.ku.btn': 'Play as Kumaran',
         'opening.btn': 'Enter Alupotha', 'opening.skip': 'Click anywhere to skip',
-        'gauge.ct': 'Civic Trust', 'gauge.ih': 'Info Health', 'gauge.vp': 'Voter Part.', 'game.week': 'WEEK',
+        'gauge.ct': 'Civic Trust', 'gauge.ih': 'Information Health', 'gauge.vp': 'Voter Participation', 'game.week': 'WEEK',
         'loc1.name': 'Grama Sevaka Office', 'loc2.name': "Uncle Sirisena's House", 'loc3.name': 'Elections Commission Notice Board', 'loc4.name': "Mudalali Perera's Boutique", 'loc5.name': 'Community Hall', 'loc6.name': 'Police Station', 'loc7.name': 'Skeptics Cafe', 'loc8.name': "Mahinda Bandara's Campaign Tent",
         'cons.heading': 'What happened.', 'cons.btn': 'Return to Alupotha',
-        'menu.play': 'Play', 'menu.newgame': 'New Game', 'menu.continue': 'Continue', 'menu.credits': 'Credits', 'menu.achievements': 'Achievements',
-        'settings.textsize': 'Text Size', 'settings.standard': 'Standard', 'settings.large': 'Large', 'settings.xlarge': 'Extra Large', 'settings.motion': 'Reduce Motion', 'settings.changelang': 'Change Language', 'settings.music': 'Music Volume', 'settings.sfx': 'Sound Effects',
-        'about.text': 'Play. Learn. Vote is a civic education project developed to improve voter education and counter election-related misinformation in Sri Lanka. Developed with support from LIRNEasia and available free in English, Sinhala, and Tamil. The game does not tell you who to vote for. That part is entirely yours. All characters, candidates, and political parties depicted are fictional. The Elections Commission of Sri Lanka is referenced as a public institution only — no real officials are depicted. Electoral law accuracy: All voter registration procedures, electoral rules, and ballot instructions reflect Sri Lankan law and Elections Commission guidelines as of 2024.',
+        'menu.newgame': 'New Game', 'menu.continue': 'Continue',
+        'settings.textsize': 'Text Size', 'settings.standard': 'Standard', 'settings.large': 'Large', 'settings.xlarge': 'Extra Large', 'settings.motion': 'Reduce Motion', 'settings.changelang': 'Change Language',
+        'about.text': 'Road Remains is a civic education game set in the fictional Sri Lankan village of Alupotha, six weeks before an election. You play as a resident navigating voter registration, misinformation, and the quiet pressure of a community making up its mind. The game does not tell you who to vote for. That part is entirely yours. All characters, candidates, and political parties depicted are fictional.',
         'npc.nandadasa': 'Nandadasa Mahaththaya', 'npc.uncle': 'Uncle Sirisena', 'npc.board': 'Notice Board', 'npc.mudalali': 'Mudalali Perera', 'npc.hall': 'Announcer', 'npc.police': 'Sgt. Wickramasinghe', 'npc.cafe': 'Cafe Owner', 'npc.mahinda': 'Mahinda Bandara'
     },
     si: {
@@ -454,6 +464,10 @@ function renderStaticText() {
 
 function selectLanguage(lang) {
     window.gameState.lang = lang;
+const htmlEl = document.getElementById('root-html');
+if (lang === 'si') { htmlEl.lang = 'si'; htmlEl.dir = 'ltr'; }
+else if (lang === 'ta') { htmlEl.lang = 'ta'; htmlEl.dir = 'ltr'; }
+else { htmlEl.lang = 'en'; htmlEl.dir = 'ltr'; }
     applyLanguage();
     showScreen('screen-mainmenu');
 }
@@ -502,6 +516,86 @@ function updateSettings(playSfxTest = false) {
 
 function openModal(id) { document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+// ── Cinematic Credits ────────────────────────────────────────────
+(function() {
+    let _creditsRaf = null;   // active requestAnimationFrame handle
+    let _creditsPos = 0;      // current translateY in px (starts at +viewH, scrolls negative)
+
+window.openCredits = function() {
+    const screen = document.getElementById('screen-credits');
+    const inner  = document.getElementById('credits-scroll-inner');
+    if (!screen || !inner) return;
+
+    // 1. Kill any running animation from a previous open
+    if (_creditsRaf) {
+        cancelAnimationFrame(_creditsRaf);
+        _creditsRaf = null;
+    }
+
+    // 2. Show the screen — must happen before measuring
+    showScreen('screen-credits');
+
+    // 3. Wait two frames so the screen is rendered and measurable
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            const viewH  = window.innerHeight;
+            const totalH = inner.scrollHeight; // padding: 30vh top+bottom baked in
+
+            // Start position: begin on-screen immediately so there's no waiting
+            _creditsPos = 0;
+            inner.style.transform = 'translateY(' + _creditsPos + 'px)';
+
+            // End position: last card has scrolled fully off the top
+            const endPos = -totalH;
+
+            // Pace: 60px/s feels like proper game credits
+            const pxPerMs = 60 / 1000;
+
+            // Start animating much faster (100ms instead of 800ms)
+            setTimeout(function() {
+                let last = null;
+
+                function tick(ts) {
+                    if (!last) last = ts;
+                    const delta = ts - last;
+                    last = ts;
+
+                    _creditsPos -= pxPerMs * delta;
+                    inner.style.transform = 'translateY(' + _creditsPos + 'px)';
+
+                    // Stop when the last card has cleared the top
+                    if (_creditsPos > endPos) {
+                        _creditsRaf = requestAnimationFrame(tick);
+                    } else {
+                        _creditsRaf = null;
+                    }
+                }
+
+                _creditsRaf = requestAnimationFrame(tick);
+            }, 800);
+        });
+    });
+};
+
+window.closeCredits = function() {
+    // Stop the scroll loop immediately so it freezes in place during fade-out
+    if (_creditsRaf) {
+        cancelAnimationFrame(_creditsRaf);
+        _creditsRaf = null;
+    }
+
+    const prev = window.gameState._creditsReturnScreen || 'screen-mainmenu';
+    window.gameState._creditsReturnScreen = null;
+    showScreen(prev);
+
+    // Delay resetting the position until the screen has completely faded out (600ms)
+    setTimeout(() => {
+        const inner = document.getElementById('credits-scroll-inner');
+        if (inner) inner.style.transform = 'translateY(0)';
+    }, 600);
+};
+})();
 
 function toggleGaugeInfo(key) {
     ['ct','ih','vp'].forEach(k => {
@@ -579,8 +673,57 @@ function _renderPauseAchievements() {
 function exitToMainMenu() {
     document.getElementById('overlay-pause').classList.remove('active');
     closeDialoguePanel(); // Ensure dialogue is closed if leaving mid-conversation
-    saveGame(); // Save progress before leaving
+    // Only save mid-game progress — never save after an ending (would resurrect a wiped save)
+    if (!window.gameState.flags.endingReached) {
+        saveGame();
+    }
     window.showScreen('screen-mainmenu');
+}
+
+// ── Ending Screen ────────────────────────────────────────────────
+// Call this when the game reaches a true ending (not a mid-game consequence).
+// endingKey: 'bad' | 'neutral' | 'good' | 'secret'
+// bodyText: the narrative paragraph to display
+function showEnding(endingKey, bodyText) {
+    const ENDING_LABELS = {
+        bad:     'Bad Ending',
+        neutral: 'Neutral Ending',
+        good:    'Good Ending',
+        secret:  'Secret Ending'
+    };
+    const ENDING_TITLES = {
+        bad:     'The Road Remains',
+        neutral: 'The Road Remains',
+        good:    'The Road Remains',
+        secret:  'The Unbroken Chain'
+    };
+
+    // Populate text
+    document.getElementById('ending-label').textContent  = ENDING_LABELS[endingKey] || 'Ending';
+    document.getElementById('ending-title').textContent  = ENDING_TITLES[endingKey] || 'The Road Remains';
+    document.getElementById('ending-body').textContent   = bodyText || '';
+
+    // Show final gauges with animated bars
+    const g = window.gameState.gauges;
+    ['ct','ih','vp'].forEach(key => {
+        const val = Math.max(0, Math.min(100, Math.round(g[key])));
+        document.getElementById('ending-val-' + key).textContent = val;
+        const bar = document.getElementById('ending-bar-' + key);
+        if (bar) {
+            bar.style.width = '0%';
+            setTimeout(() => { bar.style.width = val + '%'; }, 200);
+        }
+    });
+
+    // Switch phase
+    document.getElementById('cons-phase-choice').style.display  = 'none';
+    document.getElementById('cons-phase-ending').style.display  = 'flex';
+    document.getElementById('cons-phase-ending').style.flexDirection = 'column';
+
+    // Show the consequence screen as the ending screen
+    window.showScreen('screen-consequence');
+    window.gameState.flags.endingReached = endingKey;
+    saveGame();
 }
 
 // --- GAME FLOW ---
@@ -756,8 +899,15 @@ function startGame() {
     showScreen('screen-game');
     document.getElementById('week-val').textContent = window.gameState.week;
     updateGauges();
-    checkMapUnlocks();
+    // Do NOT call checkMapUnlocks() here — it sets the objective bar text.
+    // That text should only appear after the prologue ends (_afterPrologueReady handles this).
     scaleMap();
+
+    // Mark prologue active — hides objective bar and week-advance UI until map is shown
+    document.getElementById('screen-game').classList.add('prologue-active');
+    // Hide objective bar explicitly during prologue
+    const objBar = document.getElementById('objective-bar');
+    if (objBar) objBar.style.opacity = '0';
 
     // Load and show the prologue scene, then enter the map
     fetch('scenes/prologue.json')
@@ -776,7 +926,19 @@ function startGame() {
         .catch(() => {
             // Prologue file missing — continue silently to the map
             console.warn('[PLV] prologue.json not found — skipping intro scene.');
+            _afterPrologueReady();
         });
+}
+
+function _afterPrologueReady() {
+    // Called when prologue ends (or is skipped) — reveal objective bar and unblock map UI
+    document.getElementById('screen-game').classList.remove('prologue-active');
+    const objBar = document.getElementById('objective-bar');
+    if (objBar) {
+        objBar.style.transition = 'opacity 800ms ease';
+        objBar.style.opacity = '1';
+    }
+    checkMapUnlocks(); // Re-evaluate so objective text is fresh for Week 6
 }
 
 function unlockAchievement(id) {
@@ -785,6 +947,12 @@ function unlockAchievement(id) {
     }
     if (window.gameState.flags.achievements.includes(id)) return;
     window.gameState.flags.achievements.push(id);
+    
+    // Persist globally outside of standard volatile save file
+    try {
+        localStorage.setItem('plv_achievements', JSON.stringify(window.gameState.flags.achievements));
+    } catch(e) {}
+
     saveGame();
 
     const a = ACHIEVEMENTS[id];
@@ -903,10 +1071,11 @@ function checkMapUnlocks() {
     const flags = window.gameState.flags;
     const char = window.gameState.character;
     const visited = flags.visitedLocs || [];
-    const isVisited = (pathMatch) => visited.some(p => p.includes(pathMatch));
+    const completed = flags.completedLocs || [];
+    const isVisited = (pathMatch) => visited.some(p => p.includes(pathMatch)) || completed.some(p => p.includes(pathMatch));
 
     // Dynamic state checks since JSONs don't explicitly set "Resolved" boolean flags
-    const w6UncleDone = isVisited('uncle_house_shared') || isVisited('uncle_house_ignore') || isVisited('ec_board_w6');
+    const w6UncleDone = isVisited('uncle_house_entry') || isVisited('uncle_house_shared') || isVisited('uncle_house_ignore') || isVisited('uncle_house_verify') || isVisited('ec_board_w6');
     const w5UncleDone = isVisited('uncle_house_w5_shared') || isVisited('uncle_house_w5_verify') || isVisited('ec_board_w5');
     const w4UncleDone = isVisited('uncle_house_w4_shared') || isVisited('ec_board_w4');
 
@@ -1032,14 +1201,18 @@ function checkMapUnlocks() {
 
 function checkWeekCompletion() {
     const week = window.gameState.week;
-    if (week === 0) return; // election day, no advance needed
-    
     const flags = window.gameState.flags;
     const char = window.gameState.character;
     const visited = flags.visitedLocs || [];
-    const isVisited = (pathMatch) => visited.some(p => p.includes(pathMatch));
+    const completed = flags.completedLocs || [];
     
-    const w6UncleDone = isVisited('uncle_house_shared') || isVisited('uncle_house_ignore') || isVisited('ec_board_w6');
+    // WEEK 0 FIX: Step completely out of the way. 
+    // Let polling_vote_valid.json route to ending_good.json natively.
+    if (week === 0) return; 
+    
+    const isVisited = (pathMatch) => visited.some(p => p.includes(pathMatch)) || completed.some(p => p.includes(pathMatch));
+    
+    const w6UncleDone = isVisited('uncle_house_entry') || isVisited('uncle_house_shared') || isVisited('uncle_house_ignore') || isVisited('uncle_house_verify') || isVisited('ec_board_w6');
     const w5UncleDone = isVisited('uncle_house_w5_shared') || isVisited('uncle_house_w5_verify') || isVisited('ec_board_w5');
     const w4UncleDone = isVisited('uncle_house_w4_shared') || isVisited('ec_board_w4');
     
@@ -1049,13 +1222,13 @@ function checkWeekCompletion() {
         const w6GramaDone = flags.registrationStarted || isVisited('grama_office_w6_Kamala') || isVisited('grama_office_w6_kumaran') || isVisited('grama_office_w6') || isVisited('week6/grama_office');
         weekComplete = (char === 'Karunasena') ? (w6UncleDone && w6GramaDone) : w6GramaDone;
     } else if (week === 5) {
-        const w5MainDone = isVisited('ec_board_w5') || isVisited('police_w5'); // Boutique is optional — not a completion trigger
+        const w5MainDone = isVisited('ec_board_w5') || isVisited('police_w5'); // Boutique is optional
         weekComplete = (char === 'Karunasena') ? (w5UncleDone && w5MainDone) : w5MainDone;
     } else if (week === 4) {
         const w4GramaDone = flags.registrationComplete || flags.registrationDeadlineMissed;
         weekComplete = (char === 'Karunasena') ? (w4UncleDone && w4GramaDone) : w4GramaDone;
     } else if (week === 3) {
-        weekComplete = isVisited('ec_board_w3'); // EC board (candidate list) is mandatory; cafe is optional bonus
+        weekComplete = isVisited('ec_board_w3'); // EC board is mandatory
     } else if (week === 2) {
         weekComplete = isVisited('campaign_tent') || flags.readCurrentManifesto;
     } else if (week === 1) {
@@ -1126,9 +1299,10 @@ function advanceWeek() {
     const _flags = window.gameState.flags;
     const _char = window.gameState.character;
     const _visited = _flags.visitedLocs || [];
-    const _isV = (m) => _visited.some(p => p.includes(m));
+    const _completed = _flags.completedLocs || [];
+    const _isV = (m) => _visited.some(p => p.includes(m)) || _completed.some(p => p.includes(m));
     let _canAdvance = false;
-    if (_safetyWeek === 6) { const d = _flags.registrationStarted || _isV('grama_office_w6_Kamala') || _isV('grama_office_w6_kumaran') || _isV('grama_office_w6') || _isV('week6/grama_office'); _canAdvance = (_char === 'Karunasena') ? ((_isV('uncle_house_shared') || _isV('uncle_house_ignore') || _isV('ec_board_w6')) && d) : d; }
+    if (_safetyWeek === 6) { const d = _flags.registrationStarted || _isV('grama_office_w6_Kamala') || _isV('grama_office_w6_kumaran') || _isV('grama_office_w6') || _isV('week6/grama_office'); _canAdvance = (_char === 'Karunasena') ? ((_isV('uncle_house_entry') || _isV('uncle_house_shared') || _isV('uncle_house_ignore') || _isV('uncle_house_verify') || _isV('ec_board_w6')) && d) : d; }
     else if (_safetyWeek === 5) { const d = _isV('ec_board_w5') || _isV('police_w5'); _canAdvance = (_char === 'Karunasena') ? ((_isV('uncle_house_w5_shared') || _isV('uncle_house_w5_verify') || _isV('ec_board_w5')) && d) : d; }
     else if (_safetyWeek === 4) { const d = _flags.registrationComplete || _flags.registrationDeadlineMissed; _canAdvance = (_char === 'Karunasena') ? ((_isV('uncle_house_w4_shared') || _isV('ec_board_w4')) && d) : d; }
     else if (_safetyWeek === 3) { _canAdvance = _isV('ec_board_w3'); } // Must match checkWeekCompletion — cafe alone is not enough
@@ -1150,7 +1324,11 @@ function advanceWeek() {
         const ps = document.querySelector('[data-loc="loc9"]');
         if (ps) ps.classList.add('unlocked-loc');
         const ps9 = document.getElementById('loc9-node');
-        if (ps9) { ps9.style.opacity = '1'; ps9.style.pointerEvents = 'auto'; }
+        if (ps9) {
+            ps9.classList.add('polling-unlocked');
+            ps9.style.opacity = '1';
+            ps9.style.pointerEvents = 'auto';
+        }
     }
 }
 
@@ -1218,7 +1396,7 @@ function getScenePath(locId) {
         else if (locId === 'loc8') targetSceneId = 'w1_campaign_tent_readonly';
     }
     else if (week === 0) {
-        if (locId === 'loc9') targetSceneId = 'w0_polling_arrival';
+        if (locId === 'loc9') targetSceneId = (char === 'Kumaran') ? 'w0_kumaran_polling' : 'w0_polling_arrival';
     }
 
     if (!targetSceneId) return null;
@@ -1226,12 +1404,13 @@ function getScenePath(locId) {
 }
 
 function openLocation(locId) {
+    window.gameState.currentLoc = locId;
+
     // Community Hall (loc5) has no active scenes in any week currently
     if (locId === 'loc5') {
         renderDialogue({
             lines: [
-                { type: "narration", text: "The Community Hall is quiet. There is a notice on the door about an event next week, but nothing is happening here today.", advance: "choice" },
-                { type: "choice", prompt: " ", choices: [{ label: "Return to Map", goto: "screen_map" }] }
+                { type: "narration", text: "The Community Hall is quiet. There is a notice on the door about an event next week, but nothing is happening here today." }
             ],
             on_complete: { goto: "screen_map" }
         });
@@ -1241,8 +1420,16 @@ function openLocation(locId) {
     if (locId === 'loc_kovil') {
         renderDialogue({
             lines: [
-                { type: "narration", text: "The kovil is peaceful. Incense smoke drifts past the entrance. Whatever you came here for, it is not here.", advance: "choice" },
-                { type: "choice", prompt: " ", choices: [{ label: "Return to Map", goto: "screen_map" }] }
+                { type: "narration", text: "The kovil is peaceful. Incense smoke drifts past the entrance. Whatever you came here for, it is not here." }
+            ],
+            on_complete: { goto: "screen_map" }
+        });
+        return;
+    }
+    if (locId === 'loc_temple') {
+        renderDialogue({
+            lines: [
+                { type: "narration", text: "The temple is peaceful. Leaves rustle in the courtyard. Whatever you came here for, it is not here." }
             ],
             on_complete: { goto: "screen_map" }
         });
@@ -1251,8 +1438,7 @@ function openLocation(locId) {
     if (locId === 'loc_bar') {
         renderDialogue({
             lines: [
-                { type: "narration", text: "The bar is quiet this time of day. A ceiling fan turns slowly overhead. Someone has left a newspaper on the counter. It is three days old. There is a handwritten sign near the door: 'No election talk. Owner's orders.'", advance: "choice" },
-                { type: "choice", prompt: " ", choices: [{ label: "Return to Map", goto: "screen_map" }] }
+                { type: "narration", text: "The bar is quiet this time of day. A ceiling fan turns slowly overhead. Someone has left a newspaper on the counter. It is three days old. There is a handwritten sign near the door: 'No election talk. Owner's orders.'" }
             ],
             on_complete: { goto: "screen_map" }
         });
@@ -1263,8 +1449,7 @@ function openLocation(locId) {
         if (window.gameState.character !== 'Kumaran') {
             renderDialogue({
                 lines: [
-                    { type: "narration", text: "This is a boarding house. You have no reason to go in.", advance: "choice" },
-                    { type: "choice", prompt: " ", choices: [{ label: "Return to Map", goto: "screen_map" }] }
+                    { type: "narration", text: "This is a boarding house. You have no reason to go in." }
                 ],
                 on_complete: { goto: "screen_map" }
             });
@@ -1272,25 +1457,29 @@ function openLocation(locId) {
         }
         renderDialogue({
             lines: [
-                { type: "narration", text: "This is where you stay. A small room at the end of the corridor. The landlady has left a note on the door about the water being cut off tomorrow morning. There is a form on your desk you have not filled in yet.", advance: "choice" },
-                { type: "choice", prompt: " ", choices: [{ label: "Return to Map", goto: "screen_map" }] }
+                { type: "narration", text: "This is where you stay. A small room at the end of the corridor. The landlady has left a note on the door about the water being cut off tomorrow morning. There is a form on your desk you have not filled in yet." }
             ],
             on_complete: { goto: "screen_map" }
         });
         return;
     }
-    window.gameState.currentLoc = locId;
+    
     const path = getScenePath(locId);
     
-    // Glitch Fix: Check if the player has already visited this specific scene path
-    const isAlreadyVisited = path && window.gameState.flags.visitedLocs && window.gameState.flags.visitedLocs.includes(path);
+    // Only block re-entry if the scene fully completed — not just visited
+    if (!Array.isArray(window.gameState.flags.completedLocs)) {
+        window.gameState.flags.completedLocs = [];
+    }
+    const isFullyCompleted = path && window.gameState.flags.completedLocs.includes(path);
     
-    // Intercept map returns and already visited scenes before attempting to fetch
-    if (!path || path.endsWith('_map') || path === 'screen_map' || isAlreadyVisited) {
+    // Intercept map returns and fully-completed scenes before attempting to fetch
+    if (!path || path.endsWith('_map') || path === 'screen_map' || isFullyCompleted) {
+        let fallbackText = "Nothing new is happening here right now. You should check elsewhere.";
+        if (locId === 'loc2') fallbackText = "Uncle Sirisena is not answering the door right now. He is probably busy on WhatsApp.";
+        
         renderDialogue({
             lines: [
-                { type: "narration", text: "Nothing new is happening here right now. You should check elsewhere.", advance: "choice" },
-                { type: "choice", prompt: " ", choices: [{ label: "Return to Map", goto: "screen_map" }] }
+                { type: "narration", text: fallbackText }
             ],
             on_complete: { goto: "screen_map" }
         });
@@ -1306,8 +1495,11 @@ async function openScenePath(scenePath) {
         window.gameState.flags.visitedLocs = [];
     }
 
-    // Glitch Fix: Block execution if scene is already visited to prevent internal JSON goto loops and stat farming
-    if (window.gameState.flags.visitedLocs.includes(scenePath)) {
+    // Block re-entry only if scene fully completed (not just visited — interrupted visits allow re-entry)
+    if (!Array.isArray(window.gameState.flags.completedLocs)) {
+        window.gameState.flags.completedLocs = [];
+    }
+    if (window.gameState.flags.completedLocs.includes(scenePath)) {
         renderDialogue({
             lines: [
                 { type: "narration", text: "Nothing new is happening here right now. You should check elsewhere.", advance: "choice" },
@@ -1317,6 +1509,9 @@ async function openScenePath(scenePath) {
         });
         return;
     }
+    // If only visited (not completed), remove from visitedLocs so it can be fetched fresh
+    const vIdx = window.gameState.flags.visitedLocs.indexOf(scenePath);
+    if (vIdx !== -1) window.gameState.flags.visitedLocs.splice(vIdx, 1);
 
     try {
         const response = await fetch(scenePath);
@@ -1324,16 +1519,26 @@ async function openScenePath(scenePath) {
         const sceneData = await response.json();
         // Only mark as visited AFTER confirming the scene loaded successfully
         window.gameState.flags.visitedLocs.push(scenePath);
+        window.gameState._pendingScenePath = scenePath; // track for completedLocs
         renderDialogue(sceneData);
     } catch (error) {
         console.warn('[PLV] Scene load failed:', error.message);
+        // Still mark as visited so week-completion checks pass even if the JSON file is missing
+        if (!window.gameState.flags.visitedLocs.includes(scenePath)) {
+            window.gameState.flags.visitedLocs.push(scenePath);
+        }
+        if (!window.gameState.flags.completedLocs.includes(scenePath)) {
+            window.gameState.flags.completedLocs.push(scenePath);
+        }
+        saveGame();
+        checkWeekCompletion();
+        checkMapUnlocks();
         // Friendly fallback — not an error message, just a quiet dead end
         renderDialogue({
             lines: [
                 {
                     type: "narration",
-                    text: "Nothing seems to be happening here right now. Alupotha is a small town — there is only so much to see in a day.",
-                    advance: "click"
+                    text: "Nothing seems to be happening here right now. Alupotha is a small town — there is only so much to see in a day."
                 }
             ],
             on_complete: { goto: "screen_map" }
@@ -1362,210 +1567,210 @@ async function openScenePath(scenePath) {
 //       Canonical GDD v2.0 names are Karunasena/Kamala/Kumaran — use these.
 const CHARACTER_PORTRAITS = {
     'Karunasena': {
-        neutral:   'Assets/characters/char_Karunasena_neutral.png',
-        talking:   'Assets/characters/char_Karunasena_talking.png',
-        happy:     'Assets/characters/char_Karunasena_happy.png',
-        worried:   'Assets/characters/char_Karunasena_worried.png',
-        surprised: 'Assets/characters/char_Karunasena_surprised.png',
+        neutral:   'assets/characters/char_Karunasena_neutral.png',
+        talking:   'assets/characters/char_Karunasena_talking.png',
+        happy:     'assets/characters/char_Karunasena_happy.png',
+        worried:   'assets/characters/char_Karunasena_worried.png',
+        surprised: 'assets/characters/char_Karunasena_surprised.png',
     },
     'Kamala': {
-        neutral:   'Assets/characters/char_Kamala_neutral.png',
-        talking:   'Assets/characters/char_Kamala_talking.png',
-        happy:     'Assets/characters/char_Kamala_happy.png',
-        worried:   'Assets/characters/char_Kamala_worried.png',
-        surprised: 'Assets/characters/char_Kamala_surprised.png',
+        neutral:   'assets/characters/char_Kamala_neutral.png',
+        talking:   'assets/characters/char_Kamala_talking.png',
+        happy:     'assets/characters/char_Kamala_happy.png',
+        worried:   'assets/characters/char_Kamala_worried.png',
+        surprised: 'assets/characters/char_Kamala_surprised.png',
     },
     'Kumaran': {
-        neutral:   'Assets/characters/char_kumaran_neutral.png',
-        talking:   'Assets/characters/char_kumaran_talking.png',
-        happy:     'Assets/characters/char_kumaran_happy.png',
-        worried:   'Assets/characters/char_kumaran_worried.png',
-        surprised: 'Assets/characters/char_kumaran_surprised.png',
+        neutral:   'assets/characters/char_kumaran_neutral.png',
+        talking:   'assets/characters/char_kumaran_talking.png',
+        happy:     'assets/characters/char_kumaran_happy.png',
+        worried:   'assets/characters/char_kumaran_worried.png',
+        surprised: 'assets/characters/char_kumaran_surprised.png',
     }
 };
 
 // ─── NPC PORTRAITS ───────────────────────────────────────────────────────────
 // Format: PNG with transparency
-// Naming: npc_{character}_{state}.png → stored in Assets/npcs/
+// Naming: npc_{character}_{state}.png → stored in assets/npcs/
 // These keys are used in scene JSON files as: "portrait": "npc_uncle_enthusiastic"
 const NPC_PORTRAITS = {
     // Aunty Soma — prologue + endings
-    'npc_soma_neutral':          'Assets/npcs/npc_soma_neutral.png',
-    'npc_soma_talking':          'Assets/npcs/npc_soma_talking.png',
-    'npc_soma_warm':             'Assets/npcs/npc_soma_warm.png',
+    'npc_soma_neutral':          'assets/npcs/npc_soma_neutral.png',
+    'npc_soma_talking':          'assets/npcs/npc_soma_talking.png',
+    'npc_soma_warm':             'assets/npcs/npc_soma_warm.png',
     // Uncle Sirisena — Uncle's House, WhatsApp messages
-    'npc_uncle_neutral':         'Assets/npcs/npc_uncle_neutral.png',
-    'npc_uncle_talking':         'Assets/npcs/npc_uncle_talking.png',
-    'npc_uncle_enthusiastic':    'Assets/npcs/npc_uncle_enthusiastic.png',
+    'npc_uncle_neutral':         'assets/npcs/npc_uncle_neutral.png',
+    'npc_uncle_talking':         'assets/npcs/npc_uncle_talking.png',
+    'npc_uncle_enthusiastic':    'assets/npcs/npc_uncle_enthusiastic.png',
     // Nandadasa Mahaththaya — Grama Sevaka Office
-    'npc_nandadasa_neutral':     'Assets/npcs/npc_nandadasa_neutral.png',
-    'npc_nandadasa_talking':     'Assets/npcs/npc_nandadasa_talking.png',
-    'npc_nandadasa_annoyed':     'Assets/npcs/npc_nandadasa_annoyed.png',
+    'npc_nandadasa_neutral':     'assets/npcs/npc_nandadasa_neutral.png',
+    'npc_nandadasa_talking':     'assets/npcs/npc_nandadasa_talking.png',
+    'npc_nandadasa_annoyed':     'assets/npcs/npc_nandadasa_annoyed.png',
     // Sergeant Wickramasinghe — Police Station
-    'npc_sergeant_neutral':      'Assets/npcs/npc_sergeant_neutral.png',
-    'npc_sergeant_talking':      'Assets/npcs/npc_sergeant_talking.png',
-    'npc_sergeant_amused':       'Assets/npcs/npc_sergeant_amused.png',
+    'npc_sergeant_neutral':      'assets/npcs/npc_sergeant_neutral.png',
+    'npc_sergeant_talking':      'assets/npcs/npc_sergeant_talking.png',
+    'npc_sergeant_amused':       'assets/npcs/npc_sergeant_amused.png',
     // Mudalali Perera — Boutique
-    'npc_mudalali_neutral':      'Assets/npcs/npc_mudalali_neutral.png',
-    'npc_mudalali_talking':      'Assets/npcs/npc_mudalali_talking.png',
-    'npc_mudalali_loud':         'Assets/npcs/npc_mudalali_loud.png',
+    'npc_mudalali_neutral':      'assets/npcs/npc_mudalali_neutral.png',
+    'npc_mudalali_talking':      'assets/npcs/npc_mudalali_talking.png',
+    'npc_mudalali_loud':         'assets/npcs/npc_mudalali_loud.png',
     // Mahinda Bandara — Campaign Tent
-    'npc_mahinda_neutral':       'Assets/npcs/npc_mahinda_neutral.png',
-    'npc_mahinda_talking':       'Assets/npcs/npc_mahinda_talking.png',
-    'npc_mahinda_evasive':       'Assets/npcs/npc_mahinda_evasive.png',
+    'npc_mahinda_neutral':       'assets/npcs/npc_mahinda_neutral.png',
+    'npc_mahinda_talking':       'assets/npcs/npc_mahinda_talking.png',
+    'npc_mahinda_evasive':       'assets/npcs/npc_mahinda_evasive.png',
     // Elderly Woman — Polling Station queue (Week 0)
-    'npc_elderly_neutral':       'Assets/npcs/npc_elderly_neutral.png',
-    'npc_elderly_confused':      'Assets/npcs/npc_elderly_confused.png',
-    'npc_elderly_relieved':      'Assets/npcs/npc_elderly_relieved.png',
+    'npc_elderly_neutral':       'assets/npcs/npc_elderly_neutral.png',
+    'npc_elderly_confused':      'assets/npcs/npc_elderly_confused.png',
+    'npc_elderly_relieved':      'assets/npcs/npc_elderly_relieved.png',
 };
 
 // ─── BACKGROUND SCENES ───────────────────────────────────────────────────────
 // Format: JPEG, 1920×1080px
 // These are already used in LOC_BGS and BG_MAP below — listed here for reference
-const BACKGROUND_ASSETS = {
-    'bg_loading':         'Assets/backgrounds/bg_loading.jpeg',
-    'bg_language':        'Assets/backgrounds/bg_language.jpeg',
-    'bg_main_menu':       'Assets/backgrounds/bg_main_menu.png',   // PNG — uses transparency layer
-    'bg_char_select':     'Assets/backgrounds/bg_char_select.jpeg',
-    'bg_opening':         'Assets/backgrounds/bg_opening.jpeg',
-    'bg_consequence':     'Assets/backgrounds/bg_consequence.jpeg',
-    'bg_uncle_house':     'Assets/backgrounds/bg_uncle_house.jpeg',
-    'bg_grama_office':    'Assets/backgrounds/bg_grama_office.jpeg',
-    'bg_boutique':        'Assets/backgrounds/bg_boutique.jpeg',
-    'bg_police':          'Assets/backgrounds/bg_police.jpeg',
-    'bg_campaign_tent':   'Assets/backgrounds/bg_campaign_tent.jpeg',
-    'bg_ec_board':        'Assets/backgrounds/bg_ec_board.jpeg',
-    'bg_polling_station': 'Assets/backgrounds/bg_polling_station.jpeg',
-    'bg_skeptics_cafe':   'Assets/backgrounds/bg_skeptics_cafe.jpeg',
-    'bg_ending_positive': 'Assets/backgrounds/bg_ending_positive.jpeg',
-    'bg_ending_negative': 'Assets/backgrounds/bg_ending_negative.jpeg',
-    'bg_ending_neutral':  'Assets/backgrounds/bg_ending_neutral.jpeg',
-    'bg_kovil':           'Assets/backgrounds/bg_kovil.jpeg',
-    'bg_temple':          'Assets/backgrounds/bg_temple.jpeg',
-    'bg_prologue_k':      'Assets/backgrounds/bg_prologue_k.jpeg',
-    'bg_prologue_ka':     'Assets/backgrounds/bg_prologue_ka.jpeg',
-    'bg_prologue_ku':     'Assets/backgrounds/bg_prologue_ku.jpeg',
+const BACKGROUND_assets = {
+    'bg_loading':         'assets/backgrounds/bg_loading.jpeg',
+    'bg_language':        'assets/backgrounds/bg_language.jpeg',
+    'bg_main_menu':       'assets/backgrounds/bg_main_menu.png',   // PNG — uses transparency layer
+    'bg_char_select':     'assets/backgrounds/bg_char_select.jpeg',
+    'bg_opening':         'assets/backgrounds/bg_opening.jpeg',
+    'bg_consequence':     'assets/backgrounds/bg_consequence.jpeg',
+    'bg_uncle_house':     'assets/backgrounds/bg_uncle_house.jpeg',
+    'bg_grama_office':    'assets/backgrounds/bg_grama_office.jpeg',
+    'bg_boutique':        'assets/backgrounds/bg_boutique.jpeg',
+    'bg_police':          'assets/backgrounds/bg_police.jpeg',
+    'bg_campaign_tent':   'assets/backgrounds/bg_campaign_tent.jpeg',
+    'bg_ec_board':        'assets/backgrounds/bg_ec_board.jpeg',
+    'bg_polling_station': 'assets/backgrounds/bg_polling_station.jpeg',
+    'bg_skeptics_cafe':   'assets/backgrounds/bg_skeptics_cafe.jpeg',
+    'bg_ending_positive': 'assets/backgrounds/bg_ending_positive.jpeg',
+    'bg_ending_negative': 'assets/backgrounds/bg_ending_negative.jpeg',
+    'bg_ending_neutral':  'assets/backgrounds/bg_ending_neutral.jpeg',
+    'bg_kovil':           'assets/backgrounds/bg_kovil.jpeg',
+    'bg_temple':          'assets/backgrounds/bg_temple.jpeg',
+    'bg_prologue_k':      'assets/backgrounds/bg_prologue_k.jpeg',
+    'bg_prologue_ka':     'assets/backgrounds/bg_prologue_ka.jpeg',
+    'bg_prologue_ku':     'assets/backgrounds/bg_prologue_ku.jpeg',
 };
 
-// ─── MAP LOCATION ASSETS ─────────────────────────────────────────────────────
+// ─── MAP LOCATION assets ─────────────────────────────────────────────────────
 // Format: PNG with transparency (mix-blend-mode: multiply removes white bg)
-// Currently stored in Assets/ root — subfolder Assets/map/ is the canonical target
-// Update the HTML SVG hrefs when you move them to Assets/map/
-const MAP_ASSETS = {
+// Currently stored in assets/ root — subfolder assets/map/ is the canonical target
+// Update the HTML SVG hrefs when you move them to assets/map/
+const MAP_assets = {
     // Decorative landmarks (non-clickable)
-    'map_kovil':          'Assets/map_icon_kovil.jpeg',         // → rename to .png when ready
-    'map_temple':         'Assets/map_icon_temple.jpeg',        // → rename to .png when ready
+    'map_kovil':          'assets/map_icon_kovil.jpeg',         // → rename to .png when ready
+    'map_temple':         'assets/map_icon_temple.jpeg',        // → rename to .png when ready
     // Interactive location markers — loc IDs match map SVG data-loc attributes
-    'loc1_grama':         'Assets/map_marker_gramasevaka.jpeg', // → Assets/map/map_grama_office.png
-    'loc2_uncle':         'Assets/map_marker_uncle.jpeg',       // → Assets/map/map_uncle_house.png
-    'loc3_ecboard':       'Assets/map_marker_noticeboard.jpeg', // → Assets/map/map_ec_board.png
-    'loc4_boutique':      'Assets/map_marker_mudalali.jpeg',    // → Assets/map/map_boutique.png
-    'loc5_hall':          'Assets/map_marker_hall.jpeg',        // → Assets/map/map_community_hall.png
-    'loc6_police':        'Assets/map_marker_police.jpeg',      // → Assets/map/map_police.png
-    'loc7_cafe':          'Assets/map_marker_cafe.jpeg',        // → Assets/map/map_skeptics_cafe.png (missing)
-    'loc8_tent':          'Assets/map_marker_tent.jpeg',        // → Assets/map/map_campaign_tent.png
-    'loc9_polling':       'Assets/map_marker_polling.jpeg',     // → Assets/map/map_polling_station.png
+    'loc1_grama':         'assets/map_marker_gramasevaka.jpeg', // → assets/map/map_grama_office.png
+    'loc2_uncle':         'assets/map_marker_uncle.jpeg',       // → assets/map/map_uncle_house.png
+    'loc3_ecboard':       'assets/map_marker_noticeboard.jpeg', // → assets/map/map_ec_board.png
+    'loc4_boutique':      'assets/map_marker_mudalali.jpeg',    // → assets/map/map_boutique.png
+    'loc5_hall':          'assets/map_marker_hall.jpeg',        // → assets/map/map_community_hall.png
+    'loc6_police':        'assets/map_marker_police.jpeg',      // → assets/map/map_police.png
+    'loc7_cafe':          'assets/map_marker_cafe.jpeg',        // → assets/map/map_skeptics_cafe.png (missing)
+    'loc8_tent':          'assets/map_marker_tent.jpeg',        // → assets/map/map_campaign_tent.png
+    'loc9_polling':       'assets/map_marker_polling.jpeg',     // → assets/map/map_polling_station.png
 };
 
-// ─── UI ELEMENT ASSETS ───────────────────────────────────────────────────────
+// ─── UI ELEMENT assets ───────────────────────────────────────────────────────
 // Format: PNG (whatsapp elements), SVG (icons)
-// Stored in Assets/ui/
+// Stored in assets/ui/
 // Used in: WhatsApp message cards, dialogue panel decorations, gauge icons
-const UI_ASSETS = {
+const UI_assets = {
     // WhatsApp message card chrome
-    'whatsapp_bubble':    'Assets/ui/whatsapp_bubble.png',       // WhatsApp UI frame
-    'phone_frame':        'Assets/ui/phone_frame.png',           // Phone outer frame
-    'voice_waveform':     'Assets/ui/voice_waveform.png',        // Voice note waveform graphic
-    'video_play_still':   'Assets/ui/video_play_still.png',      // Video clip placeholder still
+    'whatsapp_bubble':    'assets/ui/whatsapp_bubble.png',       // WhatsApp UI frame
+    'phone_frame':        'assets/ui/phone_frame.png',           // Phone outer frame
+    'voice_waveform':     'assets/ui/voice_waveform.png',        // Voice note waveform graphic
+    'video_play_still':   'assets/ui/video_play_still.png',      // Video clip placeholder still
     // Elections Commission visual elements
-    'ec_stamp':           'Assets/ui/ec_stamp.png',              // Official EC stamp
-    'ec_logo_real':       'Assets/ui/ec_logo_real.png',          // Correct EC logo (Week 6 board)
-    'ec_logo_fake':       'Assets/ui/ec_logo_fake.png',          // Subtly wrong EC logo (Week 4)
+    'ec_stamp':           'assets/ui/ec_stamp.png',              // Official EC stamp
+    'ec_logo_real':       'assets/ui/ec_logo_real.png',          // Correct EC logo (Week 6 board)
+    'ec_logo_fake':       'assets/ui/ec_logo_fake.png',          // Subtly wrong EC logo (Week 4)
     // HUD gauge icons
-    'icon_ct':            'Assets/ui/icon_ct.svg',               // Civic Trust gauge icon
-    'icon_ih':            'Assets/ui/icon_ih.svg',               // Information Health gauge icon
-    'icon_vp':            'Assets/ui/icon_vp.svg',               // Voter Participation gauge icon
+    'icon_ct':            'assets/ui/icon_ct.svg',               // Civic Trust gauge icon
+    'icon_ih':            'assets/ui/icon_ih.svg',               // Information Health gauge icon
+    'icon_vp':            'assets/ui/icon_vp.svg',               // Voter Participation gauge icon
     // Achievements
-    'achievement_locked': 'Assets/ui/achievement_locked.svg',    // Hidden achievement tile
+    'achievement_locked': 'assets/ui/achievement_locked.svg',    // Hidden achievement tile
     // Sandya's handwritten note texture
-    'sandya_note':        'Assets/ui/sandya_note.png',           // EC board note background
+    'sandya_note':        'assets/ui/sandya_note.png',           // EC board note background
 };
 
-// ─── PROP DOCUMENT ASSETS ────────────────────────────────────────────────────
+// ─── PROP DOCUMENT assets ────────────────────────────────────────────────────
 // Format: PNG, rendered as full-width document cards inside the dialogue panel
-// Stored in Assets/props/
+// Stored in assets/props/
 // Used in: scene JSONs as { type: "document", image: "manifesto_2025" }
-const PROP_ASSETS = {
-    'manifesto_2025':          'Assets/props/manifesto_2025.png',        // Mahinda current manifesto
-    'manifesto_2010':          'Assets/props/manifesto_2010.png',        // 2010 manifesto (secret)
-    'manifesto_comparison':    'Assets/props/manifesto_comparison.png',  // Side-by-side comparison
-    'ec_notice_registration':  'Assets/props/ec_notice_registration.png',// Week 6 EC board notice
-    'ec_notice_candidates':    'Assets/props/ec_notice_candidates.png',  // Week 3 candidate list
-    'ec_notice_correction':    'Assets/props/ec_notice_correction.png',  // Correction after fake shared
-    'receipt_1977':            'Assets/props/receipt_1977.png',          // Mudalali's 1977 receipt (secret)
-    'road_file_folder':        'Assets/props/road_file_folder.png',      // Road File folder (secret)
-    'voter_card_1983':         'Assets/props/voter_card_1983.png',       // Aunty Soma's card (secret ending)
+const PROP_assets = {
+    'manifesto_2025':          'assets/props/manifesto_2025.png',        // Mahinda current manifesto
+    'manifesto_2010':          'assets/props/manifesto_2010.png',        // 2010 manifesto (secret)
+    'manifesto_comparison':    'assets/props/manifesto_comparison.png',  // Side-by-side comparison
+    'ec_notice_registration':  'assets/props/ec_notice_registration.png',// Week 6 EC board notice
+    'ec_notice_candidates':    'assets/props/ec_notice_candidates.png',  // Week 3 candidate list
+    'ec_notice_correction':    'assets/props/ec_notice_correction.png',  // Correction after fake shared
+    'receipt_1977':            'assets/props/receipt_1977.png',          // Mudalali's 1977 receipt (secret)
+    'road_file_folder':        'assets/props/road_file_folder.png',      // Road File folder (secret)
+    'voter_card_1983':         'assets/props/voter_card_1983.png',       // Aunty Soma's card (secret ending)
 };
 
-// ─── AUDIO ASSETS ────────────────────────────────────────────────────────────
+// ─── AUDIO assets ────────────────────────────────────────────────────────────
 // Ambient: OGG (compressed, loopable)   SFX: WAV (short, uncompressed)
-// Stored in Assets/audio/
+// Stored in assets/audio/
 // The audioMap in openDialoguePanel() maps bg names → ambient files automatically
-const AUDIO_ASSETS = {
+const AUDIO_assets = {
     // Ambient background loops — auto-play when entering each location
-    'ambient_uncle_house':    'Assets/audio/ambient_uncle_house.ogg',
-    'ambient_grama_office':   'Assets/audio/ambient_grama_office.ogg',
-    'ambient_boutique':       'Assets/audio/ambient_boutique.ogg',
-    'ambient_police':         'Assets/audio/ambient_police.ogg',
-    'ambient_tent':           'Assets/audio/ambient_tent.ogg',
-    'ambient_ec_board':       'Assets/audio/ambient_ec_board.ogg',
-    'ambient_polling':        'Assets/audio/ambient_polling.ogg',
+    'ambient_uncle_house':    'assets/audio/ambient_uncle_house.ogg',
+    'ambient_grama_office':   'assets/audio/ambient_grama_office.ogg',
+    'ambient_boutique':       'assets/audio/ambient_boutique.ogg',
+    'ambient_police':         'assets/audio/ambient_police.ogg',
+    'ambient_tent':           'assets/audio/ambient_tent.ogg',
+    'ambient_ec_board':       'assets/audio/ambient_ec_board.ogg',
+    'ambient_polling':        'assets/audio/ambient_polling.ogg',
     // Sound effects — triggered by game events
-    'sfx_whatsapp':           'Assets/audio/sfx_whatsapp_notification.wav',  // Uncle message arrives
-    'sfx_advance':            'Assets/audio/sfx_dialogue_advance.wav',       // Dialogue click
-    'sfx_gauge_up':           'Assets/audio/sfx_gauge_up.wav',               // Positive gauge change
-    'sfx_gauge_down':         'Assets/audio/sfx_gauge_down.wav',             // Negative gauge change
-    'sfx_achievement':        'Assets/audio/sfx_achievement.wav',            // Achievement unlocked
-    'sfx_week_transition':    'Assets/audio/sfx_week_transition.wav',        // Week advance card
+    'sfx_whatsapp':           'assets/audio/sfx_whatsapp_notification.wav',  // Uncle message arrives
+    'sfx_advance':            'assets/audio/sfx_dialogue_advance.wav',       // Dialogue click
+    'sfx_gauge_up':           'assets/audio/sfx_gauge_up.wav',               // Positive gauge change
+    'sfx_gauge_down':         'assets/audio/sfx_gauge_down.wav',             // Negative gauge change
+    'sfx_achievement':        'assets/audio/sfx_achievement.wav',            // Achievement unlocked
+    'sfx_week_transition':    'assets/audio/sfx_week_transition.wav',        // Week advance card
 };
 
 const LOC_BGS = {
-    'loc1': 'Assets/backgrounds/bg_grama_office.jpeg',
-    'loc2': 'Assets/backgrounds/bg_uncle_house.jpeg',
-    'loc3': 'Assets/backgrounds/bg_ec_board.jpeg',
-    'loc4': 'Assets/backgrounds/bg_boutique.jpeg',
-    'loc5': 'Assets/backgrounds/bg_community_hall.jpeg', // PLACEHOLDER — create bg_community_hall.jpeg for Aunty Soma / Community Hall scene
-    'loc6': 'Assets/backgrounds/bg_police.jpeg',
-    'loc7': 'Assets/backgrounds/bg_skeptics_cafe.jpeg',
-    'loc8': 'Assets/backgrounds/bg_campaign_tent.jpeg',
-    'loc9': 'Assets/backgrounds/bg_polling_station.jpeg',
-    'loc_kovil': 'Assets/backgrounds/bg_kovil.jpeg',
-    'loc_temple': 'Assets/backgrounds/bg_temple.jpeg'
+    'loc1': 'assets/backgrounds/bg_grama_office.jpeg',
+    'loc2': 'assets/backgrounds/bg_uncle_house.jpeg',
+    'loc3': 'assets/backgrounds/bg_ec_board.jpeg',
+    'loc4': 'assets/backgrounds/bg_boutique.jpeg',
+    'loc5': 'assets/backgrounds/bg_community_hall.jpeg', // PLACEHOLDER — create bg_community_hall.jpeg for Aunty Soma / Community Hall scene
+    'loc6': 'assets/backgrounds/bg_police.jpeg',
+    'loc7': 'assets/backgrounds/bg_skeptics_cafe.jpeg',
+    'loc8': 'assets/backgrounds/bg_campaign_tent.jpeg',
+    'loc9': 'assets/backgrounds/bg_polling_station.jpeg',
+    'loc_kovil': 'assets/backgrounds/bg_kovil.jpeg',
+    'loc_temple': 'assets/backgrounds/bg_temple.jpeg'
 };
 
 const BG_MAP = {
-    'bg_uncle_house':    'Assets/backgrounds/bg_uncle_house.jpeg',
-    'bg_grama_office':   'Assets/backgrounds/bg_grama_office.jpeg',
-    'bg_ec_board':       'Assets/backgrounds/bg_ec_board.jpeg',
-    'bg_boutique':       'Assets/backgrounds/bg_boutique.jpeg',
-    'bg_police':         'Assets/backgrounds/bg_police.jpeg',
-    'bg_campaign_tent':  'Assets/backgrounds/bg_campaign_tent.jpeg',
-    'bg_skeptics_cafe':  'Assets/backgrounds/bg_skeptics_cafe.jpeg',
-    'bg_polling_station':'Assets/backgrounds/bg_polling_station.jpeg',
-    'bg_main_menu':      'Assets/backgrounds/bg_main_menu.png',
-    'bg_town_map':       'Assets/backgrounds/bg_town_map.jpeg',
+    'bg_uncle_house':    'assets/backgrounds/bg_uncle_house.jpeg',
+    'bg_grama_office':   'assets/backgrounds/bg_grama_office.jpeg',
+    'bg_ec_board':       'assets/backgrounds/bg_ec_board.jpeg',
+    'bg_boutique':       'assets/backgrounds/bg_boutique.jpeg',
+    'bg_police':         'assets/backgrounds/bg_police.jpeg',
+    'bg_campaign_tent':  'assets/backgrounds/bg_campaign_tent.jpeg',
+    'bg_skeptics_cafe':  'assets/backgrounds/bg_skeptics_cafe.jpeg',
+    'bg_polling_station':'assets/backgrounds/bg_polling_station.jpeg',
+    'bg_main_menu':      'assets/backgrounds/bg_main_menu.png',
+    'bg_town_map':       'assets/backgrounds/bg_town_map.jpeg',
     /* Master Scene File uses these keys — map to the positive/negative files */
-    'bg_ending_good':    'Assets/backgrounds/bg_ending_positive.jpeg',
-    'bg_ending_bad':     'Assets/backgrounds/bg_ending_negative.jpeg',
+    'bg_ending_good':    'assets/backgrounds/bg_ending_positive.jpeg',
+    'bg_ending_bad':     'assets/backgrounds/bg_ending_negative.jpeg',
     /* Legacy aliases kept for backward compat */
-    'bg_ending_positive':'Assets/backgrounds/bg_ending_positive.jpeg',
-    'bg_ending_negative':'Assets/backgrounds/bg_ending_negative.jpeg',
-    'bg_ending_neutral': 'Assets/backgrounds/bg_ending_neutral.jpeg',
-    'bg_kovil':          'Assets/backgrounds/bg_kovil.jpeg',
-    'bg_temple':         'Assets/backgrounds/bg_temple.jpeg',
-    'bg_prologue_k':     'Assets/backgrounds/bg_prologue_k.jpeg',
-    'bg_prologue_ka':    'Assets/backgrounds/bg_prologue_ka.jpeg',
-    'bg_prologue_ku':    'Assets/backgrounds/bg_prologue_ku.jpeg'
+    'bg_ending_positive':'assets/backgrounds/bg_ending_positive.jpeg',
+    'bg_ending_negative':'assets/backgrounds/bg_ending_negative.jpeg',
+    'bg_ending_neutral': 'assets/backgrounds/bg_ending_neutral.jpeg',
+    'bg_kovil':          'assets/backgrounds/bg_kovil.jpeg',
+    'bg_temple':         'assets/backgrounds/bg_temple.jpeg',
+    'bg_prologue_k':     'assets/backgrounds/bg_prologue_k.jpeg',
+    'bg_prologue_ka':    'assets/backgrounds/bg_prologue_ka.jpeg',
+    'bg_prologue_ku':    'assets/backgrounds/bg_prologue_ku.jpeg'
 };
 
 // --- PANEL OPEN / CLOSE ---
@@ -1603,6 +1808,10 @@ function openDialoguePanel() {
 }
 
 function closeDialoguePanel() {
+    // If prologue was active, reveal the objective bar now
+    if (document.getElementById('screen-game')?.classList.contains('prologue-active')) {
+        _afterPrologueReady();
+    }
     document.getElementById('dialogue-scene-wrapper').classList.remove('active');
     document.getElementById('dialogue-panel').classList.remove('open');
     // Hide the back button when we return to the map
@@ -1630,7 +1839,7 @@ function playAudio(type, fileName) {
         if (player.paused) player.play().catch(e => console.warn('Audio blocked:', e));
         return;
     }
-    player.src = `Assets/audio/${fileName}`;
+    player.src = `assets/audio/${fileName}`;
     player.play().catch(e => console.warn('Audio play blocked:', e));
 }
 
@@ -1654,7 +1863,7 @@ function _setNpcPortrait(portraitKey, speakerName, flip) {
     if (portraitKey) {
         const src = (NPC_PORTRAITS && NPC_PORTRAITS[portraitKey])
             ? NPC_PORTRAITS[portraitKey]
-            : `Assets/npcs/${portraitKey}.png`;
+            : `assets/npcs/${portraitKey}.png`;
         const flipClass = flip ? ' npc-flipped' : '';
         cont.innerHTML = `<img src="${src}" data-initials="${(speakerName||'NPC').substring(0,2).toUpperCase()}" onerror="imgFallback(this)" alt="${speakerName || 'NPC'}" class="npc-portrait-img${flipClass}">`;
     } else if (!isPCSpeaking) {
@@ -1684,7 +1893,7 @@ function _setPcPortrait(emotion) {
         const charPortraits = CHARACTER_PORTRAITS && CHARACTER_PORTRAITS[state.character];
         const src = (charPortraits && charPortraits[em])
             ? charPortraits[em]
-            : `Assets/characters/char_${state.character}_${em}.png`;
+            : `assets/characters/char_${state.character.toLowerCase()}_${em}.png`;
         cont.innerHTML = `<img src="${src}" data-initials="PC" onerror="imgFallback(this)" alt="Player character" class="pc-portrait-img">`;
         if (em !== 'neutral') state.flags.latestEmotion = em;
     }
@@ -1695,9 +1904,9 @@ function _setPcPortrait(emotion) {
 function _renderPropLine(line) {
     const textEl = document.getElementById('dialogue-text');
     const imageKey = line.image || line.prop;
-    const src = (PROP_ASSETS && PROP_ASSETS[imageKey])
-        ? PROP_ASSETS[imageKey]
-        : (imageKey ? `Assets/props/${imageKey}.png` : null);
+    const src = (PROP_assets && PROP_assets[imageKey])
+        ? PROP_assets[imageKey]
+        : (imageKey ? `assets/props/${imageKey}.png` : null);
 
     let html = '';
     if (src) {
@@ -1717,7 +1926,7 @@ function _renderPropLine(line) {
 // ─── UI ASSET RESOLVER ───────────────────────────────────────────────────────
 // Resolves a UI asset key to its path — used in WhatsApp card rendering
 function _getUIAsset(key) {
-    return (UI_ASSETS && UI_ASSETS[key]) ? UI_ASSETS[key] : `Assets/ui/${key}.png`;
+    return (UI_assets && UI_assets[key]) ? UI_assets[key] : `assets/ui/${key}.png`;
 }
 
 // --- CONDITION EVALUATOR ---
@@ -1764,8 +1973,10 @@ function renderDialogue(sceneDef) {
         lines: allLines,
         on_complete: sceneDef.on_complete || null,
         _sceneBg: sceneDef.background || null,
+        _scenePath: state._pendingScenePath || null, // path that loaded this scene
         _waiting: false   // true when a choice line is displayed and awaiting player pick
     };
+    state._pendingScenePath = null; // clear after use
 
     // Clear options panel immediately
     const optsCont = document.getElementById('dialogue-options');
@@ -1817,7 +2028,8 @@ function _renderLine(line) {
 
         case 'dialogue': {
             textEl.classList.add('line-dialogue');
-            _setPcPortrait('neutral'); 
+            const _pcEmotion = (line.speaker === window.gameState.character) ? (line.emotion || 'talking') : 'neutral';
+            _setPcPortrait(_pcEmotion);
             _setNpcPortrait(line.portrait_state || null, line.speaker || '', line.npc_flip || false);
             document.getElementById('dialogue-panel').classList.remove('panel-expanded');
             textEl.innerHTML = line.text || '';
@@ -2043,6 +2255,63 @@ function _renderLine(line) {
     }
 }
 
+function _checkAutoAchievements() {
+    const state = window.gameState;
+    const vc = state.flags.verifiedCount || 0;
+    const vabc = state.flags.verifiedAtBoardCount || 0;
+    if ((vc >= 1 || vabc >= 1) && !state.flags._ach_alg_fired) {
+        state.flags._ach_alg_fired = true;
+        unlockAchievement('the_algorithm_would_hate_you');
+    }
+    if ((vc >= 3 || vabc >= 3) && !state.flags._ach_skeptic_fired) {
+        state.flags._ach_skeptic_fired = true;
+        unlockAchievement('professional_skeptic');
+    }
+    if (state.flags.helpedElderlyWoman && state.flags.helpedNICYoungMan && state.flags.helpedLostCouple && !state.flags._ach_helpers_fired) {
+        state.flags._ach_helpers_fired = true;
+        unlockAchievement('at_least_someone_asked');
+    }
+    if (state.gauges.ih >= 100 && !state.flags._ach_ih100_fired) {
+        state.flags._ach_ih100_fired = true;
+        unlockAchievement('information_health_100');
+    }
+    if (state.flags.sharedVerifiedInfo && !state.flags._ach_spreads_fired) {
+        state.flags._ach_spreads_fired = true;
+        unlockAchievement('it_spreads_both_ways');
+    }
+    if (state.flags.foundSandyaNote && state.flags.sandyaOnRegister && !state.flags._ach_sandya_fired) {
+        state.flags._ach_sandya_fired = true;
+        unlockAchievement('sandya_made_it');
+    }
+    if (state.flags.foundRoadFile && !state.flags._ach_roadfile_fired) {
+        state.flags._ach_roadfile_fired = true;
+        unlockAchievement('thirty_years_in_the_same_room');
+    }
+    if (state.flags.found1977Receipt && !state.flags._ach_receipt_fired) {
+        state.flags._ach_receipt_fired = true;
+        unlockAchievement('pol_roti_and_politics');
+    }
+    if (state.flags.foundSergeantTransferThread && !state.flags._ach_sergeant_fired) {
+        state.flags._ach_sergeant_fired = true;
+        unlockAchievement('somebody_had_to_ask');
+    }
+    if (state.flags.askedNandadasa && !state.flags._ach_nandadasa_fired) {
+        state.flags._ach_nandadasa_fired = true;
+        unlockAchievement('nandadasa_approved');
+    }
+    if (state.flags.manifestoComparisonDone && !state.flags._ach_manifesto_fired) {
+        state.flags._ach_manifesto_fired = true;
+        unlockAchievement('actually_read_the_fine_print');
+    }
+    if (state.flags.readCurrentManifesto && !state.flags._ach_readmanifesto_fired) {
+        state.flags._ach_readmanifesto_fired = true;
+        unlockAchievement('read_the_fine_print');
+    }
+    if (state.flags.helpedElderlyWoman && !state.flags._ach_elderly_fired) {
+        state.flags._ach_elderly_fired = true;
+        unlockAchievement('not_your_job');
+    }
+}
 // --- CHOICE APPLICATION ---
 // Handles a player's selection from a "choice" line.
 // Maps Master File schema fields: goto, flags_set, flags_increment, gauges, achievement.
@@ -2062,6 +2331,13 @@ function _applySceneChoice(opt) {
     (opt.flags_set || []).forEach(flagKey => {
         state.flags[flagKey] = true;
     });
+    // Auto-detect verified information sharing (for achievement)
+    if (opt.flags_set && opt.flags_set.includes('sharedVerifiedInfo')) {
+        state.flags.sharedVerifiedInfo = true;
+    }
+    if (opt.label && (opt.label.includes('verify') || opt.label.includes('Verify')) && !opt.flags_set?.includes('sharedFakeMessage')) {
+        state.flags.sharedVerifiedInfo = true;
+    }
 
     // 3. Increment counter flags
     const increments = opt.flags_increment || {};
@@ -2072,77 +2348,11 @@ function _applySceneChoice(opt) {
     // 4. Unlock achievement
     if (opt.achievement) unlockAchievement(opt.achievement);
 
-    // 4b. Auto-achievements based on flag state after increments
-    // Fire 'the_algorithm_would_hate_you' on first EC board verification
-    const vc = state.flags.verifiedCount || 0;
-    const vabc = state.flags.verifiedAtBoardCount || 0;
-    if ((vc >= 1 || vabc >= 1) && !state.flags._ach_alg_fired) {
-        state.flags._ach_alg_fired = true;
-        unlockAchievement('the_algorithm_would_hate_you');
-    }
-    // Fire 'professional_skeptic' when verifiedCount reaches 3
-    if ((vc >= 3 || vabc >= 3) && !state.flags._ach_skeptic_fired) {
-        state.flags._ach_skeptic_fired = true;
-        unlockAchievement('professional_skeptic');
-    }
-    // Fire 'at_least_someone_asked' when all three polling helpers done
-    if (state.flags.helpedElderlyWoman && state.flags.helpedNICYoungMan && state.flags.helpedLostCouple && !state.flags._ach_helpers_fired) {
-        state.flags._ach_helpers_fired = true;
-        unlockAchievement('at_least_someone_asked');
-    }
-    // Fire 'information_health_100' if ih gauge is at 100
-    if (state.gauges.ih >= 100 && !state.flags._ach_ih100_fired) {
-        state.flags._ach_ih100_fired = true;
-        unlockAchievement('information_health_100');
-    }
-    // Fire 'it_spreads_both_ways' when player shares verified info back to uncle
-    if (state.flags.sharedVerifiedInfo && !state.flags._ach_spreads_fired) {
-        state.flags._ach_spreads_fired = true;
-        unlockAchievement('it_spreads_both_ways');
-    }
-    // Fire 'sandya_made_it' when Sandya's note is found AND she is confirmed on register
-    if (state.flags.foundSandyaNote && state.flags.sandyaOnRegister && !state.flags._ach_sandya_fired) {
-        state.flags._ach_sandya_fired = true;
-        unlockAchievement('sandya_made_it');
-    }
-    // Fire 'thirty_years_in_the_same_room' when road file is found
-    if (state.flags.foundRoadFile && !state.flags._ach_roadfile_fired) {
-        state.flags._ach_roadfile_fired = true;
-        unlockAchievement('thirty_years_in_the_same_room');
-    }
-    // Fire 'pol_roti_and_politics' when 1977 receipt is found
-    if (state.flags.found1977Receipt && !state.flags._ach_receipt_fired) {
-        state.flags._ach_receipt_fired = true;
-        unlockAchievement('pol_roti_and_politics');
-    }
-    // Fire 'somebody_had_to_ask' when sergeant transfer thread is found
-    if (state.flags.foundSergeantTransferThread && !state.flags._ach_sergeant_fired) {
-        state.flags._ach_sergeant_fired = true;
-        unlockAchievement('somebody_had_to_ask');
-    }
-    // Fire 'nandadasa_approved' when player asked Nandadasa before acting
-    if (state.flags.askedNandadasa && !state.flags._ach_nandadasa_fired) {
-        state.flags._ach_nandadasa_fired = true;
-        unlockAchievement('nandadasa_approved');
-    }
-    // Fire 'actually_read_the_fine_print' when manifesto comparison is done
-    if (state.flags.manifestoComparisonDone && !state.flags._ach_manifesto_fired) {
-        state.flags._ach_manifesto_fired = true;
-        unlockAchievement('actually_read_the_fine_print');
-    }
-    // Fire 'read_the_fine_print' when current manifesto is read
-    if (state.flags.readCurrentManifesto && !state.flags._ach_readmanifesto_fired) {
-        state.flags._ach_readmanifesto_fired = true;
-        unlockAchievement('read_the_fine_print');
-    }
-    // Fire 'not_your_job' when elderly woman is helped at polling station
-    if (state.flags.helpedElderlyWoman && !state.flags._ach_elderly_fired) {
-        state.flags._ach_elderly_fired = true;
-        unlockAchievement('not_your_job');
-    }
+    // 4b. Auto-achievements
+    _checkAutoAchievements();
 
     // 5. Curiosity perk achievement
-    if (opt.perk === 'curiosity') unlockAchievement('curiosity_perk');
+    
 
     // 6. Update emotion for player portrait
     if (gaugeDeltas.ih > 0)  state.flags.latestEmotion = 'happy';
@@ -2156,17 +2366,21 @@ function _applySceneChoice(opt) {
         updateGauges(true);
         saveGame();
         checkMapUnlocks();
-        // Show consequence screen, then route to goto after player dismisses
-        _pendingGoto = opt.goto || null;
+        _pendingGoto = opt.goto || 'RESOLVE_ON_COMPLETE';
         showConsequence(opt.consequence_text || '', gaugeDeltas, prevGauges);
         return;
     }
 
     state.history.push({ loc: state.currentLoc, choice: opt.label || opt.text, effect: gaugeDeltas });
     updateGauges(false);
+
+    // Sync verifiedCount with verifiedAtBoardCount
+    if (state.flags.verifiedAtBoardCount > (state.flags.verifiedCount || 0)) {
+        state.flags.verifiedCount = state.flags.verifiedAtBoardCount;
+    }
+
     saveGame();
     checkMapUnlocks();
-    // Week completion checked when dialogue fully closes, not mid-scene
 
     // 8. Navigate
     if (opt.goto) {
@@ -2186,29 +2400,58 @@ function _resumeAfterConsequence() {
     if (_pendingGoto) {
         const target = _pendingGoto;
         _pendingGoto = null;
-        _navigateGoto(target);
+        if (target === 'RESOLVE_ON_COMPLETE') {
+            _resolveOnComplete(window.gameState.dialogue.on_complete);
+        } else {
+            _navigateGoto(target);
+        }
     }
 }
 
-// --- ON_COMPLETE RESOLVER ---
-// Handles the three on_complete shapes from the Master File:
-//   { goto: "scene_id" }
-//   { goto: "scene_id", week_set: 5 }
-//   { conditional: [ { condition: "...", goto: "..." }, ..., { default: true, goto: "..." } ] }
-
 function _resolveOnComplete(onComplete) {
+    // Mark the scene that just finished as fully completed
+    const d = window.gameState.dialogue;
+    const currentPath = d ? d._scenePath : null;
+    
+    if (currentPath) {
+        if (!Array.isArray(window.gameState.flags.completedLocs)) {
+            window.gameState.flags.completedLocs = [];
+        }
+        if (!window.gameState.flags.completedLocs.includes(currentPath)) {
+            window.gameState.flags.completedLocs.push(currentPath);
+        }
+    }
+    
     closeDialoguePanel();
+    _checkAutoAchievements();
     updateGauges(false);
     saveGame();
     checkMapUnlocks();
-    // checkWeekCompletion IS called indirectly via closeDialoguePanel() above.
-    // Week advancement banner is shown by checkWeekCompletion(); actual advance requires player to click advanceWeek().
 
     if (!onComplete) return;
 
+    if (typeof onComplete === 'string') {
+        _navigateGoto(onComplete);
+        return;
+    }
+
+    let newWeek = null;
     if (onComplete.week_set !== undefined) {
-        window.gameState.week = onComplete.week_set;
-        showWeekBanner(onComplete.week_set);
+        newWeek = onComplete.week_set;
+        window.gameState.week = newWeek;
+        showWeekBanner(newWeek);
+    }
+
+    // If week became 0, immediately unlock polling station
+    if (newWeek === 0 || window.gameState.week === 0) {
+        const ps = document.querySelector('[data-loc="loc9"]');
+        if (ps) ps.classList.add('unlocked-loc');
+        const ps9 = document.getElementById('loc9-node');
+        if (ps9) {
+            ps9.classList.add('polling-unlocked');
+            ps9.style.opacity = '1';
+            ps9.style.pointerEvents = 'auto';
+        }
     }
 
     if (onComplete.goto) {
@@ -2234,35 +2477,35 @@ function _navigateGoto(target) {
     if (!target) return;
 
     // Gracefully handle returning to map state
-    if (target.endsWith('_map') || target === 'screen_map') { 
-        closeDialoguePanel(); // Also triggers checkWeekCompletion and checkMapUnlocks internally
+    if (target.endsWith('_map') || target === 'screen_map') {
+        const panel = document.getElementById('dialogue-panel');
+        if (panel && panel.classList.contains('open')) {
+            closeDialoguePanel();
+        }
         showScreen('screen-game');
         return; 
     }
 
     // Special action strings
     if (target === 'screen_character_select') { showScreen('screen-character'); return; }
-    if (target === 'screen_main_menu')         { showScreen('screen-mainmenu'); return; }
     if (target === 'triggerEnding')            { triggerEnding(); return; }
     if (target === 'checkWeekCompletion')      { checkWeekCompletion(); return; }
 
-    // Ending scene IDs — always run triggerEnding() first to fire achievements and dynamic text,
-    // then attempt to load the ending JSON for any additional scene content
-    if (['ending_good', 'ending_bad', 'ending_neutral', 'ending_secret'].includes(target)) {
-        triggerEnding(); // Fires achievements, sets dynamic ending text, shows consequence screen
-        // Optionally load additional ending scene JSON if it exists (non-blocking)
-        const endingPath = `scenes/week0/${target}.json`;
-        fetch(endingPath).then(r => {
-            if (r.ok) return r.json();
-        }).then(sceneData => {
-            if (sceneData) renderDialogue(sceneData);
-        }).catch(() => { /* No additional ending scene — triggerEnding() content is sufficient */ });
+    // INTERCEPT: Safely handle routing to main menu or final ending screen
+    const hasEndingCompleted = window.gameState.flags.completedLocs &&
+        window.gameState.flags.completedLocs.some(p => p.includes('ending_good') || p.includes('ending_bad') || p.includes('ending_neutral') || p.includes('ending_secret'));
+    
+    if (target === 'screen_main_menu') {
+        // Only trigger ending if it has not already been shown this session
+        if (!window.gameState.flags.endingReached && (window.gameState.week === 0 || hasEndingCompleted)) {
+            triggerEnding();
+        } else {
+            showScreen('screen-mainmenu');
+        }
         return;
     }
 
     // Scene IDs from the Master File are dot-prefixed week folders:
-    // "w6_uncle_entry" → "scenes/week6/uncle_house_entry.json" (via getScenePathById)
-    // OR a direct file path already built by getScenePath()
     if (target.startsWith('scenes/')) {
         openScenePath(target);
         return;
@@ -2375,6 +2618,7 @@ function _sceneIdToPath(sceneId) {
         // Week 0 / Election Day / Endings
         'w0_town_map_narration':           'scenes/week0/map_w0_transition.json',
         'w0_polling_arrival':              'scenes/week0/polling_arrival.json',
+        'w0_kumaran_polling':              'scenes/week0/kumaran_polling_w0.json',
         'w0_polling_elderly':              'scenes/week0/polling_elderly.json',
         'w0_polling_elderly_helped':       'scenes/week0/polling_elderly_helped.json',
         'w0_polling_youngman':             'scenes/week0/polling_youngman.json',
@@ -2407,7 +2651,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Kept here so any scene files not yet migrated do not throw a reference error.
 // Logs a warning so you can identify and migrate them.
 function applyChoice(choice) {
-    console.warn('[PLV] applyChoice() called — this scene uses the OLD schema. Migrate to "choices" array with goto/flags_set/gauges fields.', choice);
+    // Legacy schema — migrate scene JSON to new format when possible
     const deltas = choice.effect || {};
     const prev = { ...window.gameState.gauges };
     for (const [k, v] of Object.entries(deltas)) {
@@ -2433,6 +2677,10 @@ function applyChoice(choice) {
 }
 
 function showConsequence(text, deltas, prev) {
+    // RESET TO PHASE 1 UI (In case the player came from a previous ending)
+    document.getElementById('cons-phase-choice').style.display = 'flex';
+    document.getElementById('cons-phase-ending').style.display = 'none';
+    
     const badgesCont = document.getElementById('cons-changes');
     badgesCont.innerHTML = '';
     
@@ -2440,21 +2688,44 @@ function showConsequence(text, deltas, prev) {
         if(v === 0) continue;
         const sign = v > 0 ? '↑' : '↓';
         const cls = v > 0 ? 'pos' : 'neg';
-        const label = document.querySelector(`[data-i18n="gauge.${k}"]`) ? document.querySelector(`[data-i18n="gauge.${k}"]`).textContent : k.toUpperCase();
+        const label = document.querySelector(`[data-i18n="gauge.${k}"]`)
+            ? document.querySelector(`[data-i18n="gauge.${k}"]`).textContent
+            : k.toUpperCase();
         badgesCont.innerHTML += `<div class="cons-badge ${cls}">${sign} ${label} ${v > 0 ? '+'+v : v}</div>`;
     }
     
     document.getElementById('cons-text').textContent = text;
     updateGauges(true);
-    showScreen('screen-consequence');
+    // Use overlay approach — do NOT call showScreen() which hides screen-game.
+    // Consequence screen sits on top as a fixed overlay instead.
+    const consScreen = document.getElementById('screen-consequence');
+    consScreen.classList.add('active');
+    consScreen.removeAttribute('aria-hidden');
+    consScreen.style.zIndex = '200'; // Ensure it sits above everything
 }
 
 function returnToGame() {
     showScreen('screen-game');
+    // Always ensure dialogue wrapper is fully closed when returning from consequence screen
+    const wrapper = document.getElementById('dialogue-scene-wrapper');
+    const panel   = document.getElementById('dialogue-panel');
+    const backBtn = document.getElementById('location-back-btn');
+    if (wrapper) wrapper.classList.remove('active');
+    if (panel)   panel.classList.remove('open');
+    if (backBtn) backBtn.classList.remove('visible');
+    // Restore objective bar visibility
+    const objBar = document.getElementById('objective-bar');
+    if (objBar) objBar.style.opacity = '1';
+    // Close the consequence overlay properly
+    const consScreen = document.getElementById('screen-consequence');
+    if (consScreen) {
+        consScreen.classList.remove('active');
+        consScreen.setAttribute('aria-hidden', 'true');
+    }
     _resumeAfterConsequence();
     updateGauges();
     checkMapUnlocks();
-    setTimeout(() => checkWeekCompletion(), 100); // Defer so screen-consequence 'active' class is removed first
+    setTimeout(() => checkWeekCompletion(), 100);
 }
 
 function triggerEnding() {
@@ -2465,11 +2736,24 @@ function triggerEnding() {
     let endingTitle = 'The Election Has Passed.';
     let endingText = '';
     
-    const allAbove60 = g.ct > 60 && g.ih > 60 && g.vp > 60;
+    const allAbove75 = g.ct >= 75 && g.ih >= 75 && g.vp >= 75;
+    const allAbove60 = g.ct >= 60 && g.ih >= 60 && g.vp >= 60;
     const anyBelow30 = g.ct < 30 || g.ih < 30 || g.vp < 30;
-    const badVote = flags.ballotSpoiled || !flags.registrationComplete; // Fixed invalid flag reference
+    const badVote = flags.ballotSpoiled; // Unregistered alone does not force bad ending per spec
     
-    if (allAbove60 && !badVote) {
+    // Secret ending: all advanced evidence collected AND all gauges ≥ 75
+    const secretCondition = allAbove75 &&
+        flags.manifestoComparisonDone &&
+        flags.foundRoadFile &&
+        flags.helpedElderlyWoman &&
+        flags.helpedYoungMan &&
+        flags.helpedCouple;
+
+    if (secretCondition) {
+        endingType = 'secret';
+        endingTitle = 'The Unbroken Chain.';
+        endingText = `Aunty Soma shows you a voter registration card from 1983. Her name. Her photo. A different address, a different decade. "Every election," she says, "they find a reason why someone should not vote." The road is still not fixed. You already knew about the road file. The manifesto from 2010 is in your bag. You came anyway. So did she.`;
+    } else if (allAbove60 && !badVote) {
         endingType = 'good';
         endingTitle = 'Alupotha Voted.';
         endingText = `You walk out of the polling station. The street is quieter than it was this morning. Aunty Soma is waiting outside. She does not say anything for a moment. Then: "Did you vote?" You say yes. She nods once. "Good." The road is still not fixed. But you came.`;
@@ -2488,41 +2772,50 @@ function triggerEnding() {
     
     // Swap background image based on outcome
     if (consBg) {
-        if (endingType === 'good') {
-            consBg.style.backgroundImage = "url('Assets/backgrounds/bg_ending_positive.jpeg')";
+        if (endingType === 'secret') {
+            consBg.style.backgroundImage = "url('assets/backgrounds/bg_ending_secret.jpeg')";
+        } else if (endingType === 'good') {
+            consBg.style.backgroundImage = "url('assets/backgrounds/bg_ending_positive.jpeg')";
         } else if (endingType === 'bad') {
-            consBg.style.backgroundImage = "url('Assets/backgrounds/bg_ending_negative.jpeg')";
+            consBg.style.backgroundImage = "url('assets/backgrounds/bg_ending_negative.jpeg')";
         } else {
-            consBg.style.backgroundImage = "url('Assets/backgrounds/bg_ending_neutral.jpeg')"; // neutral fallback
+            consBg.style.backgroundImage = "url('assets/backgrounds/bg_ending_neutral.jpeg')";
         }
     }
     
-    document.getElementById('cons-text').textContent = endingText;
+    // Populate the Phase 2 Ending screen text
+    const ENDING_LABELS_MAP = { bad: 'Bad Ending', neutral: 'Neutral Ending', good: 'Good Ending', secret: 'Secret Ending' };
+    document.getElementById('ending-title').textContent = endingTitle;
+    document.getElementById('ending-body').textContent = endingText;
+    document.getElementById('ending-label').textContent = ENDING_LABELS_MAP[endingType] || 'The Election Has Passed';
     
-    const badgesCont = document.getElementById('cons-changes');
-    badgesCont.innerHTML = `
-        <div style="text-align:center;margin-bottom:1.5rem;">
-            <div style="font-size:1.4rem;font-family:var(--font-title,serif);margin-bottom:0.5rem;">${endingTitle}</div>
-            <div style="font-size:0.85rem;color:var(--text-muted);">Final scores</div>
-        </div>
-        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:1rem;">
-            <div class="cons-badge ${g.ct > 60 ? 'pos' : 'neg'}">Civic Trust: ${g.ct}</div>
-            <div class="cons-badge ${g.ih > 60 ? 'pos' : 'neg'}">Info Health: ${g.ih}</div>
-            <div class="cons-badge ${g.vp > 60 ? 'pos' : 'neg'}">Voter Part.: ${g.vp}</div>
-        </div>
-    `;
-    
-    updateGauges(true);
-    showScreen('screen-consequence');
+    // Animate final gauges
+    ['ct','ih','vp'].forEach(key => {
+        const val = Math.max(0, Math.min(100, Math.round(g[key])));
+        const valEl = document.getElementById('ending-val-' + key);
+        if (valEl) valEl.textContent = val;
+        const bar = document.getElementById('ending-bar-' + key);
+        if (bar) {
+            bar.style.width = '0%';
+            setTimeout(() => { bar.style.width = val + '%'; }, 200);
+        }
+    });
+
+    // Switch consequence UI to Phase 2
+    document.getElementById('cons-phase-choice').style.display = 'none';
+    document.getElementById('cons-phase-ending').style.display = 'flex';
+    document.getElementById('cons-phase-ending').style.flexDirection = 'column';
+
+updateGauges(true);
+    window.showScreen('screen-consequence');
+    // Ensure consequence overlay z-index doesn't persist over main menu
+    document.getElementById('screen-consequence').style.zIndex = '';
 
     // Fire end-of-game achievements
     unlockAchievement('the_road_remains');
     unlockAchievement('you_finished_an_education_game');
-    if (endingType === 'good') {
-        // Check secret ending condition: Sandya's note was found AND she's on register
-        if (window.gameState.flags.foundSandyaNote && window.gameState.flags.sandyaOnRegister) {
-            unlockAchievement('the_unbroken_chain');
-        }
+    if (endingType === 'secret') {
+        unlockAchievement('the_unbroken_chain');
     }
     if (window.gameState.flags.registrationDeadlineMissed) {
         unlockAchievement('the_door_was_right_there');
@@ -2554,15 +2847,7 @@ function triggerEnding() {
         unlockAchievement('you_were_so_confident');
     }
 
-    // Replace the return button with "Play Again" using its stable data-i18n attribute
-    const returnBtn = document.querySelector('#screen-consequence .cons-btn');
-    if (returnBtn) {
-        returnBtn.textContent = 'Play Again';
-        returnBtn.onclick = () => {
-            localStorage.removeItem('plv_save');
-            location.reload();
-        };
-    }
+    
     
     // Track completed characters for 'three_perspectives' achievement (cross-playthrough)
     try {
@@ -2577,7 +2862,13 @@ function triggerEnding() {
         }
     } catch(e) { /* localStorage unavailable */ }
 
-    saveGame();
+    // Mark ending reached — loadGame() and exitToMainMenu() both check this flag
+    window.gameState.flags.endingReached = endingType;
+
+    // WIPE SAVE SO THE PLAYER ISN'T STUCK IN A LOOP
+    try {
+        localStorage.removeItem('plv_save');
+    } catch(e) {}
 }
 
 // =============================================================
@@ -2674,7 +2965,31 @@ function saveGame() {
 function loadGame() {
     const s = localStorage.getItem('plv_save');
     if (!s) return;
-    window.gameState = JSON.parse(s);
+    try {
+        window.gameState = JSON.parse(s);
+    } catch(e) {
+        console.error("Save file corrupted");
+        return;
+    }
+
+    // Ensure completedLocs exists (may be missing in saves created before this fix)
+    if (!window.gameState.flags) window.gameState.flags = {};
+    if (!Array.isArray(window.gameState.flags.completedLocs)) {
+        window.gameState.flags.completedLocs = [];
+    }
+    if (!Array.isArray(window.gameState.flags.visitedLocs)) {
+        window.gameState.flags.visitedLocs = [];
+    }
+
+    // Merge global achievements so they aren't lost if the save is old
+    try {
+        const storedAchs = localStorage.getItem('plv_achievements');
+        if (storedAchs) {
+            const parsedAchs = JSON.parse(storedAchs);
+            const combined = new Set([...(window.gameState.flags.achievements || []), ...parsedAchs]);
+            window.gameState.flags.achievements = Array.from(combined);
+        }
+    } catch(e) {}
 
     // If the game was saved while a dialogue was active, the last visited scene
     // path may have been pushed before the dialogue completed. Remove it so the
@@ -2687,6 +3002,14 @@ function loadGame() {
         window.gameState.dialogue.active = false; // Reset dialogue state
     }
 
+    // If the game was already completed, wipe the stale save and return to menu cleanly
+    if (window.gameState.flags.endingReached) {
+        try { localStorage.removeItem('plv_save'); } catch(e) {}
+        checkContinueBtn();
+        showScreen('screen-mainmenu');
+        return;
+    }
+
     applyLanguage(true);
     updateGauges(false);
     checkMapUnlocks();
@@ -2696,6 +3019,12 @@ function loadGame() {
     showScreen('screen-game');
     // Restore week completion banner if the player saved after completing a week's tasks
     setTimeout(() => checkWeekCompletion(), 300);
+
+    // Restore polling station unlock if saved at week 0
+    if (window.gameState.week === 0) {
+        const ps9 = document.getElementById('loc9-node');
+        if (ps9) { ps9.style.opacity = '1'; ps9.style.pointerEvents = 'auto'; }
+    }
 }
 
 function checkContinueBtn() {
@@ -2705,13 +3034,15 @@ function checkContinueBtn() {
     const subtitleEl = document.getElementById('menu-subtitle');
     
     if (save) {
-        const saveData = JSON.parse(save);
+        let saveData;
+        try { saveData = JSON.parse(save); } catch(e) { localStorage.removeItem('plv_save'); checkContinueBtn(); return; }
         if (btnContinue) btnContinue.style.display = 'block';
         if (btnNewGame) btnNewGame.classList.remove('primary'); 
         
         // Personalize the subtitle if a character is active
         if (subtitleEl && saveData.character) {
-            const charName = t(`char.${CHAR_KEY[saveData.character]}.name`);
+            const safeChar = saveData.character.charAt(0).toUpperCase() + saveData.character.slice(1).toLowerCase();
+            const charName = t(`char.${CHAR_KEY[safeChar] || 'k'}.name`);
             subtitleEl.textContent = `${charName}, Alupotha is waiting for you.`;
         }
     } else {
@@ -2727,8 +3058,112 @@ function checkNewGame() {
     if (localStorage.getItem('plv_save')) {
         openModal('modal-overwrite'); // Warn user before destroying save
     } else {
-        showScreen('screen-character'); // Safe to proceed immediately
+        startNewGame(); // Safe to proceed immediately, ensures clean state
     }
+}
+
+function startNewGame() {
+    // Keep meta progress (achievements)
+    let earnedAchievements = [];
+    try {
+        const storedAchs = localStorage.getItem('plv_achievements');
+        if (storedAchs) earnedAchievements = JSON.parse(storedAchs);
+    } catch(e) {}
+    
+    // Wipe local storage save
+    localStorage.removeItem('plv_save');
+
+    // Build default flags object (complete, matches initial state)
+    const defaultFlags = {
+        visitedLocs: [],
+        completedLocs: [],
+        achievements: earnedAchievements,
+        endingReached: null,
+        secretEndingReached: false,
+        uncleMsgWeek6Delivered: false,
+        uncleMsgWeek5Delivered: false,
+        uncleMsgWeek4Delivered: false,
+        uncleMsgWeek3Delivered: false,
+        uncleMsgWeek2Delivered: false,
+        uncleMsgWeek1Delivered: false,
+        sharedFakeMessage_w6: false,
+        sharedFakeVoicenote_w5: false,
+        sharedFake4amMessage: false,
+        sharedFakeCandidateList: false,
+        sharedFakeBallotFold: false,
+        sharedAnyFakeMessage: false,
+        uncleVisited: false,
+        registrationStarted: false,
+        registrationComplete: false,
+        registrationDeadlineMissed: false,
+        gremaOfficeVisited: false,
+        verifiedAtBoardCount: 0,
+        verifiedCount: 0,
+        foundRoadFile: false,
+        found1977Receipt: false,
+        foundOldManifesto: false,
+        manifestoComparisonDone: false,
+        foundSergeantTransferThread: false,
+        heardAbout2016Road: false,
+        foundSandyaNote: false,
+        sandyaOnRegister: false,
+        skepticsCafeUnlocked: false,
+        joinedCafe: false,
+        readCurrentManifesto: false,
+        reportedIllegalPosters: false,
+        reportedVoterIntimidation: false,
+        verifiedBallotFold: false,
+        willFoldInThirds: false,
+        kamala_wrongAssumption_pollingStation: false,
+        helpedElderlyWoman: false,
+        helpedNICYoungMan: false,
+        helpedLostCouple: false,
+        votedSuccessfully: false,
+        ballotSpoiled: false,
+        ballotWillBeSpoiled: false,
+        clue_roadFile_delivered: false,
+        clue_manifesto_delivered: false,
+        clue_cafe_delivered: false,
+        karunasena_dismissedCount: 0,
+        kamala_assumptionsCorrected: 0,
+        kumaran_transferStepsComplete: 0,
+        sharedFakeMessage: false,
+        cameFromUncle: false,
+        ignored: false,
+        attendedHall: false,
+        dismissedMessages: 0,
+        gaugesTutorialSeen: false,
+        _ach_alg_fired: false,
+        _ach_skeptic_fired: false,
+        _ach_helpers_fired: false,
+        _ach_ih100_fired: false,
+        _ach_spreads_fired: false,
+        _ach_sandya_fired: false,
+        _ach_roadfile_fired: false,
+        _ach_receipt_fired: false,
+        _ach_sergeant_fired: false,
+        _ach_nandadasa_fired: false,
+        _ach_manifesto_fired: false,
+        _ach_readmanifesto_fired: false,
+        _ach_elderly_fired: false,
+        sharedVerifiedInfo: false
+    };
+
+    window.gameState = {
+        lang: window.gameState.lang || 'en',
+        screen: 'screen-character',
+        character: null,
+        week: 6,
+        gauges: { ct: 50, ih: 50, vp: 50 },
+        flags: defaultFlags,
+        dialogue: { active: false, currentLine: 0, lines: [], choices: null },
+        history: [],
+        currentLoc: null
+    };
+    
+    closeModal('modal-overwrite');
+    showScreen('screen-character');
+    checkContinueBtn();
 }
 
 // =============================================================================
