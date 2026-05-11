@@ -1,5 +1,5 @@
 [
-  { "id": "bar", "src": "assets/images/bar.png", "x": 114.17, "y": 114.17, "width": 228.34, "height": 228.34 },
+  { "id": "bar", "src": "assets/images/bar.png", "x": 125, "y": 395, "width": 228.34, "height": 228.34 },
   { "id": "board", "src": "assets/images/board.png", "x": 1296.07, "y": 609.07, "width": 190.14, "height": 190.14 },
   { "id": "boarding", "src": "assets/images/boarding.png", "x": 1344.62, "y": 857.62, "width": 301.25, "height": 301.25 },
   { "id": "café", "src": "assets/images/cafe.png", "x": 225.15, "y": 773.15, "width": 318.30, "height": 318.30 },
