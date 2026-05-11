@@ -1,0 +1,31 @@
+{
+  "id": "w2_boutique",
+  "week": 2,
+  "location": "boutique",
+  "background": "bg_boutique",
+  "portraits": {
+    "left": "char_karunasena_neutral",
+    "right": "npc_mudalali_talking"
+  },
+  "lines": [
+    {
+      "id": "w2_b_01",
+      "type": "dialogue",
+      "speaker": "Mudalali Perera",
+      "portrait_state": "npc_mudalali_talking",
+      "text": "Two weeks. I have my calendar ready. You voted before? No? Well. It is not difficult. You go, you stand in line, you vote. The difficult part is knowing who to vote for.",
+      "advance": "click"
+    },
+    {
+      "id": "w2_b_02",
+      "type": "dialogue",
+      "speaker": "Mudalali Perera",
+      "portrait_state": "npc_mudalali_loud",
+      "text": "I know who I am voting for. Same as always. Some things do not need to change.",
+      "advance": "click"
+    }
+  ],
+  "on_complete": {
+    "goto": "w2_map"
+  }
+}

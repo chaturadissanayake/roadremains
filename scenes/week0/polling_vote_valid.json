@@ -1,0 +1,67 @@
+{
+  "id": "w0_casting_ballot",
+  "week": 0,
+  "location": "polling_station",
+  "background": "bg_polling_station",
+  "portraits": {
+    "left": "char_karunasena_neutral",
+    "right": null
+  },
+  "lines": [
+    {
+      "id": "w0_cb_01",
+      "type": "narration",
+      "text": "The presiding officer demonstrates the fold. Once. Vertically. Your preference vote goes in the column — they explain which column. They ask if you have any questions.",
+      "advance": "click"
+    },
+    {
+      "id": "w0_cb_choice",
+      "type": "choice",
+      "prompt": "You are in the booth. You have marked your preference. Now you fold the ballot.",
+      "choices": [
+        {
+          "id": "w0_cb_choice_valid",
+          "label": "Fold it once, vertically, in half — as the presiding officer showed.",
+          "condition": "!flags.willFoldInThirds",
+          "goto": "w0_ballot_valid",
+          "flags_set": [
+            "votedSuccessfully"
+          ],
+          "gauges": {
+            "ct": 10,
+            "ih": 10,
+            "vp": 20
+          }
+        },
+        {
+          "id": "w0_cb_choice_override",
+          "label": "You checked. You know the fold. Fold once, vertically, in half.",
+          "condition": "flags.willFoldInThirds && flags.verifiedBallotFold",
+          "goto": "w0_ballot_valid",
+          "flags_set": [
+            "votedSuccessfully"
+          ],
+          "gauges": {
+            "ct": 10,
+            "ih": 10,
+            "vp": 20
+          }
+        },
+        {
+          "id": "w0_cb_choice_spoiled",
+          "label": "Fold it in thirds — as the voice note said.",
+          "condition": "flags.willFoldInThirds && !flags.verifiedBallotFold",
+          "goto": "w0_ballot_spoiled",
+          "flags_set": [
+            "ballotSpoiled"
+          ],
+          "gauges": {
+            "ct": -10,
+            "ih": -20,
+            "vp": -10
+          }
+        }
+      ]
+    }
+  ]
+}

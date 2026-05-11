@@ -1,0 +1,51 @@
+{
+  "id": "w1_campaign_tent_readonly",
+  "week": 1,
+  "location": "campaign_tent",
+  "background": "bg_campaign_tent",
+  "portraits": {
+    "left": "char_karunasena_neutral",
+    "right": "npc_mahinda_neutral"
+  },
+  "lines": [
+    {
+      "id": "w1_ctr_01",
+      "type": "narration",
+      "text": "The tent is still here. The jingle is still playing. Mahinda Bandara is not giving interviews today — the campaign period has entered its final day. A supporter is still distributing calendars.",
+      "advance": "click"
+    },
+    {
+      "id": "w1_ctr_02",
+      "type": "narration",
+      "text": "The manifesto is still on the table. The unmarked box is still in the corner — if you have not opened it yet.",
+      "advance": "click"
+    },
+    {
+      "id": "w1_ctr_choice",
+      "type": "choice",
+      "prompt": "What do you look at?",
+      "choices": [
+        {
+          "id": "w1_ctr_a",
+          "label": "Read the manifesto again.",
+          "condition": "flags.readCurrentManifesto",
+          "goto": "w1_map",
+          "gauges": {}
+        },
+        {
+          "id": "w1_ctr_b",
+          "label": "Open the unmarked box.",
+          "condition": "flags.readCurrentManifesto && !flags.foundOldManifesto",
+          "goto": "w2_campaign_tent_oldbox",
+          "gauges": {}
+        },
+        {
+          "id": "w1_ctr_c",
+          "label": "Leave.",
+          "goto": "w1_map",
+          "gauges": {}
+        }
+      ]
+    }
+  ]
+}

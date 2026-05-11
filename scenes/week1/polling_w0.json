@@ -1,0 +1,24 @@
+{
+  "id": "w0.polling.01",
+  "npc": "Presiding Officer",
+  "portrait": "Assets/npcs/npc_nandadasa_neutral.png",
+  "initials": "PO",
+  "dialogue": [
+    "<em>The desks have been pushed to the walls. The principal's office is now the presiding officer's room. There is a sign on the door listing what you cannot bring inside. The queue extends down the front steps and around the corner.</em>",
+    "<em>An elderly woman in front of you looks confused. She is holding a piece of paper and looking between two different queue lines.</em>"
+  ],
+  "options": [
+    {
+      "text": "Help the elderly woman find her name on the register.",
+      "effect": { "ct": 10, "ih": 5, "vp": 25 },
+      "redirect": "scenes/week0/polling_vote.json",
+      "consequence": "You help her. She has voted in every election since 1971. She finds her name. You step up to the desk."
+    },
+    {
+      "text": "You are in a rush. Move past her.",
+      "effect": { "ct": -5 },
+      "redirect": "scenes/week0/polling_vote.json",
+      "consequence": "You move ahead. You step up to the desk."
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "id": "w0_polling_arrival",
+  "week": 0,
+  "location": "polling_station",
+  "background": "bg_polling_station",
+  "portraits": {
+    "left": "char_karunasena_neutral",
+    "right": null
+  },
+  "lines": [
+    {
+      "id": "w0_pa_01",
+      "type": "narration",
+      "text": "The desks have been pushed to the walls. The principal's office is now the presiding officer's office. There is a sign on the door listing what you cannot bring inside. The queue extends down the front steps and around the corner.",
+      "advance": "click"
+    },
+    {
+      "id": "w0_pa_02",
+      "type": "narration",
+      "condition": "flags.registrationComplete",
+      "text": "Your name should be on the register. You registered before the deadline.",
+      "advance": "click"
+    },
+    {
+      "id": "w0_pa_03",
+      "type": "narration",
+      "condition": "flags.registrationDeadlineMissed",
+      "text": "You were already registered in a previous cycle. Your name may still be on the register from before.",
+      "advance": "click"
+    },
+    {
+      "id": "w0_pa_04",
+      "type": "narration",
+      "text": "Three people are around you in the queue. You can engage with any of them — or none of them.",
+      "advance": "click"
+    },
+    {
+      "id": "w0_pa_choice",
+      "type": "choice",
+      "prompt": "Who do you look at?",
+      "choices": [
+        {
+          "id": "w0_pa_a",
+          "label": "An elderly woman is struggling to find her name. She looks lost.",
+          "goto": "w0_polling_elderly",
+          "gauges": {}
+        },
+        {
+          "id": "w0_pa_b",
+          "label": "A young man is checking his pockets frantically.",
+          "goto": "w0_polling_youngman",
+          "gauges": {}
+        },
+        {
+          "id": "w0_pa_c",
+          "label": "A couple nearby are arguing quietly — they seem to be in the wrong place.",
+          "goto": "w0_polling_couple",
+          "gauges": {}
+        },
+        {
+          "id": "w0_pa_d",
+          "label": "Move through the queue. You are here to vote.",
+          "goto": "w0_check_sandya",
+          "gauges": {
+            "ct": -5,
+            "vp": -10
+          }
+        }
+      ]
+    }
+  ]
+}

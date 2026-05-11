@@ -1,0 +1,32 @@
+{
+  "id": "w0_ballot_spoiled",
+  "week": 0,
+  "location": "polling_station",
+  "background": "bg_polling_station",
+  "portraits": {
+    "left": "char_karunasena_worried",
+    "right": null
+  },
+  "gauges_on_enter": {
+    "ct": -10,
+    "ih": -20,
+    "vp": -10
+  },
+  "lines": [
+    {
+      "id": "w0_bs_01",
+      "type": "narration",
+      "text": "You folded it in thirds. As the voice note said. The presiding officer says nothing at this stage — the booth is private. The fold is wrong. When the ballots are counted, yours cannot be read.",
+      "advance": "click"
+    },
+    {
+      "id": "w0_bs_02",
+      "type": "narration",
+      "text": "You did not check the source. The ballot fold was a detail. Details are the point.",
+      "advance": "click"
+    }
+  ],
+  "on_complete": {
+    "goto": "ending_bad"
+  }
+}

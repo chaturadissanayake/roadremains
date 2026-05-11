@@ -1,0 +1,35 @@
+{
+  "id": "w0_polling_elderly_helped",
+  "week": 0,
+  "location": "polling_station",
+  "background": "bg_polling_station",
+  "portraits": {
+    "left": "char_karunasena_happy",
+    "right": "npc_elderly_relieved"
+  },
+  "gauges_on_enter": {
+    "ct": 10,
+    "ih": 5,
+    "vp": 25
+  },
+  "achievement": "not_your_job",
+  "lines": [
+    {
+      "id": "w0_peh_01",
+      "type": "dialogue",
+      "speaker": "Elderly Woman",
+      "portrait_state": "npc_elderly_relieved",
+      "text": "Ah! There. Seelarathna, B.A. — that is me. Thank you, putha. Thank you.",
+      "advance": "click"
+    },
+    {
+      "id": "w0_peh_02",
+      "type": "narration",
+      "text": "She told you she has voted in every election since 1971 in the time it took to find her name. She was not boasting. She was just telling you.",
+      "advance": "click"
+    }
+  ],
+  "on_complete": {
+    "goto": "w0_polling_youngman"
+  }
+}
