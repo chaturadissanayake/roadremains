@@ -88,15 +88,15 @@ body {
     pointer-events: none;
 }
 
-#bg-loading { background-image: url('assets/backgrounds/bg_loading.jpeg'); }
-#bg-language { background-image: url('assets/backgrounds/bg_language.jpeg'); }
+#bg-loading { background-image: url('assets/backgrounds/bg_loading.webp'); }
+#bg-language { background-image: url('assets/backgrounds/bg_language.webp'); }
 #bg-main-menu { 
-    background-image: url('assets/backgrounds/bg_main_menu.png'); 
+    background-image: url('assets/backgrounds/bg_main_menu.webp'); 
     opacity: 1; /* Full opacity so the background is completely visible */
 }
-#bg-char-select { background-image: url('assets/backgrounds/bg_char_select.jpeg'); }
-#bg-opening { background-image: url('assets/backgrounds/bg_opening.jpeg'); }
-#bg-consequence { background-image: url('assets/backgrounds/bg_consequence.jpeg'); opacity: 0.25; }
+#bg-char-select { background-image: url('assets/backgrounds/bg_char_select.webp'); }
+#bg-opening { background-image: url('assets/backgrounds/bg_opening.webp'); }
+#bg-consequence { background-image: url('assets/backgrounds/bg_consequence.webp'); opacity: 0.25; }
 
 /* Subtle Film Grain */
 body::before {
@@ -3405,5 +3405,5 @@ body.reduce-motion .map-location.pulse-active .base-dot {
 
 /* Achievements screen background */
 #bg-achievements {
-    background-image: url('assets/backgrounds/bg_char_select.jpeg');
+    background-image: url('assets/backgrounds/bg_char_select.webp');
 }
