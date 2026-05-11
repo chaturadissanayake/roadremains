@@ -1,0 +1,47 @@
+{
+  "id": "prologue",
+  "week": null,
+  "location": "main_menu",
+  "background": "bg_main_menu",
+  "portraits": {
+    "left": null,
+    "right": "npc_soma_warm"
+  },
+  "lines": [
+    {
+      "id": "prologue_01",
+      "type": "dialogue",
+      "speaker": "Aunty Soma",
+      "portrait_state": "npc_soma_warm",
+      "text": "There is an election coming. Six weeks from today.",
+      "advance": "click"
+    },
+    {
+      "id": "prologue_02",
+      "type": "dialogue",
+      "speaker": "Aunty Soma",
+      "portrait_state": "npc_soma_talking",
+      "text": "In Alupotha, this means several things. Mahinda Bandara will put his face on everything. The WhatsApp group will go quiet for approximately two minutes and then make up for it.",
+      "advance": "click"
+    },
+    {
+      "id": "prologue_03",
+      "type": "dialogue",
+      "speaker": "Aunty Soma",
+      "portrait_state": "npc_soma_warm",
+      "text": "I have voted in every election since 1983. Not because everything went perfectly. Mostly because it did not.",
+      "advance": "click"
+    },
+    {
+      "id": "prologue_04",
+      "type": "dialogue",
+      "speaker": "Aunty Soma",
+      "portrait_state": "npc_soma_neutral",
+      "text": "Someone new is coming to town this time. Maybe that is you.",
+      "advance": "click"
+    }
+  ],
+  "on_complete": {
+    "goto": "screen_character_select"
+  }
+}

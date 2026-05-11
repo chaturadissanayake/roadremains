@@ -1,0 +1,17 @@
+{
+  "id": "w6_boutique_optional",
+  "week": 6,
+  "location": "boutique",
+  "background": "bg_boutique",
+  "portraits": { "left": "char_karunasena_neutral", "right": "npc_mudalali_loud" },
+  "lines": [
+    { "id": "w6_bo_01", "type": "narration", "text": "Mudalali Perera has sold Milo, motor oil, and political opinions since 1977. He is not a villain. He is simply certain in a way that makes nuance difficult.", "advance": "click" },
+    { "id": "w6_bo_02", "type": "dialogue", "speaker": "Mudalali Perera", "portrait_state": "npc_mudalali_loud", "text": "You! New face. Have you registered? Young people — they sit and complain and then don't register. What is the point of complaining if you don't register?", "advance": "click" },
+    { "id": "w6_bo_03", "type": "narration", "text": "Two customers are nearby. You can hear them:", "advance": "click" },
+    { "id": "w6_bo_04", "type": "narration", "text": "\"I still haven't registered. Has the deadline passed?\" \"I don't know. Someone in my group said last week. Someone else said Week 4.\" \"You should ask at the office. But the queue —\" \"I know. The queue.\"", "advance": "click" },
+    { "id": "w6_bo_05", "type": "choice", "prompt": "Mudalali is looking at you. He is going to have an opinion.", "choices": [
+      { "id": "w6_bo_choice_a", "label": "Listen. He probably knows this area well.", "goto": "w6_boutique_listen", "gauges": {} },
+      { "id": "w6_bo_choice_b", "label": "Ask a critical question about his political opinion.", "goto": "w6_boutique_critical", "gauges": { "ih": 5 } }
+    ]}
+  ]
+}

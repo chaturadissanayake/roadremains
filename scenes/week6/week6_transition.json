@@ -1,0 +1,40 @@
+{
+  "id": "w6_transition",
+  "week": 6,
+  "location": "transition",
+  "background": "bg_main_menu",
+  "portraits": {
+    "left": null,
+    "right": null
+  },
+  "lines": [
+    {
+      "id": "w6_tr_01",
+      "type": "narration",
+      "text": "Week 5 of 6",
+      "advance": "auto"
+    },
+    {
+      "id": "w6_tr_02",
+      "type": "narration",
+      "text": "The first week in Alupotha is done. The election is five weeks away. Uncle Sirisena's message is still circulating. Whether you stopped it, corrected it, shared it, or ignored it — it is still out there.",
+      "advance": "click"
+    },
+    {
+      "id": "w6_tr_03",
+      "type": "narration",
+      "text": "The registration deadline is Week 4. The Elections Commission notice board has the correct information. Nandadasa Mahaththaya opens at 8:30.",
+      "advance": "click"
+    },
+    {
+      "id": "w6_tr_04",
+      "type": "narration",
+      "text": "Next week: The rumours start moving faster. Uncle Sirisena has found a voice note.",
+      "advance": "click"
+    }
+  ],
+  "on_complete": {
+    "goto": "w5_uncle_voicenote",
+    "week_set": 5
+  }
+}
