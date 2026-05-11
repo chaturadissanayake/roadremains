@@ -1628,28 +1628,28 @@ const NPC_PORTRAITS = {
 // Format: JPEG, 1920×1080px
 // These are already used in LOC_BGS and BG_MAP below — listed here for reference
 const BACKGROUND_assets = {
-    'bg_loading':         'assets/backgrounds/bg_loading.jpeg',
-    'bg_language':        'assets/backgrounds/bg_language.jpeg',
+    'bg_loading':         'assets/backgrounds/bg_loading.webp',
+    'bg_language':        'assets/backgrounds/bg_language.webp',
     'bg_main_menu':       'assets/backgrounds/bg_main_menu.png',   // PNG — uses transparency layer
-    'bg_char_select':     'assets/backgrounds/bg_char_select.jpeg',
-    'bg_opening':         'assets/backgrounds/bg_opening.jpeg',
-    'bg_consequence':     'assets/backgrounds/bg_consequence.jpeg',
-    'bg_uncle_house':     'assets/backgrounds/bg_uncle_house.jpeg',
-    'bg_grama_office':    'assets/backgrounds/bg_grama_office.jpeg',
-    'bg_boutique':        'assets/backgrounds/bg_boutique.jpeg',
-    'bg_police':          'assets/backgrounds/bg_police.jpeg',
-    'bg_campaign_tent':   'assets/backgrounds/bg_campaign_tent.jpeg',
-    'bg_ec_board':        'assets/backgrounds/bg_ec_board.jpeg',
-    'bg_polling_station': 'assets/backgrounds/bg_polling_station.jpeg',
-    'bg_skeptics_cafe':   'assets/backgrounds/bg_skeptics_cafe.jpeg',
-    'bg_ending_positive': 'assets/backgrounds/bg_ending_positive.jpeg',
-    'bg_ending_negative': 'assets/backgrounds/bg_ending_negative.jpeg',
-    'bg_ending_neutral':  'assets/backgrounds/bg_ending_neutral.jpeg',
-    'bg_kovil':           'assets/backgrounds/bg_kovil.jpeg',
-    'bg_temple':          'assets/backgrounds/bg_temple.jpeg',
-    'bg_prologue_k':      'assets/backgrounds/bg_prologue_k.jpeg',
-    'bg_prologue_ka':     'assets/backgrounds/bg_prologue_ka.jpeg',
-    'bg_prologue_ku':     'assets/backgrounds/bg_prologue_ku.jpeg',
+    'bg_char_select':     'assets/backgrounds/bg_char_select.webp',
+    'bg_opening':         'assets/backgrounds/bg_opening.webp',
+    'bg_consequence':     'assets/backgrounds/bg_consequence.webp',
+    'bg_uncle_house':     'assets/backgrounds/bg_uncle_house.webp',
+    'bg_grama_office':    'assets/backgrounds/bg_grama_office.webp',
+    'bg_boutique':        'assets/backgrounds/bg_boutique.webp',
+    'bg_police':          'assets/backgrounds/bg_police.webp',
+    'bg_campaign_tent':   'assets/backgrounds/bg_campaign_tent.webp',
+    'bg_ec_board':        'assets/backgrounds/bg_ec_board.webp',
+    'bg_polling_station': 'assets/backgrounds/bg_polling_station.webp',
+    'bg_skeptics_cafe':   'assets/backgrounds/bg_skeptics_cafe.webp',
+    'bg_ending_positive': 'assets/backgrounds/bg_ending_positive.webp',
+    'bg_ending_negative': 'assets/backgrounds/bg_ending_negative.webp',
+    'bg_ending_neutral':  'assets/backgrounds/bg_ending_neutral.webp',
+    'bg_kovil':           'assets/backgrounds/bg_kovil.webp',
+    'bg_temple':          'assets/backgrounds/bg_temple.webp',
+    'bg_prologue_k':      'assets/backgrounds/bg_prologue_k.webp',
+    'bg_prologue_ka':     'assets/backgrounds/bg_prologue_ka.webp',
+    'bg_prologue_ku':     'assets/backgrounds/bg_prologue_ku.webp',
 };
 
 // ─── MAP LOCATION assets ─────────────────────────────────────────────────────
@@ -1735,42 +1735,42 @@ const AUDIO_assets = {
 };
 
 const LOC_BGS = {
-    'loc1': 'assets/backgrounds/bg_grama_office.jpeg',
-    'loc2': 'assets/backgrounds/bg_uncle_house.jpeg',
-    'loc3': 'assets/backgrounds/bg_ec_board.jpeg',
-    'loc4': 'assets/backgrounds/bg_boutique.jpeg',
-    'loc5': 'assets/backgrounds/bg_community_hall.jpeg', // PLACEHOLDER — create bg_community_hall.jpeg for Aunty Soma / Community Hall scene
-    'loc6': 'assets/backgrounds/bg_police.jpeg',
-    'loc7': 'assets/backgrounds/bg_skeptics_cafe.jpeg',
-    'loc8': 'assets/backgrounds/bg_campaign_tent.jpeg',
-    'loc9': 'assets/backgrounds/bg_polling_station.jpeg',
-    'loc_kovil': 'assets/backgrounds/bg_kovil.jpeg',
-    'loc_temple': 'assets/backgrounds/bg_temple.jpeg'
+    'loc1': 'assets/backgrounds/bg_grama_office.webp',
+    'loc2': 'assets/backgrounds/bg_uncle_house.webp',
+    'loc3': 'assets/backgrounds/bg_ec_board.webp',
+    'loc4': 'assets/backgrounds/bg_boutique.webp',
+    'loc5': 'assets/backgrounds/bg_community_hall.webp', // PLACEHOLDER — create bg_community_hall.webp for Aunty Soma / Community Hall scene
+    'loc6': 'assets/backgrounds/bg_police.webp',
+    'loc7': 'assets/backgrounds/bg_skeptics_cafe.webp',
+    'loc8': 'assets/backgrounds/bg_campaign_tent.webp',
+    'loc9': 'assets/backgrounds/bg_polling_station.webp',
+    'loc_kovil': 'assets/backgrounds/bg_kovil.webp',
+    'loc_temple': 'assets/backgrounds/bg_temple.webp'
 };
 
 const BG_MAP = {
-    'bg_uncle_house':    'assets/backgrounds/bg_uncle_house.jpeg',
-    'bg_grama_office':   'assets/backgrounds/bg_grama_office.jpeg',
-    'bg_ec_board':       'assets/backgrounds/bg_ec_board.jpeg',
-    'bg_boutique':       'assets/backgrounds/bg_boutique.jpeg',
-    'bg_police':         'assets/backgrounds/bg_police.jpeg',
-    'bg_campaign_tent':  'assets/backgrounds/bg_campaign_tent.jpeg',
-    'bg_skeptics_cafe':  'assets/backgrounds/bg_skeptics_cafe.jpeg',
-    'bg_polling_station':'assets/backgrounds/bg_polling_station.jpeg',
-    'bg_main_menu':      'assets/backgrounds/bg_main_menu.png',
-    'bg_town_map':       'assets/backgrounds/bg_town_map.jpeg',
+    'bg_uncle_house':    'assets/backgrounds/bg_uncle_house.webp',
+    'bg_grama_office':   'assets/backgrounds/bg_grama_office.webp',
+    'bg_ec_board':       'assets/backgrounds/bg_ec_board.webp',
+    'bg_boutique':       'assets/backgrounds/bg_boutique.webp',
+    'bg_police':         'assets/backgrounds/bg_police.webp',
+    'bg_campaign_tent':  'assets/backgrounds/bg_campaign_tent.webp',
+    'bg_skeptics_cafe':  'assets/backgrounds/bg_skeptics_cafe.webp',
+    'bg_polling_station':'assets/backgrounds/bg_polling_station.webp',
+    'bg_main_menu':      'assets/backgrounds/bg_main_menu.webp',
+    'bg_town_map':       'assets/backgrounds/bg_town_map.webp',
     /* Master Scene File uses these keys — map to the positive/negative files */
-    'bg_ending_good':    'assets/backgrounds/bg_ending_positive.jpeg',
-    'bg_ending_bad':     'assets/backgrounds/bg_ending_negative.jpeg',
+    'bg_ending_good':    'assets/backgrounds/bg_ending_positive.webp',
+    'bg_ending_bad':     'assets/backgrounds/bg_ending_negative.webp',
     /* Legacy aliases kept for backward compat */
-    'bg_ending_positive':'assets/backgrounds/bg_ending_positive.jpeg',
-    'bg_ending_negative':'assets/backgrounds/bg_ending_negative.jpeg',
-    'bg_ending_neutral': 'assets/backgrounds/bg_ending_neutral.jpeg',
-    'bg_kovil':          'assets/backgrounds/bg_kovil.jpeg',
-    'bg_temple':         'assets/backgrounds/bg_temple.jpeg',
-    'bg_prologue_k':     'assets/backgrounds/bg_prologue_k.jpeg',
-    'bg_prologue_ka':    'assets/backgrounds/bg_prologue_ka.jpeg',
-    'bg_prologue_ku':    'assets/backgrounds/bg_prologue_ku.jpeg'
+    'bg_ending_positive':'assets/backgrounds/bg_ending_positive.webp',
+    'bg_ending_negative':'assets/backgrounds/bg_ending_negative.webp',
+    'bg_ending_neutral': 'assets/backgrounds/bg_ending_neutral.webp',
+    'bg_kovil':          'assets/backgrounds/bg_kovil.webp',
+    'bg_temple':         'assets/backgrounds/bg_temple.webp',
+    'bg_prologue_k':     'assets/backgrounds/bg_prologue_k.webp',
+    'bg_prologue_ka':    'assets/backgrounds/bg_prologue_ka.webp',
+    'bg_prologue_ku':    'assets/backgrounds/bg_prologue_ku.webp'
 };
 
 // --- PANEL OPEN / CLOSE ---
@@ -2773,13 +2773,13 @@ function triggerEnding() {
     // Swap background image based on outcome
     if (consBg) {
         if (endingType === 'secret') {
-            consBg.style.backgroundImage = "url('assets/backgrounds/bg_ending_secret.jpeg')";
+            consBg.style.backgroundImage = "url('assets/backgrounds/bg_ending_secret.webp')";
         } else if (endingType === 'good') {
-            consBg.style.backgroundImage = "url('assets/backgrounds/bg_ending_positive.jpeg')";
+            consBg.style.backgroundImage = "url('assets/backgrounds/bg_ending_positive.webp')";
         } else if (endingType === 'bad') {
-            consBg.style.backgroundImage = "url('assets/backgrounds/bg_ending_negative.jpeg')";
+            consBg.style.backgroundImage = "url('assets/backgrounds/bg_ending_negative.webp')";
         } else {
-            consBg.style.backgroundImage = "url('assets/backgrounds/bg_ending_neutral.jpeg')";
+            consBg.style.backgroundImage = "url('assets/backgrounds/bg_ending_neutral.webp')";
         }
     }
     
