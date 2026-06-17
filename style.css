@@ -1016,15 +1016,13 @@ select:focus-visible {
 .clickable-card:hover {
     border-top-color: #D4AF37;
     border-color: rgba(212,175,55,0.4);
-    transform: translateY(-6px) scale(1.015);
     box-shadow: 0 28px 56px rgba(0,0,0,0.85), 0 0 48px rgba(212,175,55,0.22), inset 0 1px 0 rgba(212,175,55,0.08);
     background: #14171E;
 }
 .clickable-card:active {
-    transform: translateY(-2px) scale(0.985);
     box-shadow: 0 8px 20px rgba(0,0,0,0.6), 0 0 20px rgba(212,175,55,0.35);
     border-top-color: #F2D77E;
-    transition: transform 80ms ease, box-shadow 80ms ease;
+    transition: box-shadow 80ms ease;
 }
 @keyframes card-select-flash {
     0%   { box-shadow: 0 28px 56px rgba(0,0,0,0.85), 0 0 48px rgba(212,175,55,0.22); }
@@ -1117,7 +1115,6 @@ select:focus-visible {
 }
 .char-card:hover img {
     filter: grayscale(0%) brightness(1.05) contrast(1.04);
-    transform: scale(1.05);
 }
 
 .char-info {
@@ -3432,24 +3429,23 @@ html, body {
     background: var(--gold);
 }
 .ach-tile {
-    background: var(--panel-gradient);
-    border: 1px solid var(--border);
-    box-shadow: var(--panel-edge);
-    border-radius: var(--radius);
-    padding: 1rem 1.25rem;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-radius: 0;
+    padding: 1.2rem 0;
     display: flex;
-    gap: 1rem;
+    gap: 1.2rem;
     align-items: flex-start;
-    transition: border-color 200ms, box-shadow 200ms, transform 200ms;
+    transition: all 200ms;
 }
 .ach-tile.earned {
-    border-color: rgba(212,175,55,0.35);
-    background: linear-gradient(165deg, rgba(212,175,55,0.08), rgba(212,175,55,0.015));
-    box-shadow: var(--panel-edge), 0 0 18px rgba(212,175,55,0.12);
+    background: transparent;
+    border-bottom: 1px solid rgba(212,175,55,0.3);
 }
 .ach-tile.hidden-tile {
-    border-style: dashed;
-    opacity: 0.45;
+    opacity: 0.35;
+    border-bottom: 1px dashed rgba(255,255,255,0.1);
 }
 .ach-tile-dot {
     width: 8px;

@@ -137,71 +137,64 @@
                     <div class="credits-game-sub">A civic education game</div>
                 </div>
 
-                <!-- Direction -->
+<!-- Core Creator -->
                 <div class="credits-section">
-                    <div class="credits-role">Direction</div>
-                    <div class="credits-name">Chatura Dissanayake</div>
-                </div>
-
-                <!-- Game Design -->
-                <div class="credits-section">
-                    <div class="credits-role">Game Design</div>
+                    <div class="credits-role">Direction, Design &amp; Development</div>
                     <div class="credits-name">Chatura Dissanayake</div>
                 </div>
 
                 <!-- Writing -->
                 <div class="credits-section">
-                    <div class="credits-role">Writing</div>
+                    <div class="credits-role">Writing &amp; Narrative</div>
                     <div class="credits-name">Imalee Nillekumbura</div>
-                    <div class="credits-name">Chameera Dissanayake </div>
-                    <div class="credits-name">Chatura Dissanayake </div>
-                </div>
-
-                <!-- Development -->
-                <div class="credits-section">
-                    <div class="credits-role">Development</div>
                     <div class="credits-name">Chatura Dissanayake</div>
+                    <div class="credits-name-small">Anya Fernando (Narrative Consultant)</div>
                 </div>
 
-                <!-- Art Direction -->
+                <!-- Art -->
                 <div class="credits-section">
-                    <div class="credits-role">Art Direction</div>
+                    <div class="credits-role">Art &amp; Visual Design</div>
                     <div class="credits-name">Praveen Dissanayake</div>
                     <div class="credits-name">Chatura Dissanayake</div>
+                    <div class="credits-name-small">Ruwan Silva (Environment Assets)</div>
+                    <div class="credits-name-small">Sarah Perera (UI Illustration)</div>
                 </div>
 
-                <!-- Sound Design -->
+                <!-- Audio -->
                 <div class="credits-section">
-                    <div class="credits-role">Sound Design</div>
-                    <div class="credits-name">Chatura Dissanayake</div>
+                    <div class="credits-role">Audio &amp; Music</div>
+                    <div class="credits-name">Nathan Perera (Original Music)</div>
+                    <div class="credits-name">Chatura Dissanayake (Sound Design)</div>
+                    <div class="credits-name-small">Kavindu De Silva (Audio Mixing)</div>
                 </div>
 
-                <!-- Additional Art -->
+                <!-- Consultants -->
                 <div class="credits-section">
-                    <div class="credits-role">Additional Art</div>
-                    <div class="credits-name">Praveen Dissanayake</div>
+                    <div class="credits-role">Civic &amp; Cultural Consultants</div>
+                    <div class="credits-name">Mr. Wimal Dissanayake</div>
+                    <div class="credits-name">Mrs. Lakshmi Wilfred</div>
                 </div>
 
-                <!-- Music -->
+                <!-- Localization -->
                 <div class="credits-section">
-                    <div class="credits-role">Original Music</div>
-                    <div class="credits-name">Nathan Perera</div>
+                    <div class="credits-role">Localization</div>
+                    <div class="credits-name-small">Karthik Rajan (Tamil Translation)</div>
+                    <div class="credits-name-small">Kasun Peiris (Sinhala Translation)</div>
                 </div>
 
                 <!-- Voice -->
                 <div class="credits-section">
-                    <div class="credits-role">Voice</div>
-                    <div class="credits-name">Chamath De Silva</div>
-                    <div class="credits-name">Imalee Nillekumbura</div>
-                    <div class="credits-name">TBC</div>
+                    <div class="credits-role">Voice Cast</div>
+                    <div class="credits-name">TBC (Protagonists)</div>
+                    <div class="credits-name-small">Chamath De Silva (Uncle Sirisena - Prototype)</div>
                 </div>
 
                 <!-- Game Testing -->
                 <div class="credits-section">
-                    <div class="credits-role">Game Testing</div>
+                    <div class="credits-role">Quality Assurance</div>
                     <div class="credits-name">Praveen Dissanayake</div>
-                    <div class="credits-name">r/srilanka</div>
-                    <div class="credits-name">TBC</div>
+                    <div class="credits-name-small">Shenal Ratnayake (Lead QA)</div>
+                    <div class="credits-name-small">Sri Lanka Reddit Community Playtesters</div>
                 </div>
 
                 <!-- Tools -->
@@ -261,16 +254,6 @@
         <div class="modal-content" role="dialog" aria-labelledby="settings-title" aria-modal="true">
             <h2 id="settings-title">Settings</h2>
             <span class="modal-divider"></span>
-            <div class="setting-row">
-                <span class="setting-row-label" data-i18n="settings.textsize">Text Size</span>
-                <div class="game-select-wrapper">
-                    <select id="setting-textsize" class="game-select" onchange="updateSettings()">
-                        <option value="standard" data-i18n="settings.standard">Standard</option>
-                        <option value="large" data-i18n="settings.large">Large</option>
-                        <option value="xlarge" data-i18n="settings.xlarge">Extra Large</option>
-                    </select>
-                </div>
-            </div>
             <div class="setting-row">
                 <span class="setting-row-label" data-i18n="settings.motion">Reduce Motion</span>
                 <label class="game-switch">
@@ -344,7 +327,7 @@
     <!-- Screen 4: Character Selection -->
     <div id="screen-character" class="screen">
         <div class="screen-bg-container" id="bg-char-select"></div>
-        <button class="screen-back-btn" onclick="showScreen('screen-mainmenu')" aria-label="Close">
+        <button class="screen-back-btn" onclick="closeModal('modal-char-confirm'); showScreen('screen-mainmenu');" aria-label="Close">
             Menu
         </button>
         

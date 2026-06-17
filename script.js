@@ -575,6 +575,9 @@ window.openCredits = function() {
                         _creditsRaf = requestAnimationFrame(tick);
                     } else {
                         _creditsRaf = null;
+                        
+                        // Auto-close credits and return to menu after a short pause
+                        setTimeout(closeCredits, 2500);
                     }
                 }
 
