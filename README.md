@@ -11,7 +11,7 @@ As a resident of Alupotha, you are tasked with navigating the quiet pressure of 
 
 * **Civic Simulation:** Experience a realistic (though fictional) election timeline in the weeks leading up to the vote.
 * **Information Health System:** Balance your own understanding of the electoral process against the spread of misinformation.
-* **Character-Driven Stories:** Play as different residents—each with unique perks, challenges, and perspectives on the town.
+* **Character-Driven Stories:** Play as different residents, each with unique perks, challenges, and perspectives on the town.
 * **Interactive Map:** Explore a living, isometric village to complete civic objectives and discover secrets.
 
 ## Tech Stack
