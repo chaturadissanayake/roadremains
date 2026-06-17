@@ -273,13 +273,17 @@ button {
     padding: 2rem;
 }
 
-/* Screen 1: Loading */
+/* Screen 1: Loading - Cinematic Layout */
 #screen-loading {
     background: transparent;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+#bg-loading {
+    opacity: 0.5 !important; 
+    filter: brightness(0.6) contrast(1.1); /* Keeps the image visible but moody so text pops */
 }
 .loading-content {
     display: flex;
@@ -289,48 +293,86 @@ button {
     text-align: center;
     padding: 2rem;
     width: 100%;
+    z-index: 10;
 }
 #loading-logo {
     font-family: var(--font-title);
-    font-size: 7rem;
-    color: var(--text-main);
-    line-height: 1.0;
-    letter-spacing: -0.03em;
+    font-size: 8rem; /* Scaled up for impact */
+    color: #f5eedc;
+    line-height: 1;
+    letter-spacing: -0.02em;
     opacity: 0;
-    text-shadow: 0 0 80px rgba(212, 175, 55, 0.15);
+    text-shadow: 0 8px 32px rgba(0,0,0,0.8);
+    margin-bottom: 1.5rem;
 }
 #loading-tagline {
-    color: var(--text-muted);
+    color: rgba(255, 255, 255, 0.6);
     font-family: var(--font-body);
-    font-size: 1.1rem;
-    font-weight: 300;
-    margin-top: 2rem;
+    font-size: 0.9rem;
+    font-weight: 400;
     opacity: 0;
-    max-width: 700px;
-    white-space: normal;
-    line-height: 1.7;
-    letter-spacing: 0.01em;
+    max-width: 600px;
+    text-align: center;
+    line-height: 1.8;
+    letter-spacing: 0.05em;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
 }
 #loading-prompt {
-    margin-top: 3rem;
-    color: var(--text-muted);
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
+    margin-top: 4.5rem;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
     text-transform: uppercase;
-    font-weight: 500;
+    font-weight: 600;
     opacity: 0;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
 }
 
 @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: scale(0.97) translateY(10px); filter: blur(4px); }
+    to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0px); }
 }
 @keyframes breathe {
-    0%, 100% { opacity: 0.3; }
+    0%, 100% { opacity: 0.4; }
     50% { opacity: 1; }
 }
-.animate-fadeUp { animation: fadeUp 1.2s forwards var(--ease); }
+.animate-fadeUp { animation: fadeUp 2.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 .animate-breathe { animation: breathe 3s infinite; }
+
+/* The new 'Presents' styling at the bottom */
+.copyright-notice {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 0.6rem;
+    font-family: var(--font-body);
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.3);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    pointer-events: none;
+    z-index: 50;
+    opacity: 0;
+    animation: fadeUp 2.5s 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.game-version {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 2.5rem; /* Moved from right to left */
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.25);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    z-index: 50;
+    pointer-events: none;
+}
+
+/* Hides HTML copyright text to ensure perfect styling control */
+.copyright-notice { display: none !important; }
 
 /* Screen 2: Language */
 #screen-language {
@@ -369,30 +411,28 @@ button {
 }
 .lang-btn {
     width: 100%;
-    padding: 20px 28px;
-    white-space: nowrap; /* Prevents text from breaking into two lines */
-    border: 1px solid rgba(255,255,255,0.12);
-    background: linear-gradient(165deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
-    box-shadow: var(--panel-edge);
-    color: var(--text-main);
-    border-radius: var(--radius);
-    font-size: 1rem;
-    font-weight: 300;
-    letter-spacing: 0.12em;
+    padding: 12px 24px; /* Much slimmer padding */
+    white-space: nowrap; 
+    border: 1px solid rgba(255,255,255,0.15); /* Clean, thin border */
+    background: transparent; /* No more gradients */
+    color: rgba(255, 255, 255, 0.65);
+    border-radius: 2px;
+    font-size: 0.85rem;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
     text-align: center;
-    transition: border-color 300ms var(--ease), color 300ms var(--ease),
-                background 300ms var(--ease), transform 300ms var(--ease),
-                box-shadow 300ms var(--ease);
+    transition: all 300ms var(--ease);
 }
 .lang-btn:not(:disabled):hover {
-    border-color: rgba(212, 175, 55, 0.7);
-    color: var(--gold);
-    background: linear-gradient(165deg, rgba(212,175,55,0.12), rgba(212,175,55,0.03));
-    transform: translateY(-3px);
-    box-shadow: var(--panel-edge), var(--gold-glow-sm);
+    border-color: var(--gold);
+    color: #EAECEF;
+    background: rgba(212, 175, 55, 0.05); /* Very subtle gold tint on hover */
+    letter-spacing: 0.25em; /* Elegant expansion on hover */
+    box-shadow: 0 0 16px rgba(212,175,55,0.15);
 }
 .lang-btn:not(:disabled):active {
-    transform: translateY(-1px) scale(0.99);
+    transform: scale(0.98);
 }
 .lang-btn:disabled {
     opacity: 0.3;
@@ -446,9 +486,9 @@ select:focus-visible {
     box-shadow: 0 0 16px rgba(212,175,55,0.65), 0 2px 4px rgba(0,0,0,0.5);
 }
 
-/* Screen 3: Main Menu */
+/* Screen 3: Main Menu - Elegant Game Layout */
 #screen-mainmenu {
-    background: transparent; /* Allows bg_main_menu.jpeg to show */
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -459,69 +499,126 @@ select:focus-visible {
     align-items: flex-start;
     justify-content: center;
     text-align: left;
-    gap: 3rem;
-    padding: 2rem 2rem 2rem 154px;
+    gap: 2.5rem;
+    padding: 2rem 2rem 2rem 100px; /* Cinematic framing, slightly tighter left */
     width: 100%;
-    max-width: 560px;
+    max-width: 600px;
 }
 .menu-title-block {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.75rem;
+    gap: 1.5rem; /* Generous breathing room between title and subtitle */
+}
+/* Dynamically adds the Presents line above the title */
+.menu-title-block::before {
+    content: "CHATURA DISSANAYAKE PRESENTS";
+    display: block;
+    font-family: var(--font-body);
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.5);
+    font-weight: 600;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem; /* Replaced negative margin with positive space */
 }
 .menu-title {
     font-family: var(--font-title);
-    font-size: 7rem;
-    color: var(--text-main);
-    line-height: 1;
-    letter-spacing: -0.03em;
-    text-shadow: 0 0 100px rgba(212, 175, 55, 0.1);
-    background: linear-gradient(180deg, #ffffff 0%, var(--text-main) 45%, #c7cbd4 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-size: 7.5rem;
+    color: #f5eedc;
+    line-height: 1; /* Relaxed the line height so letters don't crash */
+    letter-spacing: -0.02em;
+    text-shadow: 0 8px 30px rgba(0,0,0,0.8);
+    margin: 0;
+    background: none;
+    -webkit-background-clip: initial;
+    background-clip: initial;
+    -webkit-text-fill-color: initial;
 }
 .menu-subtitle {
-    font-size: 1.1rem;
-    color: var(--text-muted);
-    font-weight: 300;
-    letter-spacing: 0.05em;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: rgba(255,255,255,0.5);
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+    margin-top: 0.5rem; /* Added space above the subtitle */
 }
 .menu-actions {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 12px; /* More breathable spacing between text lines */
     width: 100%;
-    max-width: 300px;
+    max-width: 320px;
     align-items: flex-start;
 }
 .menu-btn {
-    width: 100%; text-align: left; padding: 16px 24px;
-    border: 1px solid #2D3748;
-    background: linear-gradient(165deg, #12151b 0%, #0a0c10 100%);
-    box-shadow: var(--panel-edge);
-    color: #A0AEC0;
-    font-weight: 500; border-radius: var(--radius); font-size: 0.8rem;
-    letter-spacing: 0.1em; text-transform: uppercase;
-    transition: all 150ms ease; margin-bottom: 8px;
+    width: 100%;
+    text-align: left;
+    padding: 6px 0; /* Removing the boxes */
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    color: rgba(255, 255, 255, 0.45); /* Muted inactive state */
+    font-family: var(--font-body);
+    font-weight: 600;
+    border-radius: 0;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    transition: all 300ms var(--ease);
+    margin-bottom: 0;
     position: relative;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.6);
 }
-.menu-btn.primary { color: #D4AF37; border-color: rgba(212, 175, 55, 0.35); box-shadow: var(--panel-edge), 0 0 18px rgba(212,175,55,0.06); }
+.menu-btn.primary {
+    color: var(--gold);
+}
+/* Elegant minimalist hover - no boxes, just color change and indent */
 .menu-btn:hover:not(:disabled) {
-    background: linear-gradient(165deg, #1c212c 0%, #14171e 100%);
-    color: #EAECEF; border-color: #4A5568;
-    padding-left: 24px;
-    box-shadow: var(--panel-edge), 0 10px 24px rgba(0,0,0,0.45);
+    color: #EAECEF;
+    padding-left: 18px;
+    background: transparent;
+    box-shadow: none;
 }
 .menu-btn.primary:hover:not(:disabled) {
-    background: linear-gradient(165deg, rgba(212,175,55,0.1), rgba(212,175,55,0.02));
-    border-color: #D4AF37; color: #D4AF37;
-    box-shadow: var(--panel-edge), var(--gold-glow-sm);
+    color: var(--gold-light);
+    padding-left: 18px;
+    background: transparent;
+    box-shadow: none;
+    text-shadow: 0 0 16px rgba(212,175,55,0.4);
+}
+/* Draws a subtle tracking line to the left of the text on hover */
+.menu-btn::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 1px;
+    background: #EAECEF;
+    transition: width 300ms var(--ease);
+}
+.menu-btn.primary::before { background: var(--gold); }
+.menu-btn:hover:not(:disabled)::before {
+    width: 10px;
 }
 .menu-btn:disabled {
     opacity: 0.25;
     cursor: not-allowed;
+}
+
+/* Position the game version text opposite the menu */
+.game-version {
+    position: absolute;
+    bottom: 4.5rem;
+    left: 4rem;
+    font-family: Impact, var(--font-mono);
+    font-size: 1.4rem;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 0.15em;
+    z-index: 50;
 }
 
 
@@ -3104,13 +3201,14 @@ html, body {
     left: 0;
     width: 100%;
     text-align: center;
-    font-size: 0.55rem;
+    font-size: 0.6rem;
     font-family: var(--font-body);
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.4);
     letter-spacing: 0.28em;
     text-transform: uppercase;
     pointer-events: none;
+    z-index: 50;
 }
 
 .game-version {
@@ -3118,11 +3216,13 @@ html, body {
     bottom: 2.5rem;
     right: 2.5rem;
     font-family: var(--font-mono);
-    font-size: 0.65rem;
-    color: rgba(255, 255, 255, 0.25);
-    letter-spacing: 0.1em;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
     pointer-events: none;
-    z-index: 10;
+    z-index: 999;
 }
 
 /* (duplicate .game-slider block removed — definition kept above) */
