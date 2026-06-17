@@ -38,7 +38,7 @@
       "choices": [
         {
           "id": "w6_gok_choice_a",
-          "label": "\"I know where to go — I always vote at Rivisanda school.\"",
+          "label": "\"I know where to go,  I always vote at Rivisanda school.\"",
           "goto": "w6_kamala_wrong_assumption",
           "flags_set": [
             "kamala_wrongAssumption_pollingStation"

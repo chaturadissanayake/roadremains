@@ -23,7 +23,7 @@
       "choices": [
         {
           "id": "w4_rlc_choice_a",
-          "label": "Yes — register now.",
+          "label": "Yes,  register now.",
           "goto": "w4_registration_complete",
           "flags_set": [
             "registrationStarted",

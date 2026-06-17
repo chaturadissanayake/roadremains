@@ -20,7 +20,7 @@
       "type": "dialogue",
       "speaker": "Nandadasa Mahaththaya",
       "portrait_state": "npc_nandadasa_talking",
-      "text": "Transfer… erm… ER-6 form. This form — only Sinhala. Sorry. I explain each part for you.",
+      "text": "Transfer… erm… ER-6 form. This form,  only Sinhala. Sorry. I explain each part for you.",
       "advance": "click"
     },
     {
@@ -28,7 +28,7 @@
       "type": "dialogue",
       "speaker": "Nandadasa Mahaththaya",
       "portrait_state": "npc_nandadasa_talking",
-      "text": "Name field. Address field — current address, two years minimum required. Home district — here. Signature, date.",
+      "text": "Name field. Address field,  current address, two years minimum required. Home district,  here. Signature, date.",
       "advance": "click"
     },
     {

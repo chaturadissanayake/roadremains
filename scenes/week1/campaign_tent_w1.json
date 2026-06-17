@@ -11,13 +11,13 @@
     {
       "id": "w1_ctr_01",
       "type": "narration",
-      "text": "The tent is still here. The jingle is still playing. Mahinda Bandara is not giving interviews today — the campaign period has entered its final day. A supporter is still distributing calendars.",
+      "text": "The tent is still here. The jingle is still playing. Mahinda Bandara is not giving interviews today,  the campaign period has entered its final day. A supporter is still distributing calendars.",
       "advance": "click"
     },
     {
       "id": "w1_ctr_02",
       "type": "narration",
-      "text": "The manifesto is still on the table. The unmarked box is still in the corner — if you have not opened it yet.",
+      "text": "The manifesto is still on the table. The unmarked box is still in the corner,  if you have not opened it yet.",
       "advance": "click"
     },
     {

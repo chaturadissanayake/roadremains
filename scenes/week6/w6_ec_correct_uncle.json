@@ -6,8 +6,8 @@
   "portraits": { "left": "char_karunasena_talking", "right": "npc_uncle_neutral" },
   "lines": [
     { "id": "w6_ecu_01", "type": "narration", "text": "You showed Uncle Sirisena the notice board. The real deadline. The laminated notice with the proper stamp.", "advance": "click" },
-    { "id": "w6_ecu_02", "type": "dialogue", "speaker": "Uncle Sirisena", "portrait_state": "npc_uncle_neutral", "text": "Week 4? But Jayantha said — ah. Well. Perhaps Jayantha was confused. He is often confused about these things. I will send a correction.", "advance": "click" },
-    { "id": "w6_ecu_03", "type": "narration", "text": "He typed a message to Alupotha Patriots: 'CORRECTION — I got it wrong. Deadline is Week 4, not this week. Sorry for confusion.' Three seconds later he forwarded a joke video. Life in the group continues.", "advance": "click" }
+    { "id": "w6_ecu_02", "type": "dialogue", "speaker": "Uncle Sirisena", "portrait_state": "npc_uncle_neutral", "text": "Week 4? But Jayantha said,  ah. Well. Perhaps Jayantha was confused. He is often confused about these things. I will send a correction.", "advance": "click" },
+    { "id": "w6_ecu_03", "type": "narration", "text": "He typed a message to Alupotha Patriots: 'CORRECTION,  I got it wrong. Deadline is Week 4, not this week. Sorry for confusion.' Three seconds later he forwarded a joke video. Life in the group continues.", "advance": "click" }
   ],
   "on_complete": { "goto": "w6_map" }
 }

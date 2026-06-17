@@ -13,7 +13,7 @@
       "type": "dialogue",
       "speaker": "Elderly Woman",
       "portrait_state": "npc_elderly_confused",
-      "text": "Putha… putha, can you help me? My name — I cannot find it on this sheet. They gave me this paper but I don't know which queue.",
+      "text": "Putha… putha, can you help me? My name, I cannot find it on this sheet. They gave me this paper but I don't know which queue.",
       "advance": "click"
     },
     {

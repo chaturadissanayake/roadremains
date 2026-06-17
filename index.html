@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Road Remains — An interactive civic education game to improve voter knowledge and counter election misinformation in Sri Lanka. Available in English, Sinhala, and Tamil.">
+    <meta name="description" content="Road Remains - An interactive civic education game to improve voter knowledge and counter election misinformation in Sri Lanka. Available in English, Sinhala, and Tamil.">
     <link rel="icon" href="data:;base64,iVBORw0KGgo="> <!-- Prevents missing favicon error -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -18,6 +18,7 @@
     <script src="script.js" defer></script>
 </head>
 <body>
+    <div id="game-canvas">
     <button class="skip-link" onclick="document.getElementById('btn-newgame').click();">Skip to game</button>
 
     <!-- Screen 1: Loading -->
@@ -26,9 +27,9 @@
         <div class="loading-content">
             <div id="loading-logo" data-i18n="title">Road Remains</div>
             <div id="loading-tagline" data-i18n="loading.tagline">An election is coming. Alupotha is not ready. Neither are you.</div>
-            <div id="loading-prompt" data-i18n="loading.begin">Click anywhere to begin</div>
+    <div id="loading-prompt" data-i18n="loading.begin">Click anywhere to begin</div>
         </div>
-        <div class="copyright-notice">© 2026 Chatura Dissanayake - All rights reserved.</div>
+        <div class="copyright-notice">Chatura Dissanayake Presents Road Remains</div>
     </div>
 
     <!-- Screen 2: Language -->
@@ -42,8 +43,8 @@
             </div>
             <div class="lang-buttons">
                 <button class="lang-btn" onclick="selectLanguage('en')">English</button>
-                <button class="lang-btn lang-btn--coming-soon" disabled lang="si" aria-label="සිංහල — Coming Soon" style="display: none; font-family: var(--font-si);">සිංහල <span class="lang-soon-badge">Soon</span></button>
-                <button class="lang-btn lang-btn--coming-soon" disabled lang="ta" aria-label="தமிழ் — Coming Soon" style="display: none; font-family: var(--font-ta);">தமிழ் <span class="lang-soon-badge">Soon</span></button>
+                <button class="lang-btn lang-btn--coming-soon" disabled lang="si" aria-label="සිංහල - Coming Soon" style="display: none; font-family: var(--font-si);">සිංහල <span class="lang-soon-badge">Soon</span></button>
+                <button class="lang-btn lang-btn--coming-soon" disabled lang="ta" aria-label="தமிழ் - Coming Soon" style="display: none; font-family: var(--font-ta);">தமிழ் <span class="lang-soon-badge">Soon</span></button>
             </div>
         </div>
     </div>
@@ -60,10 +61,12 @@
                 <button id="btn-continue" class="menu-btn primary" onclick="loadGame()" style="display: none;" data-i18n="menu.continue">Continue</button>
                 <button id="btn-newgame" class="menu-btn" onclick="checkNewGame()" data-i18n="menu.newgame">New Game</button>
                 <button class="menu-btn" onclick="openModal('modal-settings')" data-i18n="menu.settings">Settings</button>
+                <button class="menu-btn" onclick="openModal('modal-controls')">Controls</button>
                 <button class="menu-btn" onclick="openModal('modal-about')" data-i18n="menu.about">About</button>
                 <button class="menu-btn" onclick="window.gameState._creditsReturnScreen='screen-mainmenu'; openCredits();" data-i18n="menu.credits">Credits</button>
                 <button class="menu-btn" onclick="showAchievementsScreen()" data-i18n="menu.achievements">Achievements</button>
             </div>
+            <div class="game-version">v1.0.0</div>
         </div>
     </div>
 
@@ -74,6 +77,7 @@
             <div class="menu-actions">
                 <button class="menu-btn primary" onclick="togglePause()">Resume</button>
                 <button class="menu-btn" onclick="togglePause(); openModal('modal-settings')">Settings</button>
+                <button class="menu-btn" onclick="togglePause(); openModal('modal-controls')">Controls</button>
                 <button class="menu-btn" onclick="showGaugeTutorial()">How Gauges Work</button>
                 <button class="menu-btn" onclick="exitToMainMenu()">Exit to Menu</button>
             </div>
@@ -86,13 +90,27 @@
         </div>
     </div>
 
-    <!-- Modals -->
+<!-- Modals -->
+    <div id="modal-controls" class="modal-overlay">
+        <div class="modal-content" role="dialog" aria-labelledby="controls-title" aria-modal="true">
+            <h2 id="controls-title">Controls</h2>
+            <span class="modal-divider"></span>
+            <div class="controls-list">
+                <div class="control-item"><span>Mouse / Touch</span><span>Interact &amp; Select</span></div>
+                <div class="control-item"><span>Space / Enter</span><span>Advance Dialogue</span></div>
+                <div class="control-item"><span>Numbers 1 - 9</span><span>Select Dialogue Options</span></div>
+                <div class="control-item"><span>Escape</span><span>Pause / Back / Close</span></div>
+            </div>
+            <button class="modal-close" onclick="closeModal('modal-controls')">Close</button>
+        </div>
+    </div>
+
     <div id="modal-about" class="modal-overlay">
         <div class="modal-content" role="dialog" aria-labelledby="about-title" aria-modal="true">
             <h2 id="about-title">About</h2>
             <span class="modal-divider"></span>
-            <p class="modal-text">
-                Road Remains is a civic education game set in the fictional Sri Lankan village of Alupotha, six weeks before an election. You play as a resident navigating voter registration, misinformation, and the quiet pressure of a community making up its mind.
+<p class="modal-text">
+                Road Remains is an isometric civic education game set in the fictional Sri Lankan village of Alupotha, six weeks before an election. You explore the village from above, visiting the Grama Sevaka Office, the Elections Commission notice board, campaign tents, and your uncle's house, navigating voter registration, misinformation, and the quiet pressure of a community making up its mind.
             </p>
             <p class="modal-text" style="margin-top: -1rem;">
                 The game does not tell you who to vote for. That part is entirely yours.
@@ -105,7 +123,7 @@
         </div>
     </div>
 
-    
+    <!-- Credits Screen (cinematic full-screen scroll) -->
 
     <!-- Credits Screen (cinematic full-screen scroll) -->
     <div id="screen-credits" class="screen credits-screen" role="dialog" aria-modal="true" aria-label="Credits">
@@ -134,6 +152,7 @@
                 <div class="credits-section">
                     <div class="credits-role">Writing</div>
                     <div class="credits-name">Imalee Nillekumbura</div>
+                    <div class="credits-name">Chameera Dissanayake </div>
                     <div class="credits-name">Chatura Dissanayake </div>
                 </div>
 
@@ -148,7 +167,6 @@
                     <div class="credits-role">Art Direction</div>
                     <div class="credits-name">Praveen Dissanayake</div>
                     <div class="credits-name">Chatura Dissanayake</div>
-
                 </div>
 
                 <!-- Sound Design -->
@@ -179,8 +197,8 @@
                 <div class="credits-section">
                     <div class="credits-role">Game Testing</div>
                     <div class="credits-name">Praveen Dissanayake</div>
-                    <div class="credits-name">TBC</div>
                     <div class="credits-name">Reddit Community</div>
+                    <div class="credits-name">TBC</div>
                 </div>
 
                 <!-- Tools -->
@@ -297,7 +315,7 @@
             <p class="char-confirm-warning">Once you enter Alupotha, you cannot switch characters.</p>
             <div class="char-confirm-actions">
                 <button class="menu-btn" onclick="closeModal('modal-char-confirm')">Choose Someone Else</button>
-                <button class="menu-btn primary" id="confirm-char-btn" onclick="return false;">Begin — Enter Alupotha</button>
+                <button class="menu-btn primary" id="confirm-char-btn" onclick="return false;">Begin, Enter Alupotha</button>
             </div>
         </div>
     </div>
@@ -370,7 +388,7 @@
                 <div class="char-info">
                     <div class="char-name" data-i18n="char.ka.name">Kamala</div>
                     <div class="char-role" data-i18n="char.ka.role">Age 34. Community leader.</div>
-                    <div class="char-desc" data-i18n="char.ka.desc">Professional, confident, warm. She already knows how this town works — but the town is changing.</div>
+                    <div class="char-desc" data-i18n="char.ka.desc">Professional, confident, warm. She already knows how this town works - but the town is changing.</div>
                     
                     <div class="char-traits">
                         <div class="char-trait perk">
@@ -379,7 +397,7 @@
                         </div>
                         <div class="char-trait disadvantage">
                             <span class="trait-label">DISADVANTAGE</span>
-                            <span class="trait-text">Assumption: She believes she already knows things — but has them slightly wrong. Correcting them is worth it.</span>
+                            <span class="trait-text">Assumption: She believes she already knows things - but has them slightly wrong. Correcting them is worth it.</span>
                         </div>
                     </div>
                     <div class="char-gauges-preview">
@@ -486,9 +504,9 @@
             </div>
             <div class="top-bar-controls">
                 <div class="week-indicator"><span class="week-label" data-i18n="game.week">WEEK</span> <span id="week-val"></span></div>
-                <button class="pause-btn" onclick="togglePause()" aria-label="Pause Menu">
-                    PAUSE
-                </button>
+<button class="pause-btn" onclick="togglePause()" aria-label="Pause Menu">
+    PAUSE
+</button>
             </div>
         </div>
         <div id="objective-bar" aria-live="polite" aria-atomic="true" aria-label="Current objective">
@@ -500,79 +518,79 @@
             <div id="map-inner-wrap" style="transform: translate(0px, 0px) scale(1);">
                 <img src="assets/images/fullmap.webp" class="background-map" alt="Alupotha">
 
-                <div class="map-location" data-loc="loc_kovil" style="left:1471.63px; top:227.63px;" role="button" tabindex="0" aria-label="Kovil — Click to visit">
+                <div class="map-location" data-loc="loc_kovil" style="left:1471.63px; top:227.63px;" role="button" tabindex="0" aria-label="Kovil - Click to visit">
                     <img src="assets/images/kovil.png" class="map-asset" style="width:345.27px; height:auto;" alt="">
                     <div class="base-dot"></div>
                     <div class="radar-ripple"></div>
                 </div>
 
-                <div class="map-location" data-loc="loc_temple" style="left:440px; top:172px;" role="button" tabindex="0" aria-label="Temple — Click to visit">
+                <div class="map-location" data-loc="loc_temple" style="left:440px; top:172px;" role="button" tabindex="0" aria-label="Temple - Click to visit">
                     <img src="assets/images/temple.png" class="map-asset" style="width:277.55px; height:auto;" alt="">
                     <div class="base-dot"></div>
                     <div class="radar-ripple"></div>
                 </div>
 
-                <div class="map-location" data-loc="loc1" style="left:975px; top:460px;" role="button" tabindex="0" aria-label="Grama Niladhari Office — Click to visit">
+                <div class="map-location" data-loc="loc1" style="left:975px; top:460px;" role="button" tabindex="0" aria-label="Grama Niladhari Office - Click to visit">
                     <img src="assets/images/gramasewaka.png" class="map-asset" style="width:300px; height:auto;" alt="">
                     <div class="base-dot"></div>
                     <div class="radar-ripple"></div>
                 </div>
 
-                <div class="map-location pulse-active" data-loc="loc2" style="left:1720.26px; top:430px;" role="button" tabindex="0" aria-label="Uncle's House — Click to visit">
+                <div class="map-location pulse-active" data-loc="loc2" style="left:1720.26px; top:430px;" role="button" tabindex="0" aria-label="Uncle's House - Click to visit">
                     <img src="assets/images/uncle.png" class="map-asset" style="width:278.52px; height:auto;" alt="">
                     <div class="base-dot"></div>
                     <div class="radar-ripple"></div>
                 </div>
 
-                <div class="map-location" data-loc="loc3" style="left:1296.07px; top:609.07px;" role="button" tabindex="0" aria-label="Notice Board — Click to visit">
+                <div class="map-location" data-loc="loc3" style="left:1296.07px; top:609.07px;" role="button" tabindex="0" aria-label="Notice Board - Click to visit">
                     <img src="assets/images/board.png" class="map-asset" style="width:190.14px; height:auto;" alt="">
                     <div class="base-dot"></div>
                     <div class="radar-ripple"></div>
                 </div>
 
-                <div class="map-location" data-loc="loc4" style="left:960.33px; top:700.33px;" role="button" tabindex="0" aria-label="Mudalali's Shop — Click to visit">
+                <div class="map-location" data-loc="loc4" style="left:960.33px; top:700.33px;" role="button" tabindex="0" aria-label="Mudalali's Shop - Click to visit">
                     <img src="assets/images/market.png" class="map-asset" style="width:400px; height:auto;" alt="">
                     <div class="base-dot"></div>
                     <div class="radar-ripple"></div>
                 </div>
 
-                <div class="map-location" data-loc="loc5" style="left:615px; top:930px;" role="button" tabindex="0" aria-label="Community Hall — Click to visit">
+                <div class="map-location" data-loc="loc5" style="left:615px; top:930px;" role="button" tabindex="0" aria-label="Community Hall - Click to visit">
                     <img src="assets/images/meeting.png" class="map-asset" style="width:380px; height:auto;" alt="">
                     <div class="base-dot"></div>
                     <div class="radar-ripple"></div>
                 </div>
 
-                <div class="map-location" data-loc="loc6" style="left:710px; top:575px;" role="button" tabindex="0" aria-label="Police Station — Click to visit">
+                <div class="map-location" data-loc="loc6" style="left:710px; top:575px;" role="button" tabindex="0" aria-label="Police Station - Click to visit">
                     <img src="assets/images/police.png" class="map-asset" style="width:270.81px; height:auto;" alt="">
                     <div class="base-dot"></div>
                     <div class="radar-ripple"></div>
                 </div>
 
-                <div class="map-location" data-loc="loc7" style="left:220px; top:770px;" role="button" tabindex="0" aria-label="Skeptics Cafe — Click to visit">
+                <div class="map-location" data-loc="loc7" style="left:220px; top:770px;" role="button" tabindex="0" aria-label="Skeptics Cafe - Click to visit">
                     <img src="assets/images/cafe.png" class="map-asset" style="width:318.30px; height:auto;" alt="">
                     <div class="base-dot"></div>
                     <div class="radar-ripple"></div>
                 </div>
 
-                <div class="map-location" data-loc="loc8" style="left:1510px; top:670px;" role="button" tabindex="0" aria-label="Mahinda's Tent — Click to visit">
+                <div class="map-location" data-loc="loc8" style="left:1510px; top:670px;" role="button" tabindex="0" aria-label="Mahinda's Tent - Click to visit">
                     <img src="assets/images/tent.png" class="map-asset" style="width:280.55px; height:auto;" alt="">
                     <div class="base-dot"></div>
                     <div class="radar-ripple"></div>
                 </div>
 
-                <div class="map-location" data-loc="loc9" id="loc9-node" style="left:1064.28px; top:160.28px; pointer-events:none;" role="button" tabindex="0" aria-label="Polling Station — locked until Election Day">
+                <div class="map-location" data-loc="loc9" id="loc9-node" style="left:1064.28px; top:160.28px; pointer-events:none;" role="button" tabindex="0" aria-label="Polling Station - locked until Election Day">
                     <img src="assets/images/school.png" class="map-asset" style="width:344.57px; height:auto;" alt="">
                     <div class="base-dot"></div>
                     <div class="radar-ripple"></div>
                 </div>
 
-                <div class="map-location" data-loc="loc_bar" style="left:232px; top:515px;" role="button" tabindex="0" aria-label="Bar — Click to visit">
+                <div class="map-location" data-loc="loc_bar" style="left:232px; top:515px;" role="button" tabindex="0" aria-label="Bar - Click to visit">
                     <img src="assets/images/bar.png" class="map-asset" style="width:228.34px; height:auto;" alt="">
                     <div class="base-dot"></div>
                     <div class="radar-ripple"></div>
                 </div>
 
-                <div class="map-location" data-loc="loc_boarding" style="left:1344.62px; top:857.62px;" role="button" tabindex="0" aria-label="Boarding House — Click to visit">
+                <div class="map-location" data-loc="loc_boarding" style="left:1344.62px; top:857.62px;" role="button" tabindex="0" aria-label="Boarding House - Click to visit">
                     <img src="assets/images/boarding.png" class="map-asset" style="width:301.25px; height:auto;" alt="">
                     <div class="base-dot"></div>
                     <div class="radar-ripple"></div>
@@ -624,8 +642,8 @@
             <button class="cons-btn" onclick="returnToGame()">Return to Alupotha</button>
         </div>
 
-        <!-- Phase 2: Game Ending (final score) — shown by showEnding() -->
-        <div class="ending-wrapper" id="cons-phase-ending" style="display:none;">
+        <!-- Phase 2: Game Ending (final score) - shown by showEnding() -->
+<div class="ending-wrapper ending-wrapper--animated" id="cons-phase-ending" style="display:none;">
 
             <div class="ending-eyebrow" id="ending-label">Ending</div>
             <h2 class="ending-title" id="ending-title">The Road Remains</h2>
@@ -638,7 +656,7 @@
                     <div class="ending-gauge-bar-wrap">
                         <div class="ending-gauge-bar ct" id="ending-bar-ct"></div>
                     </div>
-                    <div class="ending-gauge-val" id="ending-val-ct">—</div>
+                    <div class="ending-gauge-val" id="ending-val-ct">-</div>
                 </div>
 
                 <div class="ending-gauge-row">
@@ -646,7 +664,7 @@
                     <div class="ending-gauge-bar-wrap">
                         <div class="ending-gauge-bar ih" id="ending-bar-ih"></div>
                     </div>
-                    <div class="ending-gauge-val" id="ending-val-ih">—</div>
+                    <div class="ending-gauge-val" id="ending-val-ih">-</div>
                 </div>
 
                 <div class="ending-gauge-row">
@@ -654,14 +672,16 @@
                     <div class="ending-gauge-bar-wrap">
                         <div class="ending-gauge-bar vp" id="ending-bar-vp"></div>
                     </div>
-                    <div class="ending-gauge-val" id="ending-val-vp">—</div>
+                    <div class="ending-gauge-val" id="ending-val-vp">-</div>
                 </div>
 
             </div>
-
-            <div class="ending-actions">
+<div class="ending-actions">
                 <button class="cons-btn primary" onclick="window.gameState._creditsReturnScreen='screen-mainmenu'; openCredits();">
                     Roll Credits
+                </button>
+                <button class="cons-btn" onclick="startNewGame()">
+                    Play Again
                 </button>
                 <button class="cons-btn" onclick="exitToMainMenu()">
                     Return to Menu
@@ -671,6 +691,8 @@
         </div>
     </div>
 
+    </div><!-- end #game-canvas -->
+    
     <!-- Audio Element Placeholders -->
     <audio id="bgm-player" loop preload="auto"></audio>
     <audio id="sfx-player" preload="auto"></audio>

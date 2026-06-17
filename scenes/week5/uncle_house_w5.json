@@ -16,7 +16,7 @@
       "type": "dialogue",
       "speaker": "Uncle Sirisena",
       "portrait_state": "npc_uncle_enthusiastic",
-      "text": "Machang, I got a very important voice note. My friend — well, his cousin works at the elections office — he says they changed the rules.",
+      "text": "Machang, I got a very important voice note. My friend,  well, his cousin works at the elections office,  he says they changed the rules.",
       "advance": "click"
     },
     {
@@ -29,7 +29,7 @@
         "time": "2:13 PM",
         "forwarded_count": 41,
         "duration": "0:38",
-        "transcript": "My cousin who works at the elections office told me — they changed it. You can now vote at ANY polling station. No need to find your assigned one. Just go anywhere on election day. Pass this on to everyone."
+        "transcript": "My cousin who works at the elections office told me,  they changed it. You can now vote at ANY polling station. No need to find your assigned one. Just go anywhere on election day. Pass this on to everyone."
       },
       "advance": "choice"
     },

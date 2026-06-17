@@ -14,13 +14,13 @@
       "type": "dialogue",
       "speaker": "Nandadasa Mahaththaya",
       "portrait_state": "npc_nandadasa_talking",
-      "text": "Address letter — received. Divisional Secretariat stamp — received. Transfer application forwarded to District Secretariat. You should be on the new register by Week 1.",
+      "text": "Address letter,  received. Divisional Secretariat stamp,  received. Transfer application forwarded to District Secretariat. You should be on the new register by Week 1.",
       "advance": "click"
     },
     {
       "id": "w3_kts3_02",
       "type": "narration",
-      "text": "Three steps. Three offices. Three weeks. Each step cost something — time, navigation in a second language, forms that existed only in Sinhala. You did it anyway.",
+      "text": "Three steps. Three offices. Three weeks. Each step cost something,  time, navigation in a second language, forms that existed only in Sinhala. You did it anyway.",
       "advance": "click"
     }
   ],

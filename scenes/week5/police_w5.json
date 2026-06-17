@@ -31,7 +31,7 @@
       "choices": [
         {
           "id": "w5_po_choice_a",
-          "label": "Ask about voter intimidation — what counts as a violation?",
+          "label": "Ask about voter intimidation,  what counts as a violation?",
           "goto": "w5_police_intimidation_info",
           "gauges": {
             "ih": 10

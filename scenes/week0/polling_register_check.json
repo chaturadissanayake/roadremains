@@ -8,7 +8,7 @@
       "id": "w0_cs_01",
       "type": "narration",
       "condition": "flags.foundSandyaNote",
-      "text": "You check the voter register before going in. You look for your name. Then — you look for Sandya. She followed the note on the board. She called the numbers she was given. She came in person. Her name is here.",
+      "text": "You check the voter register before going in. You look for your name. Then, you look for Sandya. She followed the note on the board. She called the numbers she was given. She came in person. Her name is here.",
       "advance": "click"
     },
     {

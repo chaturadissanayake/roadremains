@@ -13,7 +13,7 @@
     { "id": "w6_go_05", "type": "dialogue", "speaker": "Nandadasa Mahaththaya", "portrait_state": "npc_nandadasa_talking", "text": "NIC. ER-1 form. Fill everything. Both sides. You have a pen?", "advance": "click" },
     { "id": "w6_go_06", "type": "narration", "text": "He stamps something. He does not explain what he stamped. He has never explained what he stamped. He will not start today.", "advance": "click" },
     { "id": "w6_go_curiosity", "type": "choice", "prompt": "He has filled in half your form. You have a question.", "choices": [
-      { "id": "w6_go_curiosity_ask", "label": "\"Mahaththaya, why does the form need to go through three offices?\" (Curiosity perk — Karunasena only)", "condition": "character === 'karunasena'", "goto": "w6_grama_curiosity", "gauges": { "ih": 20 } },
+      { "id": "w6_go_curiosity_ask", "label": "\"Mahaththaya, why does the form need to go through three offices?\" (Curiosity perk,  Karunasena only)", "condition": "character === 'karunasena'", "goto": "w6_grama_curiosity", "gauges": { "ih": 20 } },
       { "id": "w6_go_curiosity_skip", "label": "Say nothing and take the form.", "goto": "w6_grama_registration_started", "gauges": {} }
     ]}
   ]

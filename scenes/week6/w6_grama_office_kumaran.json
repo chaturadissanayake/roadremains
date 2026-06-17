@@ -9,8 +9,8 @@
   "flags_increment_on_enter": { "kumaran_transferStepsComplete": 1 },
   "lines": [
     { "id": "w6_goku_01", "type": "narration", "text": "Your voter registration is in your home district. Jaffna. You have lived in Alupotha for two years. To vote here, you need to transfer it. Nandadasa is explaining this. His Tamil is limited. He is doing his best.", "advance": "click" },
-    { "id": "w6_goku_02", "type": "dialogue", "speaker": "Nandadasa Mahaththaya", "portrait_state": "npc_nandadasa_talking", "text": "Transfer… erm… ER-6 form. This form — only Sinhala. Sorry. I explain each part for you.", "advance": "click" },
-    { "id": "w6_goku_03", "type": "dialogue", "speaker": "Nandadasa Mahaththaya", "portrait_state": "npc_nandadasa_talking", "text": "Name field. Address field — current address, two years minimum required. Home district — here. Signature, date.", "advance": "click" },
+    { "id": "w6_goku_02", "type": "dialogue", "speaker": "Nandadasa Mahaththaya", "portrait_state": "npc_nandadasa_talking", "text": "Transfer… erm… ER-6 form. This form,  only Sinhala. Sorry. I explain each part for you.", "advance": "click" },
+    { "id": "w6_goku_03", "type": "dialogue", "speaker": "Nandadasa Mahaththaya", "portrait_state": "npc_nandadasa_talking", "text": "Name field. Address field,  current address, two years minimum required. Home district,  here. Signature, date.", "advance": "click" },
     { "id": "w6_goku_04", "type": "narration", "text": "He is pointing at each box slowly. He stamped the form in the wrong place once, corrected it quietly, and moved on. He has done this before. He is not embarrassed. Neither are you.", "advance": "click" },
     { "id": "w6_goku_05", "type": "narration", "text": "Transfer Step 1 of 3 complete. You have the form. Two more visits required.", "advance": "click" }
   ],

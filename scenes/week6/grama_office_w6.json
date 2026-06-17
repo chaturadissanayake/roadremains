@@ -58,7 +58,7 @@
       "choices": [
         {
           "id": "w6_go_curiosity_ask",
-          "label": "\"Mahaththaya, why does the form need to go through three offices?\" (Curiosity perk — Karunasena only)",
+          "label": "\"Mahaththaya, why does the form need to go through three offices?\" (Curiosity perk,  Karunasena only)",
           "condition": "character === 'karunasena'",
           "goto": "w6_grama_curiosity",
           "gauges": {

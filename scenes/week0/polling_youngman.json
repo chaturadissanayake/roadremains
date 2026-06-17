@@ -21,7 +21,7 @@
       "choices": [
         {
           "id": "w0_pym_choice_a",
-          "label": "\"Did you forget your NIC? You can still try — speak to the presiding officer.\"",
+          "label": "\"Did you forget your NIC? You can still try, speak to the presiding officer.\"",
           "goto": "w0_polling_youngman_helped",
           "flags_set": [
             "helpedNICYoungMan"

@@ -19,7 +19,7 @@
       "type": "dialogue",
       "speaker": "Sergeant Wickramasinghe",
       "portrait_state": "npc_sergeant_talking",
-      "text": "Ballot fold. Simple. You fold it in half — once, vertically — to conceal your preference. That is the instruction given at every polling station.",
+      "text": "Ballot fold. Simple. You fold it in half,  once, vertically,  to conceal your preference. That is the instruction given at every polling station.",
       "advance": "click"
     },
     {

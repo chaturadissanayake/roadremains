@@ -29,7 +29,7 @@
         "time": "4:45 PM",
         "forwarded_count": 203,
         "duration": "0:52",
-        "transcript": "I just found out — you have to fold the ballot in thirds, not in half. If you fold it in half your vote does not count. My brother-in-law works at the counting centre and he confirmed this."
+        "transcript": "I just found out,  you have to fold the ballot in thirds, not in half. If you fold it in half your vote does not count. My brother-in-law works at the counting centre and he confirmed this."
       },
       "advance": "choice"
     },
@@ -63,7 +63,7 @@
         },
         {
           "id": "w1_ubf_choice_d",
-          "label": "Forward it to everyone — this sounds important.",
+          "label": "Forward it to everyone,  this sounds important.",
           "goto": "w1_uncle_ballotfold_shared",
           "flags_set": [
             "sharedFakeBallotFold",

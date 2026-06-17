@@ -9,13 +9,13 @@
   ],
   "options": [
     {
-      "text": "Cast your ballot — fold it correctly in half.",
+      "text": "Cast your ballot,  fold it correctly in half.",
       "effect": { "ct": 10, "ih": 10, "vp": 20 },
       "flag": { "votedSuccessfully": true },
       "action": "triggerEnding"
     },
     {
-      "text": "Cast your ballot — fold it in thirds as the voice note said.",
+      "text": "Cast your ballot,  fold it in thirds as the voice note said.",
       "effect": { "ct": -10, "ih": -20, "vp": -10 },
       "flag": { "ballotSpoiled": true },
       "action": "triggerEnding"

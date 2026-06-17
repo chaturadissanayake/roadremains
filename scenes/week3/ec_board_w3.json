@@ -19,7 +19,7 @@
     {
       "id": "w3_ecb_01",
       "type": "narration",
-      "text": "The notice board has been updated. A new printed sheet — the official candidate list — has been laminated and added.",
+      "text": "The notice board has been updated. A new printed sheet,  the official candidate list,  has been laminated and added.",
       "advance": "click"
     },
     {
@@ -27,9 +27,9 @@
       "type": "notice",
       "card": {
         "header": "ELECTIONS COMMISSION OF SRI LANKA",
-        "title": "OFFICIAL CANDIDATE LIST — Alupotha Electoral Division",
+        "title": "OFFICIAL CANDIDATE LIST,  Alupotha Electoral Division",
         "body": "1. Mahinda Bandara\n2. R.M. Sumedha Kumari\n3. T. Velupillai\n4. W.A. Chandrasiri",
-        "footer": "Elections Commission of Sri Lanka — Reference No. EC/2025/CL/12"
+        "footer": "Elections Commission of Sri Lanka,  Reference No. EC/2025/CL/12"
       },
       "advance": "click"
     },
@@ -43,7 +43,7 @@
     {
       "id": "w3_ecb_sandya_prompt",
       "type": "narration",
-      "text": "You notice something in the bottom corner of the board — small, easy to miss. Not from the Elections Commission.",
+      "text": "You notice something in the bottom corner of the board,  small, easy to miss. Not from the Elections Commission.",
       "advance": "click"
     },
     {

@@ -22,7 +22,7 @@
       "speaker": "Sergeant Wickramasinghe",
       "portrait_state": "npc_sergeant_amused",
       "condition": "flags.readCurrentManifesto",
-      "text": "You read the manifesto? The infrastructure section — the road. The budget allocation for provincial road work is published by the Ministry. The numbers in that manifesto and the actual published allocation are worth comparing.",
+      "text": "You read the manifesto? The infrastructure section,  the road. The budget allocation for provincial road work is published by the Ministry. The numbers in that manifesto and the actual published allocation are worth comparing.",
       "advance": "click"
     },
     {

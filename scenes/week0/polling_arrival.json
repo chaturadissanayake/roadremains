@@ -31,7 +31,7 @@
     {
       "id": "w0_pa_04",
       "type": "narration",
-      "text": "Three people are around you in the queue. You can engage with any of them — or none of them.",
+      "text": "Three people are around you in the queue. You can engage with any of them, or none of them.",
       "advance": "click"
     },
     {
@@ -53,7 +53,7 @@
         },
         {
           "id": "w0_pa_c",
-          "label": "A couple nearby are arguing quietly — they seem to be in the wrong place.",
+          "label": "A couple nearby are arguing quietly, they seem to be in the wrong place.",
           "goto": "w0_polling_couple",
           "gauges": {}
         },

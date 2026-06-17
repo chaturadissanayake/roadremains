@@ -17,7 +17,7 @@
       "type": "dialogue",
       "speaker": "Uncle Sirisena",
       "portrait_state": "npc_uncle_enthusiastic",
-      "text": "Karu! Machang! You made it! Come, come — sit. Amma called me, I told her you would be fine. Did you eat anything on the bus? Sit.",
+      "text": "Karu! Machang! You made it! Come, come,  sit. Amma called me, I told her you would be fine. Did you eat anything on the bus? Sit.",
       "advance": "click"
     },
     {
@@ -31,7 +31,7 @@
       "type": "dialogue",
       "speaker": "Uncle Sirisena",
       "portrait_state": "npc_uncle_talking",
-      "text": "You arrived on a very important day. Election is coming. Six weeks. This country — anything can happen in six weeks.",
+      "text": "You arrived on a very important day. Election is coming. Six weeks. This country,  anything can happen in six weeks.",
       "advance": "click"
     },
     {
@@ -39,7 +39,7 @@
       "type": "dialogue",
       "speaker": "Uncle Sirisena",
       "portrait_state": "npc_uncle_enthusiastic",
-      "text": "Are you registered to vote? You must be registered. Your generation — nobody registers. Then they complain. You are not that type, no?",
+      "text": "Are you registered to vote? You must be registered. Your generation,  nobody registers. Then they complain. You are not that type, no?",
       "advance": "click"
     },
     {

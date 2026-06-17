@@ -15,7 +15,7 @@ window.gameState = {
     flags: {
         // ── Core state ──────────────────────────────────────────
         visitedLocs: [],
-        completedLocs: [], // scenes that fully resolved — these are truly locked
+        completedLocs: [], // scenes that fully resolved,  these are truly locked
         achievements: globalAchievements,
         endingReached: null,          // 'bad' | 'neutral' | 'good' | 'secret'
         secretEndingReached: false,
@@ -41,7 +41,7 @@ window.gameState = {
         registrationDeadlineMissed: false,
         gremaOfficeVisited: false,
         verifiedAtBoardCount: 0,      // primary counter; also aliased as verifiedCount
-        verifiedCount: 0,             // keep both — some scenes use one or the other
+        verifiedCount: 0,             // keep both,  some scenes use one or the other
 
         // ── Secrets & hidden content ─────────────────────────────
         foundRoadFile: false,
@@ -344,21 +344,26 @@ function showScreen(id) {
 }
 
 // =============================================================================
-// MAP SCALING — Scales the 1920x1080 inner canvas to fit the viewport container.
+// MAP SCALING,  Scales the 1920x1080 inner canvas to fit the viewport container.
 // Uses transform: translate + scale so pixel coordinates from map-data.json
 // remain accurate at any screen size. Called on load and on every resize.
 // =============================================================================
 function scaleMap() {
-    const container = document.getElementById('map-svg-container');
+    // scaleGame() already scales the full 1920×1080 canvas to fit the viewport.
+    // map-inner-wrap sits inside that canvas at native size; no further scaling needed.
+    // The map container clips any overflow from the top bar eating into the 1080px height.
     const inner = document.getElementById('map-inner-wrap');
-    if (!container || !inner) return;
-    const cw = container.clientWidth;
-    const ch = container.clientHeight;
-    if (!cw || !ch) return;
-    const scale = Math.min(cw / 1920, ch / 1080);
-    const offsetX = (cw - 1920 * scale) / 2;
-    const offsetY = (ch - 1080 * scale) / 2;
-    inner.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+    if (!inner) return;
+    inner.style.transform = 'translate(0px, 0px) scale(1)';
+}
+
+function scaleGame() {
+    const canvas = document.getElementById('game-canvas');
+    if (!canvas) return;
+    const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    const offsetX = (window.innerWidth  - 1920 * scale) / 2;
+    const offsetY = (window.innerHeight - 1080 * scale) / 2;
+    canvas.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
 }
 
 // --- INITIALIZATION ---
@@ -395,10 +400,11 @@ document.addEventListener('DOMContentLoaded', () => {
         g.addEventListener('click', () => openLocation(g.dataset.loc));
     });
 
+    scaleGame();
     scaleMap();
-    window.addEventListener('resize', scaleMap);
+    window.addEventListener('resize', () => { scaleGame(); scaleMap(); });
 
-    // Modal Overlays (Backdrop click disabled for game stability — use Escape or UI Close buttons)
+    // Modal Overlays (Backdrop click disabled for game stability,  use Escape or UI Close buttons)
     /* document.querySelectorAll('.modal-overlay').forEach(m => {
         m.addEventListener('click', (e) => {
             if(e.target === m) m.classList.remove('active');
@@ -428,8 +434,8 @@ const CONTENT = {
         'ui.back': 'Back to Menu',
         'char.header': 'Who are you?',
         'char.subheader': 'Choose carefully. You will carry their story.',
-        'char.k.name': 'Karunasena', 'char.k.role': '19 years old · First-time voter · Arrived in Alupotha from Kurunegala last week', 'char.k.desc': "He is living with his uncle while attending a vocational training programme. He is not particularly political. He has opinions, but he is not sure yet where they come from. The WhatsApp group is not optional — Uncle Sirisena is family.", 'char.k.btn': 'Play as Karunasena',
-        'char.ka.name': 'Kamala', 'char.ka.role': '34 years old · School teacher · Has lived in Alupotha for eight years', 'char.ka.desc': 'She has voted in the last two elections and filled in her ballot the way she always had — assuming she was doing it correctly. She was mostly right. Mostly. She knows almost everyone in Alupotha and most of them know her, which makes things easier. And occasionally more complicated.', 'char.ka.btn': 'Play as Kamala',
+        'char.k.name': 'Karunasena', 'char.k.role': '19 years old · First-time voter · Arrived in Alupotha from Kurunegala last week', 'char.k.desc': "He is living with his uncle while attending a vocational training programme. He is not particularly political. He has opinions, but he is not sure yet where they come from. The WhatsApp group is not optional,  Uncle Sirisena is family.", 'char.k.btn': 'Play as Karunasena',
+        'char.ka.name': 'Kamala', 'char.ka.role': '34 years old · School teacher · Has lived in Alupotha for eight years', 'char.ka.desc': 'She has voted in the last two elections and filled in her ballot the way she always had,  assuming she was doing it correctly. She was mostly right. Mostly. She knows almost everyone in Alupotha and most of them know her, which makes things easier. And occasionally more complicated.', 'char.ka.btn': 'Play as Kamala',
         'char.ku.name': 'Kumaran', 'char.ku.role': '28 years old · Migrant worker · Moved to Alupotha from the Northern Province two years ago', 'char.ku.desc': 'He came for work. He stayed for reasons that accumulated over two years and are now harder to name. His voter registration is in his home district. It needs to be transferred. The process involves more steps than it should, and some of those steps are in a language that is not his first. His story is harder. It is also more complete.', 'char.ku.btn': 'Play as Kumaran',
         'opening.btn': 'Enter Alupotha', 'opening.skip': 'Click anywhere to skip',
         'gauge.ct': 'Civic Trust', 'gauge.ih': 'Information Health', 'gauge.vp': 'Voter Participation', 'game.week': 'WEEK',
@@ -533,14 +539,14 @@ window.openCredits = function() {
         _creditsRaf = null;
     }
 
-    // 2. Show the screen — must happen before measuring
+    // 2. Show the screen,  must happen before measuring
     showScreen('screen-credits');
 
     // 3. Wait two frames so the screen is rendered and measurable
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-            const viewH  = window.innerHeight;
-            const totalH = inner.scrollHeight; // padding: 30vh top+bottom baked in
+            const viewH  = 1080; // fixed canvas height
+            const totalH = inner.scrollHeight; // padding: 324px top+bottom baked in
 
             // Start position: begin on-screen immediately so there's no waiting
             _creditsPos = 0;
@@ -602,16 +608,6 @@ function toggleGaugeInfo(key) {
         const tip = document.getElementById(`tooltip-${k}`);
         if (!tip) return;
         if (k === key) {
-            const willShow = !tip.classList.contains('visible');
-            if (willShow) {
-                // Position tooltip directly below its info button
-                const btn = document.querySelector(`button[onclick="toggleGaugeInfo('${k}')"]`);
-                if (btn) {
-                    const r = btn.getBoundingClientRect();
-                    // Clamp so it never runs off the right edge
-                    tip.style.left = Math.min(r.left, window.innerWidth - 258) + 'px';
-                }
-            }
             tip.classList.toggle('visible');
         } else {
             tip.classList.remove('visible');
@@ -642,11 +638,11 @@ function _renderPauseAchievements() {
     const earned = window.gameState.flags.achievements || [];
 
     if (earned.length === 0) {
-        // Show 4 mystery locked dots — never dump the full locked list
+        // Show 4 mystery locked dots,  never dump the full locked list
         const lockedCount = Math.min(Object.keys(ACHIEVEMENTS).length, 4);
         list.innerHTML = Array(lockedCount).fill(0).map(() =>
             `<div class="pause-ach-item">
-                <div class="pause-ach-dot locked"></div>
+                <div class="pause-ach-dot locked" aria-hidden="true">◇</div>
                 <div><div class="pause-ach-name">???</div></div>
             </div>`
         ).join('');
@@ -658,9 +654,10 @@ function _renderPauseAchievements() {
     list.innerHTML = earned.map(id => {
         const ach = ACHIEVEMENTS[id];
         if (!ach) return '';
+        const icon = ach.notificationType === 'popup' ? '◆' : '◈';
         return `
             <div class="pause-ach-item earned">
-                <div class="pause-ach-dot"></div>
+                <div class="pause-ach-dot" aria-hidden="true">${icon}</div>
                 <div>
                     <div class="pause-ach-name">${ach.title}</div>
                     <div class="pause-ach-desc">${ach.desc}</div>
@@ -673,7 +670,7 @@ function _renderPauseAchievements() {
 function exitToMainMenu() {
     document.getElementById('overlay-pause').classList.remove('active');
     closeDialoguePanel(); // Ensure dialogue is closed if leaving mid-conversation
-    // Only save mid-game progress — never save after an ending (would resurrect a wiped save)
+    // Only save mid-game progress,  never save after an ending (would resurrect a wiped save)
     if (!window.gameState.flags.endingReached) {
         saveGame();
     }
@@ -741,7 +738,7 @@ function selectCharacter(charId) {
             unlockAchievement('democracy_they_said');
         }
     } catch(e) { /* localStorage unavailable */ }
-    // saveGame() is already called inside unlockAchievement() — no need to repeat here
+    // saveGame() is already called inside unlockAchievement(),  no need to repeat here
     showScreen('screen-opening');
     startOpeningSequence();
 }
@@ -899,11 +896,11 @@ function startGame() {
     showScreen('screen-game');
     document.getElementById('week-val').textContent = window.gameState.week;
     updateGauges();
-    // Do NOT call checkMapUnlocks() here — it sets the objective bar text.
+    // Do NOT call checkMapUnlocks() here,  it sets the objective bar text.
     // That text should only appear after the prologue ends (_afterPrologueReady handles this).
     scaleMap();
 
-    // Mark prologue active — hides objective bar and week-advance UI until map is shown
+    // Mark prologue active,  hides objective bar and week-advance UI until map is shown
     document.getElementById('screen-game').classList.add('prologue-active');
     // Hide objective bar explicitly during prologue
     const objBar = document.getElementById('objective-bar');
@@ -924,14 +921,14 @@ function startGame() {
             renderDialogue(sceneData);
         })
         .catch(() => {
-            // Prologue file missing — continue silently to the map
-            console.warn('[PLV] prologue.json not found — skipping intro scene.');
+            // Prologue file missing,  continue silently to the map
+            console.warn('[PLV] prologue.json not found,  skipping intro scene.');
             _afterPrologueReady();
         });
 }
 
 function _afterPrologueReady() {
-    // Called when prologue ends (or is skipped) — reveal objective bar and unblock map UI
+    // Called when prologue ends (or is skipped),  reveal objective bar and unblock map UI
     document.getElementById('screen-game').classList.remove('prologue-active');
     const objBar = document.getElementById('objective-bar');
     if (objBar) {
@@ -972,7 +969,7 @@ function unlockAchievement(id) {
                 <div class="ach-title">${a.title}</div>
                 <div class="ach-desc">${a.desc}</div>
             </div>`;
-        document.body.appendChild(toast);
+        (document.getElementById('game-canvas') || document.body).appendChild(toast);
         requestAnimationFrame(() => {
             requestAnimationFrame(() => toast.classList.add('visible'));
         });
@@ -1038,17 +1035,17 @@ function showWeekBanner(week, isDeadline = false) {
     const banner = document.createElement('div');
     banner.id = 'week-banner';
     banner.innerHTML = isDeadline
-        ? `<strong>Week ${week}</strong> — Voter registration closes this week. If you are not registered, you cannot vote.`
+        ? `<strong>Week ${week}</strong>Voter registration closes this week. If you are not registered, you cannot vote.`
         : week === 0
-            ? `<strong>Election Day.</strong> The polling station is open. Go and vote.`
-            : `<strong>Week ${week}</strong> — ${week === 1 ? '1 week' : week + ' weeks'} until the election.`;
+            ? `<strong>Election Day.</strong>The polling station is open. Go and vote.`
+            : `<strong>Week ${week}</strong>${week === 1 ? '1 week' : week + ' weeks'} until the election.`;
     document.getElementById('screen-game').appendChild(banner);
     setTimeout(() => banner.classList.add('visible'), 30);
     setTimeout(() => { banner.classList.remove('visible'); setTimeout(() => banner.remove(), 400); }, 4000);
 }
 
 function checkMapUnlocks() {
-    // Skeptics Cafe — hidden until verifiedCount >= 3
+    // Skeptics Cafe,  hidden until verifiedCount >= 3
     const cafe = document.querySelector('[data-loc="loc7"]');
     if (cafe) {
         const shouldShow = window.gameState.flags.skepticsCafeUnlocked
@@ -1056,7 +1053,7 @@ function checkMapUnlocks() {
         if (shouldShow) {
             cafe.classList.add('unlocked');
             if (!window.gameState.flags.skepticsCafeUnlocked) {
-                // First time unlocking — fire the discovery achievement
+                // First time unlocking,  fire the discovery achievement
                 unlockAchievement('you_found_the_cafe');
             }
             window.gameState.flags.skepticsCafeUnlocked = true; // persist the unlock
@@ -1064,8 +1061,8 @@ function checkMapUnlocks() {
             cafe.classList.remove('unlocked');
         }
     }
-    // Community Hall (loc5) — always visible but has no active content currently
-    // Polling station (loc9) locked until week 0 — handled in advanceWeek()
+    // Community Hall (loc5),  always visible but has no active content currently
+    // Polling station (loc9) locked until week 0,  handled in advanceWeek()
 
     const week = window.gameState.week;
     const flags = window.gameState.flags;
@@ -1085,7 +1082,7 @@ function checkMapUnlocks() {
         const w6GramaDone = flags.registrationStarted || isVisited('grama_office_w6_Kamala') || isVisited('grama_office_w6_kumaran') || isVisited('grama_office_w6') || isVisited('week6/grama_office');
         weekComplete = (char === 'Karunasena') ? (w6UncleDone && w6GramaDone) : w6GramaDone;
     } else if (week === 5) {
-        const w5MainDone = isVisited('ec_board_w5') || isVisited('police_w5'); // Boutique is optional — not a completion trigger
+        const w5MainDone = isVisited('ec_board_w5') || isVisited('police_w5'); // Boutique is optional,  not a completion trigger
         weekComplete = (char === 'Karunasena') ? (w5UncleDone && w5MainDone) : w5MainDone;
     } else if (week === 4) {
         const w4GramaDone = flags.registrationComplete || flags.registrationDeadlineMissed;
@@ -1256,7 +1253,7 @@ function showNextWeekPrompt(currentWeek) {
     banner.id = 'next-week-banner';
     // z-index 18 = below top-bar (20), objective-bar (25), and all dialogue layers (29-30)
     banner.style.cssText = `
-        position: fixed; bottom: 0; left: 0; right: 0;
+        position: absolute; bottom: 0; left: 0; right: 0;
         z-index: 18;
     `;
     const isElectionDay = (nextWeek === 0);
@@ -1305,11 +1302,11 @@ function advanceWeek() {
     if (_safetyWeek === 6) { const d = _flags.registrationStarted || _isV('grama_office_w6_Kamala') || _isV('grama_office_w6_kumaran') || _isV('grama_office_w6') || _isV('week6/grama_office'); _canAdvance = (_char === 'Karunasena') ? ((_isV('uncle_house_entry') || _isV('uncle_house_shared') || _isV('uncle_house_ignore') || _isV('uncle_house_verify') || _isV('ec_board_w6')) && d) : d; }
     else if (_safetyWeek === 5) { const d = _isV('ec_board_w5') || _isV('police_w5'); _canAdvance = (_char === 'Karunasena') ? ((_isV('uncle_house_w5_shared') || _isV('uncle_house_w5_verify') || _isV('ec_board_w5')) && d) : d; }
     else if (_safetyWeek === 4) { const d = _flags.registrationComplete || _flags.registrationDeadlineMissed; _canAdvance = (_char === 'Karunasena') ? ((_isV('uncle_house_w4_shared') || _isV('ec_board_w4')) && d) : d; }
-    else if (_safetyWeek === 3) { _canAdvance = _isV('ec_board_w3'); } // Must match checkWeekCompletion — cafe alone is not enough
+    else if (_safetyWeek === 3) { _canAdvance = _isV('ec_board_w3'); } // Must match checkWeekCompletion,  cafe alone is not enough
     else if (_safetyWeek === 2) { _canAdvance = _isV('campaign_tent') || _flags.readCurrentManifesto; }
     else if (_safetyWeek === 1) { const d = _flags.verifiedBallotFold || _isV('police_w1') || _isV('grama_office_w1'); _canAdvance = (_char === 'Karunasena') ? ((_isV('uncle_house_w1_shared') || d) && d) : d; }
     else { _canAdvance = true; } // week 0 or unknown
-    if (!_canAdvance) { console.warn('[PLV] advanceWeek blocked — week not yet complete.'); return; }
+    if (!_canAdvance) { console.warn('[PLV] advanceWeek blocked,  week not yet complete.'); return; }
 
     const banner = document.getElementById('next-week-banner');
     if (banner) banner.remove();
@@ -1378,7 +1375,7 @@ function getScenePath(locId) {
         else if (locId === 'loc4') targetSceneId = 'w3_boutique';
         else if (locId === 'loc6') targetSceneId = 'w3_police';
         else if (locId === 'loc7') targetSceneId = 'w3_skeptics_cafe';
-        // loc8 (Campaign Tent) has no content in Week 3 — return null so openLocation shows the fallback narration
+        // loc8 (Campaign Tent) has no content in Week 3,  return null so openLocation shows the fallback narration
         // else if (locId === 'loc8') targetSceneId = 'w3_map'; 
     }
     else if (week === 2) {
@@ -1386,7 +1383,7 @@ function getScenePath(locId) {
         else if (locId === 'loc4') targetSceneId = 'w2_boutique';
         else if (locId === 'loc6') targetSceneId = 'w2_police';
         else if (locId === 'loc8') targetSceneId = 'w2_campaign_tent_entry';
-        // loc1, loc2, loc5 intentionally return null — fallback narration handles them
+        // loc1, loc2, loc5 intentionally return null,  fallback narration handles them
     }
     else if (week === 1) {
         if (locId === 'loc1') targetSceneId = 'w1_grama_final';
@@ -1416,7 +1413,7 @@ function openLocation(locId) {
         });
         return;
     }
-    // Kovil and Temple are decorative — give atmospheric flavour instead of dead silence
+    // Kovil and Temple are decorative,  give atmospheric flavour instead of dead silence
     if (locId === 'loc_kovil') {
         renderDialogue({
             lines: [
@@ -1466,7 +1463,7 @@ function openLocation(locId) {
     
     const path = getScenePath(locId);
     
-    // Only block re-entry if the scene fully completed — not just visited
+    // Only block re-entry if the scene fully completed,  not just visited
     if (!Array.isArray(window.gameState.flags.completedLocs)) {
         window.gameState.flags.completedLocs = [];
     }
@@ -1495,7 +1492,7 @@ async function openScenePath(scenePath) {
         window.gameState.flags.visitedLocs = [];
     }
 
-    // Block re-entry only if scene fully completed (not just visited — interrupted visits allow re-entry)
+    // Block re-entry only if scene fully completed (not just visited,  interrupted visits allow re-entry)
     if (!Array.isArray(window.gameState.flags.completedLocs)) {
         window.gameState.flags.completedLocs = [];
     }
@@ -1522,41 +1519,48 @@ async function openScenePath(scenePath) {
         window.gameState._pendingScenePath = scenePath; // track for completedLocs
         renderDialogue(sceneData);
     } catch (error) {
-        console.warn('[PLV] Scene load failed:', error.message);
-        // Still mark as visited so week-completion checks pass even if the JSON file is missing
-        if (!window.gameState.flags.visitedLocs.includes(scenePath)) {
-            window.gameState.flags.visitedLocs.push(scenePath);
+            console.warn('[PLV] Scene load failed:', error.message);
+            // Still mark as visited so week-completion checks pass even if the JSON file is missing
+            if (!window.gameState.flags.visitedLocs.includes(scenePath)) {
+                window.gameState.flags.visitedLocs.push(scenePath);
+            }
+            if (!window.gameState.flags.completedLocs.includes(scenePath)) {
+                window.gameState.flags.completedLocs.push(scenePath);
+            }
+            saveGame();
+            checkWeekCompletion();
+            checkMapUnlocks();
+
+            // CRITICAL FIX: If Week 0 polling JSON is missing, force the ending instead of getting stuck
+            if (window.gameState.week === 0 && (scenePath.includes('polling') || scenePath.includes('w0'))) {
+                triggerEnding();
+                return;
+            }
+
+            // Friendly fallback,  not an error message, just a quiet dead end
+            renderDialogue({
+                lines: [
+                    {
+                        type: "narration",
+                        text: "Nothing seems to be happening here right now. Alupotha is a small town,  there is only so much to see in a day."
+                    }
+                ],
+                on_complete: { goto: "screen_map" }
+            });
         }
-        if (!window.gameState.flags.completedLocs.includes(scenePath)) {
-            window.gameState.flags.completedLocs.push(scenePath);
-        }
-        saveGame();
-        checkWeekCompletion();
-        checkMapUnlocks();
-        // Friendly fallback — not an error message, just a quiet dead end
-        renderDialogue({
-            lines: [
-                {
-                    type: "narration",
-                    text: "Nothing seems to be happening here right now. Alupotha is a small town — there is only so much to see in a day."
-                }
-            ],
-            on_complete: { goto: "screen_map" }
-        });
-    }
-}
+} // closes openScenePath
 
 // =============================================================================
-// DIALOGUE ENGINE v2 — Aligned to Master Scene File schema
+// DIALOGUE ENGINE v2,  Aligned to Master Scene File schema
 // Every scene JSON uses: lines[], on_complete{goto|conditional|week_set}
 // Line types: dialogue, narration, whatsapp, voicenote, screenshot, notice,
 //             document, comparison, video, choice, stats
 // =============================================================================
 
 // =============================================================================
-// ASSET REGISTRY — All asset paths in one place.
+// ASSET REGISTRY,  All asset paths in one place.
 // When artwork is created, place the file at the path listed here.
-// The game engine reads these constants — nothing else needs to change.
+// The game engine reads these constants,  nothing else needs to change.
 // File naming convention from production spec (Complete_Production_File_Structure_v2.txt)
 // =============================================================================
 
@@ -1564,7 +1568,7 @@ async function openScenePath(scenePath) {
 // Format: PNG with transparency, 450×660px, transparent background
 // States: neutral, talking, happy, worried, surprised
 // NOTE: Production file used 'Atakatus'/'Imali' as internal names.
-//       Canonical GDD v2.0 names are Karunasena/Kamala/Kumaran — use these.
+//       Canonical GDD v2.0 names are Karunasena/Kamala/Kumaran,  use these.
 const CHARACTER_PORTRAITS = {
     'Karunasena': {
         neutral:   'assets/characters/char_Karunasena_neutral.png',
@@ -1594,31 +1598,31 @@ const CHARACTER_PORTRAITS = {
 // Naming: npc_{character}_{state}.png → stored in assets/npcs/
 // These keys are used in scene JSON files as: "portrait": "npc_uncle_enthusiastic"
 const NPC_PORTRAITS = {
-    // Aunty Soma — prologue + endings
+    // Aunty Soma,  prologue + endings
     'npc_soma_neutral':          'assets/npcs/npc_soma_neutral.png',
     'npc_soma_talking':          'assets/npcs/npc_soma_talking.png',
     'npc_soma_warm':             'assets/npcs/npc_soma_warm.png',
-    // Uncle Sirisena — Uncle's House, WhatsApp messages
+    // Uncle Sirisena,  Uncle's House, WhatsApp messages
     'npc_uncle_neutral':         'assets/npcs/npc_uncle_neutral.png',
     'npc_uncle_talking':         'assets/npcs/npc_uncle_talking.png',
     'npc_uncle_enthusiastic':    'assets/npcs/npc_uncle_enthusiastic.png',
-    // Nandadasa Mahaththaya — Grama Sevaka Office
+    // Nandadasa Mahaththaya,  Grama Sevaka Office
     'npc_nandadasa_neutral':     'assets/npcs/npc_nandadasa_neutral.png',
     'npc_nandadasa_talking':     'assets/npcs/npc_nandadasa_talking.png',
     'npc_nandadasa_annoyed':     'assets/npcs/npc_nandadasa_annoyed.png',
-    // Sergeant Wickramasinghe — Police Station
+    // Sergeant Wickramasinghe,  Police Station
     'npc_sergeant_neutral':      'assets/npcs/npc_sergeant_neutral.png',
     'npc_sergeant_talking':      'assets/npcs/npc_sergeant_talking.png',
     'npc_sergeant_amused':       'assets/npcs/npc_sergeant_amused.png',
-    // Mudalali Perera — Boutique
+    // Mudalali Perera,  Boutique
     'npc_mudalali_neutral':      'assets/npcs/npc_mudalali_neutral.png',
     'npc_mudalali_talking':      'assets/npcs/npc_mudalali_talking.png',
     'npc_mudalali_loud':         'assets/npcs/npc_mudalali_loud.png',
-    // Mahinda Bandara — Campaign Tent
+    // Mahinda Bandara,  Campaign Tent
     'npc_mahinda_neutral':       'assets/npcs/npc_mahinda_neutral.png',
     'npc_mahinda_talking':       'assets/npcs/npc_mahinda_talking.png',
     'npc_mahinda_evasive':       'assets/npcs/npc_mahinda_evasive.png',
-    // Elderly Woman — Polling Station queue (Week 0)
+    // Elderly Woman,  Polling Station queue (Week 0)
     'npc_elderly_neutral':       'assets/npcs/npc_elderly_neutral.png',
     'npc_elderly_confused':      'assets/npcs/npc_elderly_confused.png',
     'npc_elderly_relieved':      'assets/npcs/npc_elderly_relieved.png',
@@ -1626,11 +1630,11 @@ const NPC_PORTRAITS = {
 
 // ─── BACKGROUND SCENES ───────────────────────────────────────────────────────
 // Format: JPEG, 1920×1080px
-// These are already used in LOC_BGS and BG_MAP below — listed here for reference
+// These are already used in LOC_BGS and BG_MAP below,  listed here for reference
 const BACKGROUND_assets = {
     'bg_loading':         'assets/backgrounds/bg_loading.webp',
     'bg_language':        'assets/backgrounds/bg_language.webp',
-    'bg_main_menu':       'assets/backgrounds/bg_main_menu.png',   // PNG — uses transparency layer
+    'bg_main_menu':       'assets/backgrounds/bg_main_menu.png',   // PNG,  uses transparency layer
     'bg_char_select':     'assets/backgrounds/bg_char_select.webp',
     'bg_opening':         'assets/backgrounds/bg_opening.webp',
     'bg_consequence':     'assets/backgrounds/bg_consequence.webp',
@@ -1654,13 +1658,13 @@ const BACKGROUND_assets = {
 
 // ─── MAP LOCATION assets ─────────────────────────────────────────────────────
 // Format: PNG with transparency (mix-blend-mode: multiply removes white bg)
-// Currently stored in assets/ root — subfolder assets/map/ is the canonical target
+// Currently stored in assets/ root,  subfolder assets/map/ is the canonical target
 // Update the HTML SVG hrefs when you move them to assets/map/
 const MAP_assets = {
     // Decorative landmarks (non-clickable)
     'map_kovil':          'assets/map_icon_kovil.jpeg',         // → rename to .png when ready
     'map_temple':         'assets/map_icon_temple.jpeg',        // → rename to .png when ready
-    // Interactive location markers — loc IDs match map SVG data-loc attributes
+    // Interactive location markers,  loc IDs match map SVG data-loc attributes
     'loc1_grama':         'assets/map_marker_gramasevaka.jpeg', // → assets/map/map_grama_office.png
     'loc2_uncle':         'assets/map_marker_uncle.jpeg',       // → assets/map/map_uncle_house.png
     'loc3_ecboard':       'assets/map_marker_noticeboard.jpeg', // → assets/map/map_ec_board.png
@@ -1717,7 +1721,7 @@ const PROP_assets = {
 // Stored in assets/audio/
 // The audioMap in openDialoguePanel() maps bg names → ambient files automatically
 const AUDIO_assets = {
-    // Ambient background loops — auto-play when entering each location
+    // Ambient background loops,  auto-play when entering each location
     'ambient_uncle_house':    'assets/audio/ambient_uncle_house.ogg',
     'ambient_grama_office':   'assets/audio/ambient_grama_office.ogg',
     'ambient_boutique':       'assets/audio/ambient_boutique.ogg',
@@ -1725,7 +1729,7 @@ const AUDIO_assets = {
     'ambient_tent':           'assets/audio/ambient_tent.ogg',
     'ambient_ec_board':       'assets/audio/ambient_ec_board.ogg',
     'ambient_polling':        'assets/audio/ambient_polling.ogg',
-    // Sound effects — triggered by game events
+    // Sound effects,  triggered by game events
     'sfx_whatsapp':           'assets/audio/sfx_whatsapp_notification.wav',  // Uncle message arrives
     'sfx_advance':            'assets/audio/sfx_dialogue_advance.wav',       // Dialogue click
     'sfx_gauge_up':           'assets/audio/sfx_gauge_up.wav',               // Positive gauge change
@@ -1739,7 +1743,7 @@ const LOC_BGS = {
     'loc2': 'assets/backgrounds/bg_uncle_house.webp',
     'loc3': 'assets/backgrounds/bg_ec_board.webp',
     'loc4': 'assets/backgrounds/bg_boutique.webp',
-    'loc5': 'assets/backgrounds/bg_community_hall.webp', // PLACEHOLDER — create bg_community_hall.webp for Aunty Soma / Community Hall scene
+    'loc5': 'assets/backgrounds/bg_community_hall.webp', // PLACEHOLDER,  create bg_community_hall.webp for Aunty Soma / Community Hall scene
     'loc6': 'assets/backgrounds/bg_police.webp',
     'loc7': 'assets/backgrounds/bg_skeptics_cafe.webp',
     'loc8': 'assets/backgrounds/bg_campaign_tent.webp',
@@ -1759,7 +1763,7 @@ const BG_MAP = {
     'bg_polling_station':'assets/backgrounds/bg_polling_station.webp',
     'bg_main_menu':      'assets/backgrounds/bg_main_menu.webp',
     'bg_town_map':       'assets/backgrounds/bg_town_map.webp',
-    /* Master Scene File uses these keys — map to the positive/negative files */
+    /* Master Scene File uses these keys,  map to the positive/negative files */
     'bg_ending_good':    'assets/backgrounds/bg_ending_positive.webp',
     'bg_ending_bad':     'assets/backgrounds/bg_ending_negative.webp',
     /* Legacy aliases kept for backward compat */
@@ -1889,7 +1893,7 @@ function _setPcPortrait(emotion) {
     const cont = document.getElementById('dialogue-pc-portrait-container');
     if (cont && state.character) {
         const em = emotion || state.flags.latestEmotion || 'neutral';
-        // Use CHARACTER_PORTRAITS registry — falls back to path construction if not found
+        // Use CHARACTER_PORTRAITS registry,  falls back to path construction if not found
         const charPortraits = CHARACTER_PORTRAITS && CHARACTER_PORTRAITS[state.character];
         const src = (charPortraits && charPortraits[em])
             ? charPortraits[em]
@@ -1924,14 +1928,14 @@ function _renderPropLine(line) {
 }
 
 // ─── UI ASSET RESOLVER ───────────────────────────────────────────────────────
-// Resolves a UI asset key to its path — used in WhatsApp card rendering
+// Resolves a UI asset key to its path,  used in WhatsApp card rendering
 function _getUIAsset(key) {
     return (UI_assets && UI_assets[key]) ? UI_assets[key] : `assets/ui/${key}.png`;
 }
 
 // --- CONDITION EVALUATOR ---
 // Safely evaluates condition strings from the scene JSON.
-// Only has access to gameState.flags and gameState.gauges — no eval of arbitrary code.
+// Only has access to gameState.flags and gameState.gauges,  no eval of arbitrary code.
 
 function _evalCondition(condStr) {
     if (!condStr) return true;
@@ -1998,7 +2002,7 @@ function renderDialogue(sceneDef) {
 function advanceDialogue() {
     const d = window.gameState.dialogue;
 
-    // If a choice is displayed, clicking elsewhere does nothing — player must pick.
+    // If a choice is displayed, clicking elsewhere does nothing,  player must pick.
     if (d._waiting) return;
 
     if (d.currentLine >= d.lines.length) {
@@ -2063,7 +2067,7 @@ function _renderLine(line) {
                     ${c.forwarded_count ? `<div class="media-forwarded">⟳ Forwarded ${c.forwarded_count} times</div>` : ''}
                     <div class="media-card-body">${c.message || ''}</div>
                 </div>`;
-            // Always show continue button — player taps to proceed to the next line (which may be a choice)
+            // Always show continue button,  player taps to proceed to the next line (which may be a choice)
             contBtn.style.display = 'block';
             break;
         }
@@ -2247,7 +2251,7 @@ function _renderLine(line) {
         }
 
         default: {
-            // Unknown type — render text if present, continue.
+            // Unknown type,  render text if present, continue.
             textEl.innerHTML = line.text || '';
             contBtn.style.display = 'block';
             break;
@@ -2395,7 +2399,7 @@ function _applySceneChoice(opt) {
 // Stores the pending goto when a consequence screen is shown mid-choice.
 let _pendingGoto = null;
 
-// Called by returnToGame() — if a goto was stored, navigate there.
+// Called by returnToGame(),  if a goto was stored, navigate there.
 function _resumeAfterConsequence() {
     if (_pendingGoto) {
         const target = _pendingGoto;
@@ -2529,12 +2533,12 @@ function _navigateGoto(target) {
 
 function _sceneIdToPath(sceneId) {
     if (!sceneId) return null;
-    // Direct map lookup — no wN_ prefix required, works for prologue, endings, and all weeks.
+    // Direct map lookup,  no wN_ prefix required, works for prologue, endings, and all weeks.
     const SCENE_ID_MAP = {
         // Prologue
         'prologue':                        'scenes/prologue.json',
 
-        // Week 6 — each scene has its own file
+        // Week 6,  each scene has its own file
         'w6_uncle_entry':                  'scenes/week6/uncle_house_entry.json',
         'w6_uncle_shared':                 'scenes/week6/uncle_house_shared.json',
         'w6_uncle_asksource':              'scenes/week6/uncle_house_verify.json',
@@ -2651,7 +2655,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Kept here so any scene files not yet migrated do not throw a reference error.
 // Logs a warning so you can identify and migrate them.
 function applyChoice(choice) {
-    // Legacy schema — migrate scene JSON to new format when possible
+    // Legacy schema,  migrate scene JSON to new format when possible
     const deltas = choice.effect || {};
     const prev = { ...window.gameState.gauges };
     for (const [k, v] of Object.entries(deltas)) {
@@ -2673,7 +2677,7 @@ function applyChoice(choice) {
     } else if (choice.consequence) {
         showConsequence(choice.consequence, deltas, prev);
     }
-    // checkWeekCompletion() is handled by closeDialoguePanel() — do not call here
+    // checkWeekCompletion() is handled by closeDialoguePanel(),  do not call here
 }
 
 function showConsequence(text, deltas, prev) {
@@ -2686,17 +2690,16 @@ function showConsequence(text, deltas, prev) {
     
     for(const [k, v] of Object.entries(deltas)) {
         if(v === 0) continue;
-        const sign = v > 0 ? '↑' : '↓';
         const cls = v > 0 ? 'pos' : 'neg';
         const label = document.querySelector(`[data-i18n="gauge.${k}"]`)
             ? document.querySelector(`[data-i18n="gauge.${k}"]`).textContent
             : k.toUpperCase();
-        badgesCont.innerHTML += `<div class="cons-badge ${cls}">${sign} ${label} ${v > 0 ? '+'+v : v}</div>`;
+        badgesCont.innerHTML += `<div class="cons-badge ${cls}">${label} ${v > 0 ? '+'+v : v}</div>`;
     }
     
     document.getElementById('cons-text').textContent = text;
     updateGauges(true);
-    // Use overlay approach — do NOT call showScreen() which hides screen-game.
+    // Use overlay approach,  do NOT call showScreen() which hides screen-game.
     // Consequence screen sits on top as a fixed overlay instead.
     const consScreen = document.getElementById('screen-consequence');
     consScreen.classList.add('active');
@@ -2862,7 +2865,7 @@ updateGauges(true);
         }
     } catch(e) { /* localStorage unavailable */ }
 
-    // Mark ending reached — loadGame() and exitToMainMenu() both check this flag
+    // Mark ending reached,  loadGame() and exitToMainMenu() both check this flag
     window.gameState.flags.endingReached = endingType;
 
     // WIPE SAVE SO THE PLAYER ISN'T STUCK IN A LOOP
@@ -2872,7 +2875,7 @@ updateGauges(true);
 }
 
 // =============================================================
-// GAUGE TUTORIAL — shown once on first game entry
+// GAUGE TUTORIAL,  shown once on first game entry
 // =============================================================
 function showGaugeTutorial() {
     // Remove any existing instance first
@@ -2886,14 +2889,14 @@ function showGaugeTutorial() {
             <h2>How your choices are measured</h2>
             <p class="gauge-tutorial-subtitle">
                 Three gauges run at the top of the screen at all times.
-                Every decision you make in Alupotha moves them — sometimes visibly, sometimes not.
+                Every decision you make in Alupotha moves them,  sometimes visibly, sometimes not.
             </p>
             <div class="tutorial-gauges">
                 <div class="tg-item">
                     <div class="tg-icon" style="color:var(--gold)">♦</div>
                     <div>
                         <div class="tg-name" style="color:var(--gold)">Civic Trust</div>
-                        <div class="tg-desc">Does the community believe the election is worth participating in? Spread misinformation and it falls. Verify before you share and it rises. This is a <em>community</em> score — not just yours.</div>
+                        <div class="tg-desc">Does the community believe the election is worth participating in? Spread misinformation and it falls. Verify before you share and it rises. This is a <em>community</em> score,  not just yours.</div>
                     </div>
                 </div>
                 <div class="tg-item">
@@ -2911,10 +2914,10 @@ function showGaugeTutorial() {
                     </div>
                 </div>
             </div>
-            <button class="tut-btn" onclick="dismissGaugeTutorial()">Understood — Enter Alupotha</button>
+            <button class="tut-btn" onclick="dismissGaugeTutorial()">Understood,  Enter Alupotha</button>
         </div>
     `;
-    document.body.appendChild(overlay);
+    (document.getElementById('game-canvas') || document.body).appendChild(overlay);
     requestAnimationFrame(() => requestAnimationFrame(() => overlay.classList.add('visible')));
 }
 
@@ -3223,21 +3226,34 @@ document.addEventListener('keydown', (e) => {
         }
     }
 
-    // --- ESCAPE: Pause / Unpause ---
+    // --- ESCAPE: Universal Back / Close / Pause ---
     if (e.key === 'Escape') {
-        if (screen === 'screen-opening') {
-            skipOpening();
+        // 1. Close any active Modals first (Settings, About, Controls, Confirm)
+        const activeModal = document.querySelector('.modal-overlay.active');
+        if (activeModal) {
+            activeModal.classList.remove('active');
             return;
         }
-        if (tutorialOpen) {
-            dismissGaugeTutorial();
-        } else if (pauseActive) {
-            togglePause();
-        } else if (dialogueOpen) {
-            closeDialoguePanel();
-        } else if (screen === 'screen-game') {
-            togglePause();
+        // 2. Close Credits if they are rolling
+        const creditsScreen = document.getElementById('screen-credits');
+        if (creditsScreen && creditsScreen.classList.contains('active')) {
+            closeCredits();
+            return;
         }
+        // 3. Handle Special Overlays
+        if (screen === 'screen-opening') { skipOpening(); return; }
+        if (tutorialOpen) { dismissGaugeTutorial(); return; }
+        
+        // 4. Navigate Back to Main Menu from Sub-screens
+        if (screen === 'screen-character' || screen === 'screen-achievements') {
+            showScreen('screen-mainmenu');
+            return;
+        }
+        
+        // 5. Standard Game Interactions
+        if (pauseActive) { togglePause(); return; }
+        if (dialogueOpen) { closeDialoguePanel(); return; }
+        if (screen === 'screen-game') { togglePause(); return; }
         return;
     }
 
@@ -3279,12 +3295,8 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Reset focus index when screen changes
-const _origShowScreen = showScreen;
-window.showScreen = function(id) {
-    _origShowScreen(id);
-    _kbFocusedIndex = 0;
-};
+// Reset focus index when screen changes - handled inside showScreen() at line 331
+// No wrapper needed; showScreen already resets _kbFocusedIndex on every call.
 
 // Keyboard focus styles handled in style.css cleanly
 
@@ -3301,7 +3313,7 @@ const CHAR_CONFIRM_DATA = {
         perk: 'Network',
         perkDesc: 'Queues move faster. Characters share information more readily with her.',
         dis: 'Assumption',
-        disDesc: 'She believes she already knows things — but has some of them subtly wrong.'
+        disDesc: 'She believes she already knows things,  but has some of them subtly wrong.'
     },
     Kumaran: {
         perk: 'Persistence',
@@ -3312,8 +3324,18 @@ const CHAR_CONFIRM_DATA = {
 };
 
 window.promptCharacterConfirm = function(charId) {
-    // Always use capitalised Kumaran — no lowercase alias needed
+    // Always use capitalised Kumaran,  no lowercase alias needed
     const safeCharId = (charId === 'kumaran') ? 'Kumaran' : charId;
+
+    // Game-feel: flash the clicked card before the modal opens
+    const key = { Karunasena: 'k', Kamala: 'ka', Kumaran: 'ku' }[safeCharId];
+    document.querySelectorAll('.clickable-card').forEach(card => {
+        const nameEl = card.querySelector('[data-i18n]');
+        if (nameEl && nameEl.getAttribute('data-i18n') === `char.${key}.name`) {
+            card.classList.add('card-selected');
+            setTimeout(() => card.classList.remove('card-selected'), 500);
+        }
+    });
 
     // Name
     document.getElementById('confirm-char-name').textContent = safeCharId;

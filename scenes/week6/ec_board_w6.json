@@ -30,7 +30,7 @@
         "header": "ELECTIONS COMMISSION OF SRI LANKA",
         "title": "VOTER REGISTRATION NOTICE",
         "body": "The current voter registration period remains open.\n\nFINAL DEADLINE: WEEK 4\n(Four weeks before election day)\n\nTo register or update your details:\nVisit the Grama Sevaka Office\nMonday to Friday, 8:30am to 4:00pm\n\nYou will need: Your National Identity Card",
-        "footer": "Elections Commission of Sri Lanka — Official Notice"
+        "footer": "Elections Commission of Sri Lanka,  Official Notice"
       },
       "advance": "click"
     },
@@ -68,7 +68,7 @@
         },
         {
           "id": "w6_ecv_choice_c",
-          "label": "Note it and move on. You know — that is enough.",
+          "label": "Note it and move on. You know,  that is enough.",
           "goto": "w6_map",
           "gauges": {}
         }

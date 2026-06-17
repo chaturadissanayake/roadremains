@@ -19,7 +19,7 @@
       "type": "dialogue",
       "speaker": "Mudalali Perera",
       "portrait_state": "npc_mudalali_loud",
-      "text": "You! New face. Have you registered? Young people — they sit and complain and then don't register. What is the point of complaining if you don't register?",
+      "text": "You! New face. Have you registered? Young people,  they sit and complain and then don't register. What is the point of complaining if you don't register?",
       "advance": "click"
     },
     {
@@ -31,7 +31,7 @@
     {
       "id": "w6_bo_04",
       "type": "narration",
-      "text": "\"I still haven't registered. Has the deadline passed?\" \"I don't know. Someone in my group said last week. Someone else said Week 4.\" \"You should ask at the office. But the queue —\" \"I know. The queue.\"",
+      "text": "\"I still haven't registered. Has the deadline passed?\" \"I don't know. Someone in my group said last week. Someone else said Week 4.\" \"You should ask at the office. But the queue, \" \"I know. The queue.\"",
       "advance": "click"
     },
     {

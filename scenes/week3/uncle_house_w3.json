@@ -16,7 +16,7 @@
       "type": "dialogue",
       "speaker": "Uncle Sirisena",
       "portrait_state": "npc_uncle_enthusiastic",
-      "text": "This just came from the Patriots group. A video. The full candidate list for our division — they are saying they will take it down, so share fast.",
+      "text": "This just came from the Patriots group. A video. The full candidate list for our division,  they are saying they will take it down, so share fast.",
       "advance": "click"
     },
     {
@@ -28,7 +28,7 @@
         "sender": "Uncle Sirisena",
         "time": "11:23 AM",
         "forwarded_count": 156,
-        "caption": "CONFIRMED: Full candidate list for our district — share before they take it down",
+        "caption": "CONFIRMED: Full candidate list for our district,  share before they take it down",
         "still_description": "Video still showing a handwritten list of candidate names",
         "listed_names": [
           "Pradeep Fernando",
@@ -47,7 +47,7 @@
       "choices": [
         {
           "id": "w3_uvc_choice_a",
-          "label": "Share it. It has more names — maybe it is more complete.",
+          "label": "Share it. It has more names,  maybe it is more complete.",
           "goto": "w3_uncle_videoclip_shared",
           "flags_set": [
             "sharedFakeCandidateList_w3",

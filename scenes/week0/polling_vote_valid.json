@@ -11,7 +11,7 @@
     {
       "id": "w0_cb_01",
       "type": "narration",
-      "text": "The presiding officer demonstrates the fold. Once. Vertically. Your preference vote goes in the column — they explain which column. They ask if you have any questions.",
+      "text": "The presiding officer demonstrates the fold. Once. Vertically. Your preference vote goes in the column, they explain which column. They ask if you have any questions.",
       "advance": "click"
     },
     {
@@ -21,7 +21,7 @@
       "choices": [
         {
           "id": "w0_cb_choice_valid",
-          "label": "Fold it once, vertically, in half — as the presiding officer showed.",
+          "label": "Fold it once, vertically, in half, as the presiding officer showed.",
           "condition": "!flags.willFoldInThirds",
           "goto": "w0_ballot_valid",
           "flags_set": [
@@ -49,7 +49,7 @@
         },
         {
           "id": "w0_cb_choice_spoiled",
-          "label": "Fold it in thirds — as the voice note said.",
+          "label": "Fold it in thirds, as the voice note said.",
           "condition": "flags.willFoldInThirds && !flags.verifiedBallotFold",
           "goto": "w0_ballot_spoiled",
           "flags_set": [

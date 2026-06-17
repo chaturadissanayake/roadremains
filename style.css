@@ -29,7 +29,7 @@
     --bg: #0D0F14;
     --bg-surface: #14171E;
     --bg-card: #1A1E26;
-    
+
     /* Muted, specific dataviz colors for gauges */
     --gold: #D4AF37;   /* Civic Trust */
     --gold-dim: rgba(212, 175, 55, 0.1);
@@ -39,19 +39,55 @@
     --garnet: #8b1c2c; /* Added missing variable */
     --off-white: #f0ece4; /* Added missing variable */
     --slate: #4A5568; /* Mid-point slate — consistent with video-card usage */
-    
+
+    /* Light variants used for glows / text accents on dark glass */
+    --gold-light: #F2D77E;
+    --green-light: #9DC3B0;
+    --red-light: #E3A0AC;
+
     --text-main: #EAECEF;
     --text-muted: #9BA4B5; /* Improved color contrast */
     --border: rgba(255, 255, 255, 0.08);
     --border-strong: rgba(255, 255, 255, 0.15);
-    
+
     --radius: 4px; /* Sharper corners for print aesthetic */
+    --radius-lg: 10px;
     --ease: cubic-bezier(0.25, 1, 0.5, 1);
-    
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
     --font-title: 'Playfair Display', Georgia, serif;
     --font-body: 'Noto Sans', -apple-system, sans-serif;
     --font-si: 'Noto Sans Sinhala', sans-serif;
     --font-ta: 'Noto Sans Tamil', sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', 'Courier New', monospace;
+
+    /* ── Game-chrome system: panels, bevels & glows ──────────────
+       Shared tokens so every HUD panel, card, modal and button
+       reads as one coherent, hand-built game interface instead of
+       flat boxes with a border. */
+    --panel-gradient: linear-gradient(165deg, #1d2129 0%, #14171e 52%, #0e1015 100%);
+    --panel-gradient-hover: linear-gradient(165deg, #232838 0%, #181c26 52%, #11141a 100%);
+    --panel-sheen: linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0) 14%);
+    --panel-edge: inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.5);
+    --panel-shadow: 0 1px 0 rgba(255,255,255,0.04) inset, 0 18px 40px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.4);
+    --panel-shadow-lg: 0 1px 0 rgba(255,255,255,0.05) inset, 0 32px 80px rgba(0,0,0,0.65), 0 4px 16px rgba(0,0,0,0.5);
+
+    --gold-glow-sm: 0 0 0 1px rgba(212,175,55,0.35), 0 0 14px rgba(212,175,55,0.28);
+    --gold-glow-md: 0 0 0 1px rgba(212,175,55,0.45), 0 6px 24px rgba(212,175,55,0.22), 0 0 28px rgba(212,175,55,0.18);
+    --gold-glow-text: 0 0 18px rgba(212,175,55,0.55);
+
+    --btn-bevel: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 8%, rgba(0,0,0,0.18) 100%);
+    --notch: 10px; /* corner-cut size used by the .game-notch helper */
+}
+
+/* Reusable corner-notch shape for HUD-style panels/buttons. Applied via
+   class so layout-critical elements (icons, absolute-positioned children)
+   are never put at risk by clip-path side effects. */
+.game-notch {
+    clip-path: polygon(
+        var(--notch) 0%, 100% 0%, 100% calc(100% - var(--notch)),
+        calc(100% - var(--notch)) 100%, 0% 100%, 0% var(--notch)
+    );
 }
 
 * {
@@ -67,11 +103,22 @@ body {
     font-size: 16px;
     font-weight: 300;
     line-height: 1.6;
-    overflow: hidden; /* Prevents any scrollbar in itch.io iframe */
+    overflow: hidden;
     width: 100vw;
     height: 100vh;
-    position: fixed; /* Locks body at exactly viewport size */
+    position: fixed;
     -webkit-font-smoothing: antialiased;
+}
+
+/* ── Game Canvas — fixed 1920×1080 coordinate space scaled to any viewport ── */
+#game-canvas {
+    position: absolute;
+    width: 1920px;
+    height: 1080px;
+    top: 0;
+    left: 0;
+    transform-origin: top left;
+    overflow: hidden !important; /* CRITICAL: Stops wide monitors from breaking HUD bounds */
 }
 
 /* Screen Background System (GDD Section 18) */
@@ -137,6 +184,58 @@ button {
     color: inherit;
 }
 
+/* ── Shared game-chrome motion ──────────────────────────────── */
+@keyframes btn-sheen {
+    from { transform: translateX(-130%) skewX(-12deg); }
+    to   { transform: translateX(230%) skewX(-12deg); }
+}
+@keyframes glow-pulse {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 1; }
+}
+@keyframes gauge-fill-shimmer {
+    0% { background-position: 0% 0; }
+    100% { background-position: 200% 0; }
+}
+@keyframes pop-in {
+    0% { opacity: 0; transform: scale(0.92); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+/* Tactile, beveled push-button used as the base for every game button.
+   Apply alongside existing button classes — purely additive so no
+   selectors anywhere else in this file need to change. */
+.game-btn {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+.game-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--btn-bevel);
+    mix-blend-mode: overlay;
+    pointer-events: none;
+}
+.game-btn::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: 0;
+    width: 36%;
+    height: 200%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,0.16), transparent);
+    transform: translateX(-130%) skewX(-12deg);
+    pointer-events: none;
+}
+.game-btn:hover::after {
+    animation: btn-sheen 900ms ease;
+}
+.game-btn:active {
+    transform: translateY(1px) scale(0.99);
+}
+
 /* Common Editorial Elements */
 .editorial-line {
     width: 60px;
@@ -150,7 +249,7 @@ button {
 
 /* Screen System */
 .screen {
-    position: fixed;
+    position: absolute;
     inset: 0;
     opacity: 0;
     pointer-events: none;
@@ -170,7 +269,7 @@ button {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    height: 100%;
     padding: 2rem;
 }
 
@@ -193,7 +292,7 @@ button {
 }
 #loading-logo {
     font-family: var(--font-title);
-    font-size: clamp(3.5rem, 8vw, 7rem);
+    font-size: 7rem;
     color: var(--text-main);
     line-height: 1.0;
     letter-spacing: -0.03em;
@@ -203,7 +302,7 @@ button {
 #loading-tagline {
     color: var(--text-muted);
     font-family: var(--font-body);
-    font-size: clamp(0.9rem, 2vw, 1.1rem);
+    font-size: 1.1rem;
     font-weight: 300;
     margin-top: 2rem;
     opacity: 0;
@@ -273,7 +372,8 @@ button {
     padding: 20px 28px;
     white-space: nowrap; /* Prevents text from breaking into two lines */
     border: 1px solid rgba(255,255,255,0.12);
-    background: rgba(255,255,255,0.03);
+    background: linear-gradient(165deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
+    box-shadow: var(--panel-edge);
     color: var(--text-main);
     border-radius: var(--radius);
     font-size: 1rem;
@@ -281,13 +381,18 @@ button {
     letter-spacing: 0.12em;
     text-align: center;
     transition: border-color 300ms var(--ease), color 300ms var(--ease),
-                background 300ms var(--ease), transform 300ms var(--ease);
+                background 300ms var(--ease), transform 300ms var(--ease),
+                box-shadow 300ms var(--ease);
 }
 .lang-btn:not(:disabled):hover {
-    border-color: rgba(212, 175, 55, 0.6);
+    border-color: rgba(212, 175, 55, 0.7);
     color: var(--gold);
-    background: rgba(212, 175, 55, 0.06);
+    background: linear-gradient(165deg, rgba(212,175,55,0.12), rgba(212,175,55,0.03));
     transform: translateY(-3px);
+    box-shadow: var(--panel-edge), var(--gold-glow-sm);
+}
+.lang-btn:not(:disabled):active {
+    transform: translateY(-1px) scale(0.99);
 }
 .lang-btn:disabled {
     opacity: 0.3;
@@ -313,9 +418,10 @@ select:focus-visible {
     appearance: none; 
     width: 100%;
     height: 6px;
-    background: rgba(255,255,255,0.05);
+    background: linear-gradient(180deg, rgba(0,0,0,0.4), rgba(255,255,255,0.03));
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 4px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
     outline: none;
     margin-top: 8px;
     transition: border-color 0.2s;
@@ -329,14 +435,15 @@ select:focus-visible {
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: var(--gold);
+    background: radial-gradient(circle at 35% 30%, var(--gold-light), var(--gold) 70%);
+    border: 1px solid rgba(0,0,0,0.3);
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 0 10px rgba(212,175,55,0.4);
+    box-shadow: 0 0 10px rgba(212,175,55,0.4), 0 2px 4px rgba(0,0,0,0.5);
 }
 .game-slider::-webkit-slider-thumb:hover {
     transform: scale(1.15);
-    box-shadow: 0 0 15px rgba(212,175,55,0.6);
+    box-shadow: 0 0 16px rgba(212,175,55,0.65), 0 2px 4px rgba(0,0,0,0.5);
 }
 
 /* Screen 3: Main Menu */
@@ -353,7 +460,7 @@ select:focus-visible {
     justify-content: center;
     text-align: left;
     gap: 3rem;
-    padding: 2rem 2rem 2rem 8vw;
+    padding: 2rem 2rem 2rem 154px;
     width: 100%;
     max-width: 560px;
 }
@@ -365,11 +472,15 @@ select:focus-visible {
 }
 .menu-title {
     font-family: var(--font-title);
-    font-size: clamp(3rem, 9vw, 7rem);
+    font-size: 7rem;
     color: var(--text-main);
     line-height: 1;
     letter-spacing: -0.03em;
     text-shadow: 0 0 100px rgba(212, 175, 55, 0.1);
+    background: linear-gradient(180deg, #ffffff 0%, var(--text-main) 45%, #c7cbd4 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 .menu-subtitle {
     font-size: 1.1rem;
@@ -386,46 +497,37 @@ select:focus-visible {
     align-items: flex-start;
 }
 .menu-btn {
-    width: 100%;
-    text-align: left;
-    padding: 13px 0 13px 20px;
-    border: none;
-    border-left: 2px solid transparent;
-    background: transparent;
-    color: var(--text-muted);
-    font-weight: 500;
-    border-radius: 0;
-    font-size: 0.78rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    transition: color 200ms var(--ease), border-color 200ms var(--ease), padding-left 200ms var(--ease);
+    width: 100%; text-align: left; padding: 16px 24px;
+    border: 1px solid #2D3748;
+    background: linear-gradient(165deg, #12151b 0%, #0a0c10 100%);
+    box-shadow: var(--panel-edge);
+    color: #A0AEC0;
+    font-weight: 500; border-radius: var(--radius); font-size: 0.8rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    transition: all 150ms ease; margin-bottom: 8px;
     position: relative;
 }
-.menu-btn.primary {
-    color: var(--gold);
-    border-left-color: rgba(212,175,55,0.6);
+.menu-btn.primary { color: #D4AF37; border-color: rgba(212, 175, 55, 0.35); box-shadow: var(--panel-edge), 0 0 18px rgba(212,175,55,0.06); }
+.menu-btn:hover:not(:disabled) {
+    background: linear-gradient(165deg, #1c212c 0%, #14171e 100%);
+    color: #EAECEF; border-color: #4A5568;
+    padding-left: 24px;
+    box-shadow: var(--panel-edge), 0 10px 24px rgba(0,0,0,0.45);
 }
-.menu-btn.primary:hover {
-    color: var(--gold);
-    border-left-color: var(--gold);
-    padding-left: 26px;
-}
-.menu-btn:hover:not(:disabled):not(.primary),
-.menu-btn:focus-visible:not(:disabled):not(.primary) {
-    color: var(--text-main);
-    border-left-color: var(--text-main);
-    padding-left: 26px;
-    background: transparent;
-    outline: none;
+.menu-btn.primary:hover:not(:disabled) {
+    background: linear-gradient(165deg, rgba(212,175,55,0.1), rgba(212,175,55,0.02));
+    border-color: #D4AF37; color: #D4AF37;
+    box-shadow: var(--panel-edge), var(--gold-glow-sm);
 }
 .menu-btn:disabled {
     opacity: 0.25;
     cursor: not-allowed;
 }
 
+
 /* Modals */
 .modal-overlay {
-    position: fixed;
+    position: absolute;
     inset: 0;
     background: rgba(13, 15, 20, 0.85);
     backdrop-filter: blur(8px);
@@ -445,18 +547,26 @@ select:focus-visible {
     pointer-events: auto;
 }
 .modal-content {
-    background: rgba(10, 12, 17, 0.96);
+    background: var(--panel-gradient);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-left: 2px solid var(--gold);
-    border-radius: 2px;
+    border-radius: var(--radius-lg);
     padding: 2.5rem 3rem;
     max-width: 480px;
     width: 90%;
     transform: translateY(16px);
     transition: transform 400ms var(--ease);
-    box-shadow: 0 32px 80px rgba(0,0,0,0.8);
+    box-shadow: var(--panel-shadow-lg), var(--gold-glow-sm);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
+    position: relative;
+}
+.modal-content::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--panel-sheen);
+    pointer-events: none;
 }
 .modal-overlay.active .modal-content {
     transform: translateY(0);
@@ -539,15 +649,16 @@ select:focus-visible {
     appearance: none;
     width: 100%;
     padding: 10px 16px;
-    background: var(--bg-card);
+    background: linear-gradient(165deg, #1f242e, #161920);
     color: var(--text-main);
     border: 1px solid var(--border-strong);
-    border-radius: 0;
+    border-radius: var(--radius);
+    box-shadow: var(--panel-edge);
     font-family: var(--font-body);
     font-size: 0.78rem;
     letter-spacing: 0.08em;
     cursor: pointer;
-    transition: border-color 0.3s, background 0.3s;
+    transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
     outline: none;
 }
 .game-select option {
@@ -555,11 +666,11 @@ select:focus-visible {
     color: #EAECEF;
 }
 .game-select:hover {
-    background: rgba(255,255,255,0.06);
+    background: linear-gradient(165deg, #262c38, #1c2027);
     border-color: rgba(255,255,255,0.25);
 }
 .game-select:focus,
-.game-select:focus-visible { border-color: var(--gold); } /* Removes double outer border */
+.game-select:focus-visible { border-color: var(--gold); box-shadow: var(--panel-edge), 0 0 0 1px rgba(212,175,55,0.4); } /* Removes double outer border */
 
 .toggle-wrapper {
     display: flex;
@@ -580,10 +691,11 @@ select:focus-visible {
     position: absolute;
     cursor: pointer;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: transparent;
+    background-color: rgba(0,0,0,0.25);
     border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
     transition: border-color 200ms var(--ease), background 200ms;
-    border-radius: 0;
+    border-radius: 11px;
 }
 .slider:before {
     position: absolute;
@@ -594,16 +706,19 @@ select:focus-visible {
     top: 50%;
     transform: translateY(-50%);
     background-color: rgba(255,255,255,0.25);
-    transition: transform 200ms var(--ease), background-color 200ms;
-    border-radius: 0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    transition: transform 200ms var(--ease), background-color 200ms, box-shadow 200ms;
+    border-radius: 50%;
 }
 .game-switch input:checked + .slider {
-    background-color: rgba(212, 175, 55, 0.1);
+    background-color: rgba(212, 175, 55, 0.14);
     border-color: var(--gold);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.4), 0 0 10px rgba(212,175,55,0.25);
 }
 .game-switch input:checked + .slider:before {
     transform: translateY(-50%) translateX(22px);
     background-color: var(--gold);
+    box-shadow: 0 0 8px rgba(212,175,55,0.7);
 }
 .text-link { 
     color: var(--text-muted); 
@@ -615,9 +730,9 @@ select:focus-visible {
     background: none;
     border: none;
     cursor: pointer;
-    transition: color 200ms;
+    transition: color 200ms, text-shadow 200ms;
 }
-.text-link:hover { color: var(--text-main); text-decoration: none; }
+.text-link:hover { color: var(--gold); text-decoration: none; text-shadow: 0 0 12px rgba(212,175,55,0.4); }
 .modal-close {
     display: block;
     width: 100%;
@@ -637,8 +752,8 @@ select:focus-visible {
     text-align: center;
 }
 .modal-close:hover {
-    color: var(--text-main);
-    border-top-color: rgba(255,255,255,0.3);
+    color: var(--gold);
+    border-top-color: rgba(212,175,55,0.4);
 }
 
 /* ── Settings Modal Rows ────────────────────────────────────── */
@@ -672,7 +787,7 @@ select:focus-visible {
     font-family: var(--font-body);
 }
 .setting-action-btn {
-    background: none;
+    background: linear-gradient(165deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
     border: 1px solid rgba(255,255,255,0.12);
     color: var(--text-muted);
     font-size: 0.52rem;
@@ -682,13 +797,14 @@ select:focus-visible {
     font-family: var(--font-body);
     padding: 7px 16px;
     cursor: pointer;
-    transition: color 200ms var(--ease), border-color 200ms var(--ease);
+    transition: color 200ms var(--ease), border-color 200ms var(--ease), box-shadow 200ms var(--ease);
     flex-shrink: 0;
-    border-radius: 0;
+    border-radius: var(--radius);
 }
 .setting-action-btn:hover {
-    color: var(--text-main);
-    border-color: rgba(255,255,255,0.4);
+    color: var(--gold);
+    border-color: rgba(212,175,55,0.5);
+    box-shadow: var(--gold-glow-sm);
 }
 
 /* Screen 4: Character Selection */
@@ -723,76 +839,106 @@ select:focus-visible {
     font-weight: 600;
 }
 .screen-back-btn:hover {
-    color: var(--text-main);
-    border-left-color: rgba(255,255,255,0.5);
+    color: var(--gold);
+    border-left-color: var(--gold);
 }
 /* .screen-back-btn svg rules removed — arrow icon no longer used */
 .char-header-area {
     text-align: center;
-    padding: 1.4rem 2rem 1rem;
+    padding: 4rem 2rem 2rem;
     flex-shrink: 0;
-    background: transparent;
+    background: linear-gradient(to bottom, rgba(10,12,17,0.95) 0%, rgba(10,12,17,0) 100%);
+    width: 100%;
     position: relative;
+    z-index: 10;
 }
-.char-header-area::after {
-    content: '';
-    display: block;
-    width: 40px;
-    height: 1px;
-    background: var(--gold);
-    opacity: 0.5;
-    margin: 0.8rem auto 0;
-}
+.char-header-area::after { content: none; }
 .char-header-area h1 {
     font-family: var(--font-title);
-    font-size: 1.9rem;
+    font-size: 3rem;
+    color: #D4AF37;
     font-weight: 400;
-    margin-bottom: 0.15rem;
-    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.01em;
+    text-shadow: 0 4px 16px rgba(0,0,0,0.8);
 }
 .char-subheader {
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    font-style: italic;
+    color: #EAECEF;
+    font-size: 1rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    opacity: 0.8;
+    font-style: normal;
 }
 .char-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    flex: 1;
-    min-height: 0;
-    gap: 1.5rem;
-    padding: 1.5rem 2vw 2rem;
-    overflow: hidden; /* Removed scrollbar for locked 1920x1080 frame */
-    align-items: stretch;
-    max-width: clamp(900px, 85vw, 1480px);
+    gap: 3rem;
+    padding: 0 40px;
+    align-items: stretch; 
+    max-width: 1300px;
     margin: 0 auto;
     width: 100%;
+    height: 560px; /* Locked perfectly to prevent scrolling */
 }
-.char-card {
-    background: var(--bg-surface);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+.char-img-wrapper {
+    margin: 0;
+    width: 100%;
+    height: 380px; /* Fixed height so images don't grow infinitely */
+    display: block;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+    flex-shrink: 0;
+    position: relative;
     border-radius: 0;
+    background: var(--bg-card);
+}
+
+.char-grid::-webkit-scrollbar { width: 6px; }
+.char-grid::-webkit-scrollbar-track { background: transparent; }
+.char-grid::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 10px; }
+.char-grid::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+.char-card {
+    background: #0D0F14;
+    border: 1px solid #2D3748;
+    border-top: 2px solid #4A5568;
+    border-radius: 4px;
     padding: 0;
     display: flex;
     flex-direction: column;
     text-align: left;
     height: 100%;
-    transition: transform 300ms var(--ease), border-color 300ms,
-                box-shadow 300ms var(--ease), background 300ms;
+    transition: transform 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
     position: relative;
     outline: none;
+    box-shadow: 0 16px 32px rgba(0,0,0,0.5);
 }
 .clickable-card {
     cursor: pointer;
 }
 .clickable-card:hover {
-    border-color: rgba(212, 175, 55, 0.8);
-    transform: translateY(-6px);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 20px rgba(212,175,55,0.15);
-    background: #1e2230;
+    border-top-color: #D4AF37;
+    border-color: rgba(212,175,55,0.4);
+    transform: translateY(-6px) scale(1.015);
+    box-shadow: 0 28px 56px rgba(0,0,0,0.85), 0 0 48px rgba(212,175,55,0.22), inset 0 1px 0 rgba(212,175,55,0.08);
+    background: #14171E;
+}
+.clickable-card:active {
+    transform: translateY(-2px) scale(0.985);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.6), 0 0 20px rgba(212,175,55,0.35);
+    border-top-color: #F2D77E;
+    transition: transform 80ms ease, box-shadow 80ms ease;
+}
+@keyframes card-select-flash {
+    0%   { box-shadow: 0 28px 56px rgba(0,0,0,0.85), 0 0 48px rgba(212,175,55,0.22); }
+    35%  { box-shadow: 0 0 0 3px rgba(212,175,55,0.6), 0 0 80px rgba(212,175,55,0.75); border-top-color: #F2D77E; }
+    100% { box-shadow: 0 28px 56px rgba(0,0,0,0.85), 0 0 48px rgba(212,175,55,0.22); }
+}
+.clickable-card.card-selected {
+    animation: card-select-flash 0.45s var(--ease-spring) forwards;
 }
 .char-fold-btn {
-    background: transparent;
+    background: linear-gradient(165deg, rgba(255,255,255,0.04), rgba(255,255,255,0.005));
     border: 1px solid var(--border-strong);
     color: var(--text-muted);
     padding: 8px 12px;
@@ -807,7 +953,8 @@ select:focus-visible {
 .char-fold-btn:hover {
     color: var(--gold);
     border-color: var(--gold);
-    background: rgba(212, 175, 55, 0.05);
+    background: rgba(212, 175, 55, 0.08);
+    box-shadow: var(--gold-glow-sm);
 }
 .char-details-fold {
     padding: 0 1.5rem 1.25rem;
@@ -873,52 +1020,48 @@ select:focus-visible {
 }
 .char-card:hover img {
     filter: grayscale(0%) brightness(1.05) contrast(1.04);
-    transform: scale(1.07);
+    transform: scale(1.05);
 }
 
 .char-info {
     display: flex;
     flex-direction: column;
-    padding: 1.25rem 1.5rem;
+    padding: 1rem 1rem;
     flex-grow: 1;
-    justify-content: flex-start;
+    justify-content: center; /* Centers content perfectly since perks are hidden */
+    align-items: center;
+    text-align: center;
 }
 .char-info .char-fold-btn {
-    margin-top: auto; /* Pushes the trait button cleanly to the bottom */
+    margin-top: auto;
 }
 
 .char-name {
     font-family: var(--font-title);
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: 400;
-    margin-bottom: 0.2rem;
-    text-align: center;
+    margin-bottom: 0.1rem;
+    color: #EAECEF;
 }
 .char-role {
-    color: var(--gold);
+    color: #D4AF37;
     font-size: 0.65rem;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    margin-bottom: 1.5rem; /* Breathing room under title */
+    margin-bottom: 1.2rem;
     line-height: 1.4;
-    text-align: center;
 }
 .char-desc {
-    color: var(--text-muted);
+    color: #9BA4B5;
     font-size: 0.85rem;
-    margin-bottom: 1.5rem; /* Breathing room before traits */
-    line-height: 1.6;
+    margin-bottom: 0; 
+    line-height: 1.7;
 }
 
 /* Editorial Traits List */
 .char-traits {
-    border-top: 1px dashed rgba(255,255,255,0.1);
-    padding: 1.25rem 0 0.5rem;
-    margin-top: auto; /* Pushes traits to the bottom consistently */
-    display: flex;
-    flex-direction: column;
-    gap: 1.2rem; /* Breathing room between traits */
+    display: none; /* Hidden on select screen, shown only in confirm modal */
 }
 .char-trait {
     display: flex;
@@ -941,11 +1084,7 @@ select:focus-visible {
 
 /* Dataviz Mini Gauges - Game-style stat bars */
 .char-gauges-preview { 
-    margin-bottom: 0.6rem; 
-    display: flex; 
-    flex-direction: column; 
-    gap: 6px;
-    flex-shrink: 0;
+    display: none; /* Hidden on select screen, shown only in confirm modal */
 }
 .mini-gauge { 
     display: flex; 
@@ -962,8 +1101,10 @@ select:focus-visible {
 .mini-bar { 
     flex: 1; 
     height: 6px; 
-    background: rgba(255,255,255,0.06);
-    border-radius: 0;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 3px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.6);
     overflow: hidden;
     position: relative;
 }
@@ -985,22 +1126,31 @@ select:focus-visible {
     height: 100%; 
     transition: width 0.6s var(--ease);
     position: relative;
+    border-radius: 3px 0 0 3px;
+}
+.mini-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 45%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.45), rgba(255,255,255,0));
+    pointer-events: none;
 }
 
-.mini-gauge.ct .mini-fill { background: var(--gold); box-shadow: 0 0 6px rgba(212,175,55,0.5); }
-.mini-gauge.ih .mini-fill { background: var(--green); box-shadow: 0 0 6px rgba(107,144,128,0.5); }
-.mini-gauge.vp .mini-fill { background: var(--red);   box-shadow: 0 0 6px rgba(181,101,118,0.5); }
+.mini-gauge.ct .mini-fill { background: linear-gradient(180deg, var(--gold-light), var(--gold)); box-shadow: 0 0 8px rgba(212,175,55,0.6); }
+.mini-gauge.ih .mini-fill { background: linear-gradient(180deg, var(--green-light), var(--green)); box-shadow: 0 0 8px rgba(107,144,128,0.6); }
+.mini-gauge.vp .mini-fill { background: linear-gradient(180deg, var(--red-light), var(--red));   box-shadow: 0 0 8px rgba(181,101,118,0.6); }
 
 /* Removed char-play-btn */
 
 /* Screen 5: Opening Animation Sequence */
 #screen-opening {
-    background: transparent; /* Allows bg_opening.jpeg to show */
+    background: transparent;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 8vw;
+    padding: 154px;
     text-align: center;
     cursor: default;
     user-select: none;
@@ -1022,7 +1172,7 @@ select:focus-visible {
     width: 100%;
 }
 .opening-line {
-    font-size: clamp(1.05rem, 2.2vw, 1.55rem);
+    font-size: 1.55rem;
     color: var(--text-main);
     font-weight: 300;
     text-align: center;
@@ -1033,7 +1183,7 @@ select:focus-visible {
     position: absolute;
     width: 100%;
     max-width: 680px;
-    white-space: normal;          /* ← allows wrapping */
+    white-space: normal;
     line-height: 1.55;
     letter-spacing: 0.01em;
     text-shadow: 0 1px 18px rgba(0,0,0,0.9), 0 0 40px rgba(0,0,0,0.6);
@@ -1044,7 +1194,7 @@ select:focus-visible {
 }
 .opening-line.character-intro {
     font-family: var(--font-title);
-    font-size: clamp(1.1rem, 2.4vw, 2rem);
+    font-size: 2rem;
     color: var(--gold);
     font-style: italic;
     white-space: nowrap;
@@ -1085,7 +1235,7 @@ select:focus-visible {
 .skip-prompt {
     font-size: 0.65rem;
     color: rgba(255,255,255,0.25);
-    position: fixed;
+    position: absolute;
     bottom: 2.5rem;
     left: 50%;
     transform: translateX(-50%);
@@ -1097,7 +1247,7 @@ select:focus-visible {
 }
 /* Hold-to-skip progress bar */
 #skip-hold-bar {
-    position: fixed;
+    position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
@@ -1114,25 +1264,39 @@ select:focus-visible {
 
 /* Screen 6: Game & Map */
 .top-bar {
-    position: relative;
-    background: rgba(10, 12, 17, 0.98);
-    border-bottom: 1px solid rgba(212, 175, 55, 0.18);
-    box-shadow: 0 2px 24px rgba(0, 0, 0, 0.6);
-    padding: 10px 28px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 40;
-    flex-wrap: nowrap;
-    gap: 16px;
-    flex-shrink: 0; /* Prevents top-bar from being crushed by map flex growth */
-    min-height: 60px;
+    position: absolute; top: 0; left: 0; width: 100%;
+    padding: 24px 40px; display: flex; justify-content: space-between;
+    align-items: flex-start; z-index: 40; pointer-events: none;
+}
+.gauges { 
+    display: flex; gap: 32px; pointer-events: auto; 
+}
+.gauge-container { 
+    width: 180px; background: rgba(13, 15, 20, 0.95);
+    padding: 8px 16px 12px; border: 1px solid rgba(255,255,255,0.05);
+}
+.gauge-track {
+    height: 3px; /* Clean, minimal line */
+    background: rgba(255, 255, 255, 0.1);
+    margin-top: 8px; width: 100%;
+}
+.top-bar-controls {
+    pointer-events: auto; display: flex; align-items: center; gap: 16px;
+}
+.pause-btn {
+    background: #0D0F14; border: 1px solid #4A5568; color: #A0AEC0;
+    padding: 10px 24px; font-size: 0.7rem; font-weight: 600;
+    letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer;
+    transition: all 150ms ease;
+}
+.pause-btn:hover {
+    background: #EAECEF; color: #0D0F14; border-color: #EAECEF;
 }
 /* ── Gauges ─────────────────────────────────────────────────── */
 .gauges {
     display: flex;
-    gap: 2px;
-    flex-grow: 1;
+    gap: 16px;
+    flex-grow: 0; /* CRITICAL FIX: Stops the HUD from pushing the pause button off-screen */
     align-items: stretch;
 }
 
@@ -1141,22 +1305,23 @@ select:focus-visible {
     flex-direction: column;
     justify-content: center;
     gap: 6px;
-    padding: 0 20px 0 16px;
-    border-left: 3px solid transparent;
+    padding: 10px 20px 10px 16px;
+    background: linear-gradient(165deg, rgba(20,23,30,0.92), rgba(10,12,17,0.92));
+    border: 1px solid rgba(255,255,255,0.06);
+    border-top: 2px solid transparent; /* Moved from left to top */
+    border-radius: var(--radius);
+    box-shadow: var(--panel-edge), 0 6px 18px rgba(0,0,0,0.35);
     min-width: 160px;
-    width: clamp(160px, 16vw, 260px);
+    width: 260px;
     position: relative;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
 }
 
-/* Colour accent — left border per gauge */
-.gauge-container[data-gauge="ct"] { border-left-color: var(--gold); }
-.gauge-container[data-gauge="ih"] { border-left-color: var(--green); }
-.gauge-container[data-gauge="vp"] { border-left-color: var(--red); }
-
-@media (min-width: 1440px) {
-    .gauge-container { width: clamp(220px, 14vw, 300px); }
-    .gauges { gap: 4px; }
-}
+/* Colour accent — top border per gauge */
+.gauge-container[data-gauge="ct"] { border-top-color: var(--gold); }
+.gauge-container[data-gauge="ih"] { border-top-color: var(--green); }
+.gauge-container[data-gauge="vp"] { border-top-color: var(--red); }
 
 .gauge-header {
     display: flex;
@@ -1173,19 +1338,33 @@ select:focus-visible {
     text-transform: uppercase;
     color: var(--text-muted);
 }
+.gauge-icon {
+    font-size: 0.7rem;
+    line-height: 1;
+    margin-right: 5px;
+    flex-shrink: 0;
+    text-transform: none;
+    letter-spacing: 0;
+    opacity: 0.65;
+}
+.gauge-container[data-gauge="ct"] .gauge-icon { color: var(--gold); }
+.gauge-container[data-gauge="ih"] .gauge-icon { color: var(--green); }
+.gauge-container[data-gauge="vp"] .gauge-icon { color: var(--red-light); }
 
 .gauge-readout {
-    font-size: 0.82rem;
+    font-family: var(--font-mono);
+    font-size: 0.86rem;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
     min-width: 26px;
     text-align: right;
     line-height: 1;
+    transition: text-shadow 300ms;
 }
-.gauge-container[data-gauge="ct"] .gauge-readout { color: var(--gold); }
-.gauge-container[data-gauge="ih"] .gauge-readout { color: var(--green); }
-.gauge-container[data-gauge="vp"] .gauge-readout { color: var(--red); }
+.gauge-container[data-gauge="ct"] .gauge-readout { color: var(--gold-light); text-shadow: 0 0 12px rgba(212,175,55,0.45); }
+.gauge-container[data-gauge="ih"] .gauge-readout { color: var(--green-light); text-shadow: 0 0 12px rgba(107,144,128,0.45); }
+.gauge-container[data-gauge="vp"] .gauge-readout { color: var(--red-light); text-shadow: 0 0 12px rgba(181,101,118,0.45); }
 
 .gauge-info-btn {
     width: 14px;
@@ -1203,51 +1382,120 @@ select:focus-visible {
     transition: all 200ms;
     line-height: 1;
     padding: 0;
-    background: transparent;
+    background: rgba(255,255,255,0.03);
     font-family: var(--font-body);
 }
 .gauge-info-btn:hover {
-    border-color: var(--text-main);
-    color: var(--text-main);
+    border-color: var(--gold);
+    color: var(--gold);
+    box-shadow: 0 0 8px rgba(212,175,55,0.4);
 }
 
 .gauge-track {
-    height: 4px;
-    background: rgba(255,255,255,0.07);
-    border-radius: 0;
+    height: 6px;
+    background: rgba(0,0,0,0.45);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 3px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.6);
     overflow: hidden;
     position: relative;
     width: 100%;
 }
+.gauge-track::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(90deg, transparent 0 9px, rgba(0,0,0,0.35) 9px 10px);
+    pointer-events: none;
+}
 .gauge-fill {
     height: 100%;
     width: 50%;
-    border-radius: 0;
+    border-radius: 3px 0 0 3px;
+    position: relative;
     transition: width 900ms var(--ease), background-color 600ms;
 }
-#fill-ct { background: var(--gold);  box-shadow: 0 0 6px rgba(212,175,55,0.5); }
-#fill-ih { background: var(--green); box-shadow: 0 0 6px rgba(107,144,128,0.5); }
-#fill-vp { background: var(--red);   box-shadow: 0 0 6px rgba(181,101,118,0.5); }
+.gauge-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0));
+    pointer-events: none;
+}
+#fill-ct { background: linear-gradient(90deg, #b8932c, var(--gold) 60%, var(--gold-light)); box-shadow: 0 0 10px rgba(212,175,55,0.6); }
+#fill-ih { background: linear-gradient(90deg, #557466, var(--green) 60%, var(--green-light)); box-shadow: 0 0 10px rgba(107,144,128,0.6); }
+#fill-vp { background: linear-gradient(90deg, #934f5d, var(--red) 60%, var(--red-light));   box-shadow: 0 0 10px rgba(181,101,118,0.6); }
 .week-indicator {
-    font-family: var(--font-title);
-    font-size: clamp(1.8rem, 2.2vw, 2.6rem);
-    color: var(--text-main);
+    background: #0D0F14;
+    border: 1px solid #4A5568;
+    border-radius: 4px;
+    box-shadow: inset 0 2px 0 rgba(255,255,255,0.05), 0 4px 12px rgba(0,0,0,0.4);
     display: flex;
-    align-items: baseline;
-    gap: 6px;
-    padding: 0 24px;
-    border-left: 1px solid var(--border);
-    border-right: 1px solid var(--border);
+    align-items: center;
+    gap: 12px;
+    padding: 6px 20px;
     white-space: nowrap;
-    font-variant-numeric: tabular-nums;
 }
 .week-label {
     font-family: var(--font-body);
-    font-size: 0.55rem;
+    font-size: 0.65rem;
+    font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--text-muted);
-    transform: translateY(-4px);
+    color: #9BA4B5;
+}
+
+#week-val {
+    font-family: var(--font-body); /* Matching the sans-serif font */
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #D4AF37;
+    text-shadow: 0 0 8px rgba(212,175,55,0.4);
+    line-height: 1;
+}
+
+/* Controls Modal Formatting */
+.controls-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 1.5rem;
+}
+.control-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding-bottom: 14px;
+}
+.control-item:last-child {
+    border-bottom: none;
+}
+.control-item span:first-child {
+    font-weight: 700;
+    color: var(--gold);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: linear-gradient(165deg, rgba(212,175,55,0.12), rgba(212,175,55,0.02));
+    padding: 6px 14px;
+    border-radius: var(--radius);
+    border: 1px solid rgba(212,175,55,0.25);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 2px 4px rgba(0,0,0,0.3);
+}
+.control-item span:last-child {
+    color: var(--text-main);
+    font-size: 0.85rem;
+    text-align: right;
+}
+
+/* Consequence Button Formatting */
+.cons-btn.primary:hover {
+    color: var(--gold-light);
+    border-left-color: var(--gold);
+    padding-left: 26px;
+    text-shadow: 0 0 12px rgba(212,175,55,0.5);
 }
 
 .top-bar-controls {
@@ -1257,31 +1505,36 @@ select:focus-visible {
 }
 
 .pause-btn {
-    background: transparent;
-    border: 1px solid var(--border-strong);
-    color: var(--text-muted);
+    background: linear-gradient(165deg, #232832, #161920);
+    border: 1px solid #4A5568;
+    box-shadow: var(--panel-edge), 0 4px 12px rgba(0,0,0,0.4);
+    color: #EAECEF;
     border-radius: var(--radius);
-    padding: 7px 16px;
+    padding: 8px 24px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 7px;
-    transition: all 300ms var(--ease);
-    font-size: 0.6rem;
+    transition: all 150ms ease;
+    font-size: 0.65rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
     font-family: var(--font-body);
     font-weight: 700;
+    flex-shrink: 0; /* Prevents the button from being crushed */
+    position: relative;
+    overflow: hidden;
 }
 
 .pause-btn:hover {
-    background: rgba(255,255,255,0.06);
-    border-color: rgba(255,255,255,0.35);
-    color: var(--text-main);
+    background: linear-gradient(165deg, var(--gold-light), var(--gold));
+    border-color: var(--gold);
+    color: #0A0C11;
+    box-shadow: var(--gold-glow-md);
 }
 
 .pause-overlay {
-    position: fixed;
+    position: absolute;
     inset: 0;
     background: rgba(10, 12, 18, 0.80);
     backdrop-filter: blur(14px) saturate(0.7);
@@ -1305,22 +1558,23 @@ select:focus-visible {
     width: 100%;
     max-width: 560px;
     padding: 2rem;
-    margin-left: clamp(2rem, 8vw, 100px);
+    margin-left: 100px;
 }
 
 #objective-bar {
-    position: fixed;
+    position: absolute;
     bottom: 1.2rem;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(10, 12, 17, 0.90);
+    background: linear-gradient(165deg, rgba(22,25,32,0.95), rgba(8,10,14,0.95));
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    color: rgba(255, 255, 255, 0.75);
+    color: rgba(255, 255, 255, 0.8);
     font-size: 0.72rem;
     padding: 7px 18px;
-    border: 1px solid rgba(212, 175, 55, 0.15);
-    border-radius: 4px;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: var(--radius);
+    box-shadow: var(--panel-edge), 0 10px 28px rgba(0,0,0,0.5);
     font-weight: 500;
     letter-spacing: 0.08em;
     z-index: 25;
@@ -1330,7 +1584,7 @@ select:focus-visible {
     text-transform: uppercase;
     white-space: normal;
     text-align: center;
-    max-width: min(620px, 88vw);
+    max-width: 620px;
     pointer-events: none;
     transition: opacity 600ms ease;
 }
@@ -1341,26 +1595,28 @@ select:focus-visible {
     text-transform: uppercase;
     font-weight: 700;
     font-family: var(--font-body);
-    opacity: 0.5;
+    color: var(--gold);
+    opacity: 0.85;
     margin-right: 6px;
+    text-shadow: 0 0 8px rgba(212,175,55,0.5);
 }
 
 #week-banner {
-    position: fixed;
+    position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -40%) scale(0.95);
-    background: var(--bg-card);
-    border: 1px solid rgba(212,175,55,0.3);
+    background: var(--panel-gradient);
+    border: 1px solid rgba(212,175,55,0.35);
     color: var(--text-main);
     padding: 24px 48px;
-    border-radius: var(--radius);
+    border-radius: var(--radius-lg);
     font-size: 1rem;
     font-family: var(--font-title);
     z-index: 100;
     opacity: 0;
     transition: all 600ms var(--ease);
-    box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+    box-shadow: var(--panel-shadow-lg), var(--gold-glow-md);
     text-align: center;
     letter-spacing: 0.02em;
     pointer-events: none;
@@ -1373,13 +1629,14 @@ select:focus-visible {
 }
 #week-banner strong {
     display: block;
-    color: var(--gold);
-    font-size: clamp(1.4rem, 2.5vw, 2rem);
+    color: var(--gold-light);
+    font-size: 2rem;
     font-family: var(--font-title);
     font-weight: 400;
     margin-bottom: 6px;
     letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
+    text-shadow: var(--gold-glow-text);
 }
 
 /* Base styles for your Illustrator roads */
@@ -1405,7 +1662,9 @@ select:focus-visible {
 }
 
 .dialogue-scene-wrapper {
-    position: fixed;
+    position: absolute;
+    width: 1920px; /* Lock to the JS canvas */
+    height: 1080px; /* Lock to the JS canvas */
     inset: 0;
     z-index: 28;
     pointer-events: none;
@@ -1461,8 +1720,8 @@ select:focus-visible {
     display: flex;
 }
 #location-back-btn:hover {
-    color: var(--text-main);
-    border-left-color: rgba(255,255,255,0.5);
+    color: var(--gold);
+    border-left-color: var(--gold);
 }
 
 /* Dialogue Panel — Centered modal */
@@ -1473,65 +1732,50 @@ select:focus-visible {
     z-index: 10; /* Keeps the overlay behind characters */
 }
 #dialogue-panel {
+    position: absolute; bottom: -500px; left: 410px; width: 1100px;
+    min-height: 220px;
+    background: linear-gradient(170deg, #1a1e26 0%, #11141a 60%, #0a0c10 100%);
+    border: 1px solid #2D3748;
+    border-top: 2px solid #D4AF37; border-radius: var(--radius); z-index: 30;
+    transition: bottom 400ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-shadow: var(--panel-shadow-lg), 0 0 50px rgba(212,175,55,0.06);
+    display: flex; flex-direction: column;
+}
+#dialogue-panel::before {
+    content: '';
     position: absolute;
-    bottom: -300px;
-    left: 0;
-    right: 0;
-    margin: 0 auto;
-    width: min(92vw, 1000px);
-    height: 210px;                 /* FIXED — every dialogue line occupies identical panel height */
-    background: var(--bg-surface);
-    border: 1px solid var(--border-strong);
-    border-top: 2px solid rgba(212,175,55,0.25);
-    border-radius: 6px;
-    z-index: 30; /* Forces the dialogue panel to render IN FRONT of the characters */
-    transition: bottom 400ms var(--ease);
-    box-shadow: 0 -8px 48px rgba(0,0,0,0.4), 0 32px 80px rgba(0,0,0,0.7);
-    overflow: visible;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(180deg, rgba(212,175,55,0.07) 0%, rgba(212,175,55,0) 10%);
+    pointer-events: none;
 }
-#dialogue-panel.panel-expanded {
-    height: auto;                  /* Grows only when choice buttons are present */
-    min-height: 210px;
-}
-#dialogue-panel.open {
-    bottom: 2rem;
-}
+#dialogue-panel.panel-expanded { height: auto; }
+#dialogue-panel.open { bottom: 48px; }
+
 .dialogue-content-wrapper {
-    padding: 2rem 2.5rem;
-    position: relative;
-    height: 100%;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;        /* Text anchors to bottom — visual novel convention */
-    overflow: visible;                /* CRITICAL FIX: prevents the portrait from being clipped and hidden */
+    padding: 3rem 4rem; position: relative; height: 100%;
+    box-sizing: border-box; display: flex; flex-direction: column;
+    justify-content: flex-end; overflow: visible;
 }
-.panel-expanded .dialogue-content-wrapper {
-    height: auto;
-    overflow: visible;
+
+.dialogue-meta {
+    position: absolute; top: -35px; left: -1px; background: #0D0F14;
+    padding: 8px 24px; border: 1px solid #2D3748; border-bottom: none; 
+    border-top: 2px solid #D4AF37; z-index: 20;
 }
+
+#dialogue-npc-name {
+    font-family: var(--font-body); font-size: 0.8rem; color: #EAECEF;
+    text-transform: uppercase; letter-spacing: 0.15em; font-weight: 600;
+}
+
 #dialogue-close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    color: var(--text-muted);
-    transition: color 200ms var(--ease), border-color 200ms var(--ease);
-    z-index: 31;
-    padding: 5px 12px;
-    font-size: 0.52rem;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    font-weight: 700;
-    font-family: var(--font-body);
-    background: none;
-    border: none;
-    border-bottom: 1px solid rgba(255,255,255,0.12);
-    cursor: pointer;
+    position: absolute; top: 20px; right: 24px; background: transparent;
+    border: none; color: #4A5568; font-size: 1.2rem; cursor: pointer;
+    z-index: 31; transition: color 150ms ease, text-shadow 150ms ease; line-height: 1;
 }
-#dialogue-close:hover {
-    color: var(--text-main);
-    border-bottom-color: rgba(255,255,255,0.4);
-}
+#dialogue-close::after { content: "✖"; }
+#dialogue-close:hover { color: #D4AF37; text-shadow: 0 0 10px rgba(212,175,55,0.6); }
 
 .dialogue-header {
     position: absolute;
@@ -1544,38 +1788,44 @@ select:focus-visible {
 }
 
 /* VN Style Portrait Layout */
+/* VN Style Portrait Layout */
 .vn-portrait-container {
     position: absolute;
     bottom: 0;
-    height: 55vh; 
-    max-height: 520px; 
-    width: 45vw; 
-    max-width: 600px; 
+    width: 550px; /* Strict physical box for the art */
+    height: 900px; /* Strict height to prevent collapsing */
     display: flex;
     align-items: flex-end;
-    z-index: 20; 
+    z-index: 20;
     pointer-events: none;
 }
 .vn-portrait-container.vn-left {
-    left: 15vw; /* Pulls character inward toward the dialogue box */
-    justify-content: center;
+    left: 40px; /* Anchored to the left of the 1920px canvas */
+    justify-content: flex-start;
 }
 .vn-portrait-container.vn-right {
-    right: 15vw; /* Pulls character inward toward the dialogue box */
-    justify-content: center;
+    right: 40px; /* Anchored to the right of the 1920px canvas */
+    justify-content: flex-end;
 }
 
+.vn-portrait-container img,
 .npc-portrait-img,
 .pc-portrait-img {
-    width: auto;
+    width: 100%;
     height: 100%;
-    max-height: 100%;
     object-fit: contain;
     object-position: bottom;
     display: block;
-    /* mix-blend-mode removed to allow normal JPEG/PNG rendering */
-    transition: filter 400ms var(--ease), opacity 400ms var(--ease), transform 400ms var(--ease);
+    transition: filter 400ms var(--ease), opacity 400ms var(--ease);
     transform-origin: bottom center;
+}
+
+/* Push the character art toward the outer edges of the screen */
+.vn-portrait-container.vn-left img {
+    object-position: bottom left; 
+}
+.vn-portrait-container.vn-right img {
+    object-position: bottom right;
 }
 
 /* PC native art is drawn facing left (inward), so no flip is needed here */
@@ -1620,13 +1870,12 @@ select:focus-visible {
     position: absolute;
     top: -1.4rem;
     left: 2rem;
-    background: var(--bg-card);
+    background: linear-gradient(165deg, #1f242e, #14171e);
     padding: 5px 16px 5px 12px;
     border: 1px solid var(--border-strong);
-    border-left: 3px solid rgba(212,175,55,0.6);
-    border-radius: 4px;
+    border-radius: var(--radius);
     z-index: 20;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.5), 0 0 16px rgba(212,175,55,0.15);
 }
 #dialogue-npc-name {
     font-family: var(--font-body);
@@ -1661,32 +1910,35 @@ select:focus-visible {
 #dialogue-text p { margin-bottom: 1rem; }
 
 .dialogue-continue-btn {
-    background: transparent;
-    border: 1px solid var(--border-strong);
-    color: var(--text-main);
-    padding: 10px 24px;
+    background: linear-gradient(165deg, #5a6577, #3c4654);
+    border: 1px solid #1A1E26;
+    color: #EAECEF;
+    padding: 10px 32px;
     border-radius: var(--radius);
-    font-size: 0.8rem;
-    letter-spacing: 0.1em;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
-    font-weight: 500;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 250ms var(--ease);
+    transition: background 200ms, box-shadow 200ms, transform 150ms;
     align-self: flex-end;
     margin-top: 1rem;
     font-family: var(--font-body);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 10px rgba(0,0,0,0.4);
+    position: relative;
 }
 .dialogue-continue-btn::after {
-    content: none;
+    content: '▸';
+    margin-left: 8px;
 }
 .dialogue-continue-btn:hover {
-    border-color: var(--gold);
-    color: var(--gold);
-    background: rgba(212, 175, 55, 0.08);
-    transform: translateX(4px);
+    background: linear-gradient(165deg, var(--gold-light), var(--gold));
+    color: #0A0C11;
+    border-color: #D4AF37;
+    box-shadow: var(--gold-glow-md);
 }
-.dialogue-continue-btn:hover::after {
-    content: none;
+.dialogue-continue-btn:active {
+    transform: translateY(1px);
 }
 
 #dialogue-options {
@@ -1697,30 +1949,33 @@ select:focus-visible {
 }
 .option-btn {
     text-align: left;
-    padding: 16px 16px 16px 20px;
-    background: transparent;
-    border: 1px solid var(--border-strong);
-    border-left: 3px solid transparent;
+    padding: 14px 20px;
+    background: linear-gradient(165deg, #1a1e26, #11141a);
+    border: 1px solid #4A5568;
     border-radius: var(--radius);
-    color: var(--text-main);
-    font-size: 0.9rem;
-    transition: all 200ms var(--ease);
+    color: #EAECEF;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: var(--panel-edge);
+    transition: all 150ms ease;
+    position: relative;
 }
 .option-btn:hover,
 .option-btn:focus-visible {
-    border-color: rgba(212,175,55,0.5);
-    border-left-color: var(--gold);
-    background: rgba(212,175,55,0.04);
+    border-color: #D4AF37;
+    background: linear-gradient(165deg, var(--gold-light), var(--gold));
+    color: #0A0C11;
+    box-shadow: var(--gold-glow-md);
     outline: none;
-    transform: translateX(3px);
+    transform: translateX(4px);
 }
 .option-btn.curiosity-option {
-    border-color: rgba(107, 144, 128, 0.5);
-    border-left-color: var(--green);
-    color: var(--text-muted);
+    border-color: #6B9080;
+    color: #6B9080;
 }
-.option-btn.curiosity-option::before {
-    content: none;
+.option-btn.curiosity-option:hover {
+    background: #6B9080;
+    color: #0A0C11;
 }
 
 .notice-item {
@@ -1745,7 +2000,7 @@ select:focus-visible {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     z-index: 200;
-    position: fixed;
+    position: absolute;
     inset: 0;
     display: flex;
     align-items: center;
@@ -1794,10 +2049,11 @@ select:focus-visible {
     text-transform: uppercase;
     font-weight: 600;
     background: rgba(255,255,255,0.02);
+    box-shadow: var(--panel-edge);
 }
-.cons-badge.pos { border-color: var(--green); color: var(--green); background: rgba(107,144,128,0.06); }
-.cons-badge.neg { border-color: var(--red);   color: var(--red);   background: rgba(181,101,118,0.06); }
-.cons-badge.ct  { border-color: var(--gold);  color: var(--gold);  background: rgba(212,175,55,0.06); }
+.cons-badge.pos { border-color: var(--green); color: var(--green-light); background: rgba(107,144,128,0.1); box-shadow: var(--panel-edge), 0 0 14px rgba(107,144,128,0.25); }
+.cons-badge.neg { border-color: var(--red);   color: var(--red-light);   background: rgba(181,101,118,0.1); box-shadow: var(--panel-edge), 0 0 14px rgba(181,101,118,0.25); }
+.cons-badge.ct  { border-color: var(--gold);  color: var(--gold-light);  background: rgba(212,175,55,0.1);  box-shadow: var(--panel-edge), 0 0 14px rgba(212,175,55,0.25); }
 
 .cons-btn {
     padding: 12px 0 12px 20px;
@@ -1811,7 +2067,7 @@ select:focus-visible {
     text-transform: uppercase;
     font-family: var(--font-body);
     font-weight: 500;
-    transition: color 200ms var(--ease), border-color 200ms var(--ease), padding-left 200ms var(--ease);
+    transition: color 200ms var(--ease), border-color 200ms var(--ease), padding-left 200ms var(--ease), text-shadow 200ms var(--ease);
     width: 100%;
     text-align: left;
 }
@@ -1825,21 +2081,25 @@ select:focus-visible {
     border-left-color: rgba(212,175,55,0.6);
 }
 .cons-btn.primary:hover {
-    color: var(--gold);
+    color: var(--gold-light);
     border-left-color: var(--gold);
     padding-left: 26px;
+    text-shadow: 0 0 12px rgba(212,175,55,0.5);
 }
+
 
 /* ── Phase 2: game ending / final score ── */
 .ending-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 60px 24px;
+    padding: 40px 24px;
     max-width: 680px;
     width: 100%;
     text-align: center;
     gap: 0;
+    overflow-y: auto;
+    max-height: 100%;
 }
 .ending-eyebrow {
     font-size: 0.58rem;
@@ -1851,7 +2111,7 @@ select:focus-visible {
 }
 .ending-title {
     font-family: var(--font-title);
-    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-size: 3rem;
     color: var(--text-main);
     font-weight: 400;
     letter-spacing: -0.02em;
@@ -1891,21 +2151,33 @@ select:focus-visible {
     font-weight: 600;
 }
 .ending-gauge-bar-wrap {
-    height: 6px;
-    background: rgba(255,255,255,0.06);
-    border-radius: 1px;
+    height: 8px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.6);
+    border-radius: 4px;
     overflow: hidden;
+    position: relative;
 }
 .ending-gauge-bar {
     height: 100%;
     width: 0;
-    border-radius: 1px;
+    border-radius: 4px 0 0 4px;
     transition: width 1.4s var(--ease);
+    position: relative;
 }
-.ending-gauge-bar.ct { background: var(--gold);  box-shadow: 0 0 8px rgba(212,175,55,0.5); }
-.ending-gauge-bar.ih { background: var(--green); box-shadow: 0 0 8px rgba(107,144,128,0.5); }
-.ending-gauge-bar.vp { background: var(--red);   box-shadow: 0 0 8px rgba(181,101,118,0.5); }
+.ending-gauge-bar::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.45), rgba(255,255,255,0));
+}
+.ending-gauge-bar.ct { background: linear-gradient(90deg, #b8932c, var(--gold-light));  box-shadow: 0 0 10px rgba(212,175,55,0.55); }
+.ending-gauge-bar.ih { background: linear-gradient(90deg, #557466, var(--green-light)); box-shadow: 0 0 10px rgba(107,144,128,0.55); }
+.ending-gauge-bar.vp { background: linear-gradient(90deg, #934f5d, var(--red-light));   box-shadow: 0 0 10px rgba(181,101,118,0.55); }
 .ending-gauge-val {
+    font-family: var(--font-mono);
     font-size: 0.78rem;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
@@ -1919,20 +2191,27 @@ select:focus-visible {
     gap: 0;
     align-items: flex-start;
     width: 100%;
-    max-width: 280px;
-    border-left: 1px solid var(--border);
-    padding-left: 0;
+    max-width: 340px;
+    border-left: 1px solid rgba(212,175,55,0.3);
+    padding-left: 20px;
+    margin-top: 0.5rem;
+}
+.ending-wrapper--animated {
+    animation: ending-enter 1.2s var(--ease) both;
+}
+@keyframes ending-enter {
+    0%   { opacity: 0; transform: translateY(24px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
 
 /* Achievements / Toasts */
 .achievement-toast {
-    position: fixed;
+    position: absolute;
     bottom: 2rem;
     right: 2rem;
-    background: var(--bg-card);
+    background: var(--panel-gradient);
     border: 1px solid var(--border-strong);
-    border-left: 3px solid var(--gold);
-    border-radius: 4px;
+    border-radius: var(--radius);
     padding: 14px 18px;
     display: flex;
     align-items: flex-start;
@@ -1942,8 +2221,8 @@ select:focus-visible {
     transform: translateX(calc(100% + 2rem));
     transition: opacity 500ms var(--ease), transform 500ms var(--ease);
     max-width: 300px;
-    width: 90vw;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    width: 300px;
+    box-shadow: var(--panel-shadow), var(--gold-glow-sm);
     pointer-events: none;
 }
 .achievement-toast.visible {
@@ -2003,11 +2282,7 @@ select:focus-visible {
 #screen-game {
     display: flex;
     flex-direction: column;
-    width: 100vw;
-    height: 100vh;
     overflow: hidden;
-    position: fixed;
-    inset: 0;
 }
 
 /* =============================================================================
@@ -2051,9 +2326,10 @@ select:focus-visible {
 /* === MEDIA CARDS (WhatsApp, VoiceNote, Screenshot, Video) === */
 
 .media-card {
-    background: rgba(10, 10, 10, 0.65);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 12px;
+    background: linear-gradient(165deg, rgba(20,22,26,0.75), rgba(8,8,8,0.75));
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--panel-edge), 0 16px 40px rgba(0,0,0,0.45);
     padding: 1rem 1.1rem;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -2061,6 +2337,7 @@ select:focus-visible {
     margin: 0 auto;
     font-size: 0.88rem;
     line-height: 1.6;
+    animation: pop-in 350ms var(--ease);
 }
 
 .media-card-header {
@@ -2126,7 +2403,9 @@ select:focus-visible {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    background: rgba(255,255,255,0.05);
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
     border-radius: 8px;
     padding: 0.6rem 0.8rem;
     margin: 0.5rem 0;
@@ -2134,6 +2413,16 @@ select:focus-visible {
 
 .voicenote-icon {
     font-size: 1.1rem;
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #3fe68a, #25d366 70%);
+    box-shadow: 0 0 10px rgba(37,211,102,0.5);
+    color: #06210f;
 }
 
 .voicenote-waveform {
@@ -2214,7 +2503,8 @@ select:focus-visible {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: rgba(0,0,0,0.4);
+    background: radial-gradient(ellipse at center, rgba(40,44,52,0.6), rgba(0,0,0,0.5));
+    border: 1px solid rgba(255,255,255,0.06);
     border-radius: 8px;
     padding: 1.5rem;
     margin: 0.5rem 0;
@@ -2222,8 +2512,16 @@ select:focus-visible {
 }
 
 .video-play-icon {
-    font-size: 2.2rem;
-    color: rgba(255,255,255,0.5);
+    font-size: 1.6rem;
+    color: #0A0C11;
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff, #d8dbe0 70%);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5), 0 0 0 6px rgba(255,255,255,0.06);
 }
 
 .video-description {
@@ -2236,14 +2534,16 @@ select:focus-visible {
 /* === DOCUMENT CARDS (Notice, Document, Comparison) === */
 
 .document-card {
-    background: rgba(240, 236, 228, 0.04);
-    border: 1px solid rgba(240,236,228,0.12);
-    border-radius: 10px;
+    background: linear-gradient(165deg, rgba(240, 236, 228, 0.06), rgba(240, 236, 228, 0.02));
+    border: 1px solid rgba(240,236,228,0.14);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--panel-edge), 0 16px 40px rgba(0,0,0,0.4);
     padding: 1.25rem 1.4rem;
     max-width: 540px;
     margin: 0 auto;
     font-size: 0.88rem;
     line-height: 1.65;
+    animation: pop-in 350ms var(--ease);
 }
 
 /* --- Notice Card --- */
@@ -2362,21 +2662,25 @@ select:focus-visible {
 .stats-card {
     max-width: 420px;
     margin: 0 auto;
-    background: rgba(10,10,10,0.6);
+    background: linear-gradient(165deg, rgba(22,24,28,0.7), rgba(8,8,8,0.7));
     border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--panel-edge), 0 16px 40px rgba(0,0,0,0.45);
     overflow: hidden;
+    animation: pop-in 350ms var(--ease);
 }
 
 .stats-title {
     font-size: 0.72rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: var(--gold, #c9a84c);
+    color: var(--gold-light, #c9a84c);
     font-weight: 700;
     text-align: center;
     padding: 0.8rem;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    background: linear-gradient(165deg, rgba(212,175,55,0.1), rgba(212,175,55,0.02));
+    border-bottom: 1px solid rgba(212,175,55,0.18);
+    text-shadow: 0 0 10px rgba(212,175,55,0.3);
 }
 
 .stats-row {
@@ -2472,6 +2776,11 @@ select:focus-visible {
    below all dialogue (z-index 18 = under top-bar 20)
    ===================================================== */
 #next-week-banner {
+    position: absolute; /* CRITICAL FIX: Anchors banner safely to the screen */
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 9000; /* Ensures it stays above the map */
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -2512,11 +2821,11 @@ select:focus-visible {
     flex-shrink: 0;
 }
 .week-banner-stay {
-    background: transparent !important;
+    background: linear-gradient(165deg, rgba(255,255,255,0.05), rgba(255,255,255,0.005)) !important;
     color: var(--text-muted) !important;
     border: 1px solid var(--border) !important;
     padding: 9px 20px !important;
-    border-radius: 2px !important;
+    border-radius: var(--radius) !important;
     cursor: pointer !important;
     font-size: 0.62rem !important;
     letter-spacing: 0.1em !important;
@@ -2534,34 +2843,35 @@ select:focus-visible {
     transform: translateY(0);
 }
 .week-banner-advance {
-    background: rgba(212,175,55,0.1) !important;
-    color: var(--gold) !important;
-    border: 1px solid rgba(212,175,55,0.5) !important;
+    background: linear-gradient(165deg, var(--gold-light), var(--gold)) !important;
+    color: #0A0C11 !important;
+    border: 1px solid var(--gold) !important;
     padding: 9px 24px !important;
-    border-radius: 2px !important;
-    font-weight: 600 !important;
+    border-radius: var(--radius) !important;
+    font-weight: 700 !important;
     cursor: pointer !important;
     font-size: 0.7rem !important;
     letter-spacing: 0.12em !important;
     text-transform: uppercase !important;
     font-family: var(--font-body) !important;
+    box-shadow: var(--gold-glow-sm) !important;
     transition: all 0.2s !important;
 }
 .week-banner-advance:hover {
-    background: rgba(212,175,55,0.18) !important;
-    border-color: var(--gold) !important;
+    box-shadow: var(--gold-glow-md) !important;
+    transform: translateY(-1px) !important;
 }
 
-/* override the old blanket button rule from before */
+/* Override the old blanket button rule — now drives a subtle game-style lift instead of killing transforms */
 #next-week-banner button:hover {
-    transform: none !important;
+    transform: translateY(-1px) !important;
 }
 
 /* =============================================================
    GAUGE TUTORIAL OVERLAY — shown once on first game start
    ============================================================= */
 #gauge-tutorial {
-    position: fixed;
+    position: absolute;
     inset: 0;
     background: rgba(0,0,0,0.88);
     z-index: 10000;
@@ -2577,14 +2887,14 @@ select:focus-visible {
     pointer-events: auto;
 }
 .gauge-tutorial-inner {
-    background: var(--bg-card);
-    border: 1px solid rgba(212,175,55,0.2);
-    border-top: 2px solid rgba(212,175,55,0.35);
-    border-radius: var(--radius);
+    background: var(--panel-gradient);
+    border: 1px solid rgba(212,175,55,0.22);
+    border-top: 2px solid rgba(212,175,55,0.4);
+    border-radius: var(--radius-lg);
     padding: 2.5rem;
     max-width: 500px;
     width: 90%;
-    box-shadow: 0 32px 80px rgba(0,0,0,0.7);
+    box-shadow: var(--panel-shadow-lg), 0 0 60px rgba(212,175,55,0.08);
 }
 .gauge-tutorial-inner h2 {
     font-family: var(--font-title);
@@ -2611,8 +2921,9 @@ select:focus-visible {
     gap: 1rem;
     align-items: flex-start;
     padding: 0.8rem;
-    background: rgba(255,255,255,0.02);
+    background: linear-gradient(165deg, rgba(255,255,255,0.03), rgba(255,255,255,0.005));
     border: 1px solid var(--border);
+    box-shadow: var(--panel-edge);
     border-radius: var(--radius);
 }
 .tg-icon {
@@ -2637,9 +2948,9 @@ select:focus-visible {
 .gauge-tutorial-inner .tut-btn {
     width: 100%;
     padding: 14px;
-    border: 1px solid rgba(212,175,55,0.4);
+    border: 1px solid rgba(212,175,55,0.45);
     color: var(--gold);
-    background: transparent;
+    background: linear-gradient(165deg, rgba(212,175,55,0.06), rgba(212,175,55,0.01));
     border-radius: var(--radius);
     font-size: 0.75rem;
     letter-spacing: 0.12em;
@@ -2649,32 +2960,32 @@ select:focus-visible {
     font-family: var(--font-body);
 }
 .gauge-tutorial-inner .tut-btn:hover {
-    background: rgba(212,175,55,0.08);
+    background: linear-gradient(165deg, var(--gold-light), var(--gold));
+    color: #0A0C11;
     border-color: var(--gold);
+    box-shadow: var(--gold-glow-md);
 }
 
 /* Gauge tooltip panel */
 .gauge-tooltip-panel {
-    /* position: fixed escapes the sticky top-bar stacking context
-       so it won't be buried under the objective-bar (z-25) */
-    position: fixed;
-    top: 76px;   /* sits just below the top-bar */
-    left: 32px;  /* overridden per-gauge by toggleGaugeInfo() */
-    background: var(--bg-card);
-    border: 1px solid var(--border-strong);
-    border-top: 2px solid rgba(212,175,55,0.35);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    width: 244px;
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    line-height: 1.65;
-    z-index: 200;  /* well above everything */
-    box-shadow: 0 10px 28px rgba(0,0,0,0.6);
+    position: absolute;
+    top: calc(100% + 12px); /* Drops cleanly below the gauge */
+    left: 0; /* Anchors strictly to the left edge of its parent gauge */
+    background: #0D0F14;
+    border: 1px solid #2D3748;
+    border-top: 2px solid #D4AF37;
+    border-radius: 4px;
+    padding: 16px 20px;
+    width: 280px;
+    font-size: 0.8rem;
+    color: #EAECEF;
+    line-height: 1.6;
+    z-index: 200;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.8);
     pointer-events: none;
     opacity: 0;
-    transform: translateY(-6px);
-    transition: opacity 200ms, transform 200ms;
+    transform: translateY(-8px);
+    transition: opacity 200ms ease, transform 200ms ease;
 }
 .gauge-tooltip-panel.visible {
     opacity: 1;
@@ -2683,11 +2994,11 @@ select:focus-visible {
 }
 .gauge-tooltip-panel strong {
     display: block;
-    color: var(--text-main);
+    color: #D4AF37;
     font-size: 0.65rem;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 .gauge-container { position: relative; }
 
@@ -2741,21 +3052,18 @@ select:focus-visible {
 }
 .pause-ach-item:last-child { border-bottom: none; }
 .pause-ach-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--gold);
+    width: 20px;
     flex-shrink: 0;
+    margin-top: 2px;
+    font-size: 0.9rem;
+    color: var(--gold);
+    text-align: center;
+    line-height: 1;
+    text-shadow: 0 0 8px rgba(212,175,55,0.5);
 }
-.pause-ach-dot.locked { background: var(--border-strong); }
-.pause-ach-name { color: var(--text-main); font-weight: 500; }
-.pause-ach-desc { color: var(--text-muted); font-size: 0.7rem; display: none; }
-.pause-ach-item.earned .pause-ach-desc { display: block; }
-.pause-ach-empty {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    font-style: italic;
-    padding: 0.5rem 0;
+.pause-ach-dot.locked {
+    color: rgba(255,255,255,0.2);
+    text-shadow: none;
 }
 
 /* itch.io / Steam fullscreen compatibility */
@@ -2778,24 +3086,43 @@ html, body {
     -webkit-user-select: text;
 }
 
-/* Ensure game always fills viewport, even on unusual resolutions */
-#screen-game {
-    min-height: 100vh;
-    min-width: 100vw;
+#screen-game, #screen-character, #screen-achievements {
+    width: 1920px !important;
+    height: 1080px !important;
+    min-width: auto;
+    min-height: auto;
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden !important; /* CRITICAL: Forces wide monitors to clip correctly */
 }
 
-/* Copyright Notice */
+/* Presentation Footer & Game Version */
 .copyright-notice {
     position: absolute;
-    bottom: 2rem;
+    bottom: 2.5rem;
     left: 0;
     width: 100%;
     text-align: center;
-    font-size: 0.65rem;
-    color: rgba(255, 255, 255, 0.3);
-    letter-spacing: 0.1em;
+    font-size: 0.55rem;
+    font-family: var(--font-body);
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.18);
+    letter-spacing: 0.28em;
     text-transform: uppercase;
     pointer-events: none;
+}
+
+.game-version {
+    position: absolute;
+    bottom: 2.5rem;
+    right: 2.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.25);
+    letter-spacing: 0.1em;
+    pointer-events: none;
+    z-index: 10;
 }
 
 /* (duplicate .game-slider block removed — definition kept above) */
@@ -2902,7 +3229,8 @@ html, body {
     padding: 10px 12px;
     border-radius: var(--radius);
     border: 1px solid var(--border);
-    background: rgba(255,255,255,0.02);
+    box-shadow: var(--panel-edge);
+    background: linear-gradient(165deg, rgba(255,255,255,0.03), rgba(255,255,255,0.005));
 }
 .char-confirm-trait-label {
     font-size: 0.55rem;
@@ -2913,8 +3241,8 @@ html, body {
     width: 90px;
     padding-top: 2px;
 }
-.char-confirm-trait.perk .char-confirm-trait-label { color: var(--green); }
-.char-confirm-trait.dis .char-confirm-trait-label { color: var(--red); }
+.char-confirm-trait.perk .char-confirm-trait-label { color: var(--green-light); }
+.char-confirm-trait.dis .char-confirm-trait-label { color: var(--red-light); }
 .char-confirm-trait-text {
     font-size: 0.78rem;
     color: var(--text-muted);
@@ -2926,8 +3254,9 @@ html, body {
     gap: 6px;
     margin-bottom: 1.25rem;
     padding: 12px;
-    background: rgba(255,255,255,0.02);
+    background: linear-gradient(165deg, rgba(255,255,255,0.03), rgba(255,255,255,0.005));
     border: 1px solid var(--border);
+    box-shadow: var(--panel-edge);
     border-radius: var(--radius);
 }
 .char-confirm-warning {
@@ -3003,18 +3332,20 @@ html, body {
     background: var(--gold);
 }
 .ach-tile {
-    background: var(--bg-surface);
+    background: var(--panel-gradient);
     border: 1px solid var(--border);
+    box-shadow: var(--panel-edge);
     border-radius: var(--radius);
     padding: 1rem 1.25rem;
     display: flex;
     gap: 1rem;
     align-items: flex-start;
-    transition: border-color 200ms;
+    transition: border-color 200ms, box-shadow 200ms, transform 200ms;
 }
 .ach-tile.earned {
-    border-color: rgba(212,175,55,0.3);
-    background: rgba(212,175,55,0.03);
+    border-color: rgba(212,175,55,0.35);
+    background: linear-gradient(165deg, rgba(212,175,55,0.08), rgba(212,175,55,0.015));
+    box-shadow: var(--panel-edge), 0 0 18px rgba(212,175,55,0.12);
 }
 .ach-tile.hidden-tile {
     border-style: dashed;
@@ -3028,7 +3359,7 @@ html, body {
     flex-shrink: 0;
     margin-top: 5px;
 }
-.ach-tile.earned .ach-tile-dot { background: var(--gold); box-shadow: 0 0 8px rgba(212,175,55,0.4); }
+.ach-tile.earned .ach-tile-dot { background: var(--gold-light); box-shadow: 0 0 10px rgba(212,175,55,0.6); }
 .ach-tile-body {
     display: flex;
     flex-direction: column;
@@ -3088,7 +3419,7 @@ html, body {
     flex-direction: column;
     align-items: center;
     gap: 0;
-    padding: 30vh 2rem 30vh;
+    padding: 324px 2rem 324px;
     width: 100%;
     max-width: 640px;
     will-change: transform;
@@ -3101,7 +3432,7 @@ html, body {
 }
 .credits-game-title {
     font-family: var(--font-title);
-    font-size: clamp(3rem, 8vw, 6rem);
+    font-size: 5rem;
     color: var(--text-main);
     letter-spacing: -0.03em;
     line-height: 1;
@@ -3165,7 +3496,7 @@ html, body {
 }
 .credits-final-line {
     font-family: var(--font-title);
-    font-size: clamp(1.2rem, 3vw, 2rem);
+    font-size: 1.75rem;
     color: var(--text-muted);
     font-style: italic;
     margin-bottom: 2rem;
@@ -3179,7 +3510,7 @@ html, body {
 }
 
 .credits-close-btn {
-    position: fixed;
+    position: absolute;
     top: 2rem;
     right: 2rem;
     z-index: 10;
@@ -3198,8 +3529,8 @@ html, body {
     font-weight: 600;
 }
 .credits-close-btn:hover {
-    color: var(--text-main);
-    border-left-color: var(--text-main);
+    color: var(--gold);
+    border-left-color: var(--gold);
 }
 
 /* ── Achievements menu button restored to normal weight */
@@ -3208,10 +3539,10 @@ html, body {
     position: relative;
     flex: 1;
     width: 100%;
+    height: 100%; /* Ensures the map fills the remaining space perfectly */
     overflow: hidden;
     background: #0f0c08;
     z-index: 1;
-    min-height: 0; /* Required: lets flex child shrink below natural height */
 }
 
 #map-inner-wrap {

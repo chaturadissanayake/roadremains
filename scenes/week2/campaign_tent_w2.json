@@ -19,7 +19,7 @@
       "type": "dialogue",
       "speaker": "Mahinda Bandara",
       "portrait_state": "npc_mahinda_talking",
-      "text": "Welcome! Welcome, come in! Have you had a cold drink? Sit — I was just speaking to some young people about the future of this area.",
+      "text": "Welcome! Welcome, come in! Have you had a cold drink? Sit,  I was just speaking to some young people about the future of this area.",
       "advance": "click"
     },
     {
@@ -27,7 +27,7 @@
       "type": "dialogue",
       "speaker": "Mahinda Bandara",
       "portrait_state": "npc_mahinda_talking",
-      "text": "We have a very strong plan. Infrastructure. Jobs. The road — we have been working on the road. It is a priority. Top of the list.",
+      "text": "We have a very strong plan. Infrastructure. Jobs. The road,  we have been working on the road. It is a priority. Top of the list.",
       "advance": "click"
     },
     {
@@ -36,7 +36,7 @@
       "speaker": "Mahinda Bandara",
       "portrait_state": "npc_mahinda_evasive",
       "condition": "flags.readCurrentManifesto",
-      "text": "Ah, you read the manifesto! Very good. Informed voters — that is what we need. The road section — the timelines are there. Everything is in the document.",
+      "text": "Ah, you read the manifesto! Very good. Informed voters,  that is what we need. The road section,  the timelines are there. Everything is in the document.",
       "advance": "click"
     },
     {
@@ -45,7 +45,7 @@
       "speaker": "Mahinda Bandara",
       "portrait_state": "npc_mahinda_evasive",
       "condition": "flags.reportedIllegalPosters",
-      "text": "The posters — I have spoken to the team about that. A misunderstanding. We follow all proper procedures.",
+      "text": "The posters,  I have spoken to the team about that. A misunderstanding. We follow all proper procedures.",
       "advance": "click"
     },
     {
