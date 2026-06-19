@@ -1,0 +1,804 @@
+/* =====================================================
+   ROAD REMAINS — map.css
+   Town Map, HUD, Gauges, Overlays, Week Banner
+   ===================================================== */
+
+/* ── Top Bar ──────────────────────────────────────── */
+.top-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 24px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    z-index: 40;
+    pointer-events: none;
+}
+
+/* ── Gauge Row ────────────────────────────────────── */
+/*
+ * CLEANUP: Removed duplicate incomplete .gauges definition that had
+ * gap: 32px and no other properties, conflicting with the proper block.
+ */
+.gauges {
+    display: flex;
+    gap: 16px;
+    flex-grow: 0;
+    align-items: stretch;
+    pointer-events: auto;
+}
+
+/* ── Gauge Container ──────────────────────────────── */
+/*
+ * CLEANUP: Removed the first duplicate .gauge-container definition
+ * (width: 180px, no flex, partial properties) that was overridden
+ * here anyway. Keeping only the canonical definition.
+ */
+.gauge-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 20px 10px 16px;
+    background: linear-gradient(165deg, rgba(20,23,30,0.98), rgba(10,12,17,0.98));
+    border: 1px solid rgba(255,255,255,0.06);
+    border-top: 2px solid transparent;
+    border-radius: var(--radius);
+    box-shadow: var(--panel-edge), 0 6px 18px rgba(0,0,0,0.35);
+    min-width: 160px;
+    width: 260px;
+    position: relative;
+}
+.gauge-container[data-gauge="ct"] { border-top-color: var(--gold); }
+.gauge-container[data-gauge="ih"] { border-top-color: var(--green); }
+.gauge-container[data-gauge="vp"] { border-top-color: var(--red); }
+
+.gauge-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+.gauge-name {
+    flex: 1;
+    font-size: 0.58rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+.gauge-icon {
+    font-size: 0.7rem;
+    line-height: 1;
+    margin-right: 5px;
+    flex-shrink: 0;
+    text-transform: none;
+    letter-spacing: 0;
+    opacity: 0.65;
+}
+.gauge-container[data-gauge="ct"] .gauge-icon { color: var(--gold); }
+.gauge-container[data-gauge="ih"] .gauge-icon { color: var(--green); }
+.gauge-container[data-gauge="vp"] .gauge-icon { color: var(--red-light); }
+
+.gauge-readout {
+    font-family: var(--font-mono);
+    font-size: 0.86rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    min-width: 26px;
+    text-align: right;
+    line-height: 1;
+    transition: text-shadow 300ms;
+}
+.gauge-container[data-gauge="ct"] .gauge-readout { color: var(--gold-light); text-shadow: 0 0 12px rgba(212,175,55,0.45); }
+.gauge-container[data-gauge="ih"] .gauge-readout { color: var(--green-light); text-shadow: 0 0 12px rgba(107,144,128,0.45); }
+.gauge-container[data-gauge="vp"] .gauge-readout { color: var(--red-light); text-shadow: 0 0 12px rgba(181,101,118,0.45); }
+
+.gauge-info-btn {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1px solid var(--border-strong);
+    color: var(--text-muted);
+    font-size: 0.48rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 200ms;
+    line-height: 1;
+    padding: 0;
+    background: rgba(255,255,255,0.03);
+    font-family: var(--font-body);
+    position: relative;
+}
+.gauge-info-btn::before {
+    content: '';
+    position: absolute;
+    inset: -15px;
+}
+.gauge-info-btn:hover,
+.gauge-info-btn:focus-visible {
+    border-color: var(--gold);
+    color: var(--gold);
+    box-shadow: 0 0 8px rgba(212,175,55,0.4);
+    outline: none;
+}
+
+/* ── Gauge Track ──────────────────────────────────── */
+/*
+ * CLEANUP: Removed the first duplicate .gauge-track definition
+ * (height: 3px, plain background) that was overriding the
+ * correct definition below with its inset shadow and tick marks.
+ */
+.gauge-track {
+    height: 6px;
+    background: rgba(0,0,0,0.45);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 3px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.6);
+    overflow: visible;
+    position: relative;
+    width: 100%;
+}
+.gauge-track::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: -1px;
+    bottom: -1px;
+    width: 1px;
+    background: rgba(255,255,255,0.3);
+    z-index: 2;
+    pointer-events: none;
+}
+.gauge-track::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(90deg, transparent 0 9px, rgba(0,0,0,0.35) 9px 10px);
+    pointer-events: none;
+}
+
+.gauge-fill {
+    height: 100%;
+    width: 50%;
+    border-radius: 3px 0 0 3px;
+    position: relative;
+    transition: width 900ms var(--ease), background-color 600ms;
+}
+.gauge-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0));
+    pointer-events: none;
+}
+#fill-ct { background: linear-gradient(90deg, #b8932c, var(--gold) 60%, var(--gold-light)); box-shadow: 0 0 10px rgba(212,175,55,0.6); }
+#fill-ih { background: linear-gradient(90deg, #557466, var(--green) 60%, var(--green-light)); box-shadow: 0 0 10px rgba(107,144,128,0.6); }
+#fill-vp { background: linear-gradient(90deg, #934f5d, var(--red) 60%, var(--red-light)); box-shadow: 0 0 10px rgba(181,101,118,0.6); }
+
+/* ── Week Indicator ───────────────────────────────── */
+.week-indicator {
+    background: #0D0F14;
+    border: 1px solid #4A5568;
+    border-radius: 4px;
+    box-shadow: inset 0 2px 0 rgba(255,255,255,0.05), 0 4px 12px rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 20px;
+    white-space: nowrap;
+}
+.week-label {
+    font-family: var(--font-body);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #9BA4B5;
+    line-height: 1;
+    margin-top: 2px;
+}
+#week-val {
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #D4AF37;
+    text-shadow: 0 0 8px rgba(212,175,55,0.4);
+    line-height: 1;
+}
+
+/* ── Top Bar Controls ─────────────────────────────── */
+.top-bar-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    pointer-events: auto;
+}
+
+/* ── Pause Button ─────────────────────────────────── */
+/*
+ * CLEANUP: Removed first duplicate .pause-btn definition
+ * (flat #0D0F14 background, no gradient, incomplete) that was
+ * overriding the properly crafted version below.
+ */
+.pause-btn {
+    background: linear-gradient(165deg, #232832, #161920);
+    border: 1px solid #4A5568;
+    box-shadow: var(--panel-edge), 0 4px 12px rgba(0,0,0,0.4);
+    color: #EAECEF;
+    border-radius: var(--radius);
+    padding: 8px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    transition: all 150ms ease;
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-family: var(--font-body);
+    font-weight: 700;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+}
+.pause-btn:hover,
+.pause-btn:focus-visible {
+    background: linear-gradient(165deg, var(--gold-light), var(--gold));
+    border-color: var(--gold);
+    color: #0A0C11;
+    box-shadow: var(--gold-glow-md);
+    outline: none;
+}
+
+/* ── Pause Overlay ────────────────────────────────── */
+.pause-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 12, 18, 0.95);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 300ms var(--ease), visibility 300ms;
+}
+.pause-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+.pause-content {
+    text-align: left;
+    width: 100%;
+    max-width: 560px;
+    padding: 2rem;
+    margin-left: 100px;
+}
+
+/* ── Objective Bar ────────────────────────────────── */
+#objective-bar {
+    position: absolute;
+    bottom: 1.2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(165deg, rgba(22,25,32,0.95), rgba(8,10,14,0.95));
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.72rem;
+    padding: 7px 18px;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: var(--radius);
+    box-shadow: var(--panel-edge), 0 10px 28px rgba(0,0,0,0.5);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    z-index: 25;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    white-space: normal;
+    text-align: center;
+    max-width: 620px;
+    pointer-events: none;
+    transition: opacity 600ms ease;
+}
+#objective-icon {
+    font-size: 0.52rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-family: var(--font-body);
+    color: var(--gold);
+    opacity: 0.85;
+    margin-right: 6px;
+    text-shadow: 0 0 8px rgba(212,175,55,0.5);
+}
+
+#road-network path {
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.map-loc-label {
+    font-family: var(--font-title), serif;
+    font-size: 10px;
+    font-weight: 600;
+    fill: #3a2e1a;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-anchor: middle;
+    pointer-events: none;
+    paint-order: stroke;
+    stroke: #f5eedc;
+    stroke-width: 3px;
+    stroke-linejoin: round;
+}
+
+/* ── Prologue state ───────────────────────────────── */
+.prologue-active #objective-bar {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ── Map Container ────────────────────────────────── */
+#map-svg-container {
+    position: relative;
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #0f0c08;
+    z-index: 1;
+}
+#map-inner-wrap {
+    position: absolute;
+    width: 1920px;
+    height: 1080px;
+    transform-origin: top left;
+}
+.background-map {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1920px;
+    height: 1080px;
+    z-index: 1;
+    pointer-events: none;
+    display: block;
+}
+
+/* ── Map Locations ────────────────────────────────── */
+.map-location {
+    position: absolute;
+    cursor: pointer;
+    z-index: 2;
+    transition: filter 0.25s ease, transform 0.25s ease;
+    transform: translate(-50%, -50%);
+}
+.map-location:not(.pulse-active):hover,
+.map-location:not(.pulse-active):focus-visible {
+    z-index: 5;
+    filter: brightness(1.12) drop-shadow(0 4px 16px rgba(212,175,55,0.25));
+    transform: translate(-50%, -50%) translateY(-4px);
+    outline: none;
+}
+.map-location.pulse-active:hover {
+    z-index: 5;
+}
+.map-asset {
+    display: block;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+}
+
+/* ── Radar Pulse ──────────────────────────────────── */
+.base-dot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--gold, #D4AF37);
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.6);
+    z-index: 4;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 400ms ease;
+}
+.radar-ripple {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid rgba(212, 175, 55, 0.7);
+    background: transparent;
+    z-index: 3;
+    pointer-events: none;
+    animation: none;
+    opacity: 0;
+}
+@keyframes radar-pulse {
+    0%   { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+    100% { transform: translate(-50%, -50%) scale(4); opacity: 0; }
+}
+.map-location.pulse-active .radar-ripple {
+    border-color: var(--gold, #D4AF37);
+    border-width: 3px;
+    animation: radar-pulse-fast 1.2s ease-out infinite;
+    width: 18px;
+    height: 18px;
+}
+.map-location.pulse-active .base-dot {
+    opacity: 1;
+    background: #ffffff;
+    box-shadow: 0 0 18px rgba(212, 175, 55, 1);
+}
+@keyframes radar-pulse-fast {
+    0%   { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    60%  { opacity: 0.6; }
+    100% { transform: translate(-50%, -50%) scale(7); opacity: 0; }
+}
+.map-location.pulse-active::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid rgba(212, 175, 55, 0.5);
+    background: transparent;
+    pointer-events: none;
+    animation: radar-pulse-fast 1.2s ease-out 0.6s infinite;
+    z-index: 3;
+}
+
+/* ── Location States ──────────────────────────────── */
+.map-location.unlocked .map-asset {
+    filter: drop-shadow(0 0 10px rgba(107, 144, 128, 0.75));
+}
+.map-location.unlocked-loc {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* ── Reduced Motion / Map ─────────────────────────── */
+body.reduce-motion .radar-ripple,
+body.reduce-motion .map-location.pulse-active .radar-ripple {
+    animation: none !important;
+    opacity: 0.5;
+}
+body.reduce-motion .map-location.pulse-active .base-dot {
+    opacity: 1 !important;
+    transition: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    .radar-ripple {
+        animation: none !important;
+        opacity: 0.5;
+    }
+}
+@keyframes map-pulse {
+    0%, 100% { filter: drop-shadow(0 0 0px transparent); }
+    50% { filter: drop-shadow(0 0 12px var(--gold, #C9A84C)); }
+}
+
+/* ── Game Container ───────────────────────────────── */
+#game-container-16x9 {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+#screen-game {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* ── Next Week Banner (Centered Pill) ───────────── */
+#next-week-banner {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    z-index: 9990;
+    background: rgba(15, 18, 26, 0.95);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 24px 48px;
+    border-radius: 12px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    opacity: 0;
+    transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
+    backdrop-filter: blur(8px);
+    width: auto;
+    min-width: 400px;
+    text-align: center;
+}
+
+#next-week-banner.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.week-banner-headline {
+    font-family: var(--font-title);
+    font-size: 1.25rem;
+    color: #fff;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    margin: 0;
+}
+
+.week-banner-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+}
+
+.week-banner-stay {
+    background: rgba(255,255,255,0.04);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    padding: 10px 24px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-family: var(--font-body);
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.week-banner-stay:hover,
+.week-banner-stay:focus-visible {
+    color: var(--text-main);
+    border-color: var(--gold);
+    background: rgba(212,175,55,0.1);
+    outline: none;
+}
+
+.week-banner-advance {
+    background: linear-gradient(165deg, var(--gold-light), var(--gold));
+    color: #0A0C11;
+    border: 1px solid var(--gold);
+    padding: 10px 28px;
+    border-radius: var(--radius);
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-family: var(--font-body);
+    box-shadow: var(--gold-glow-sm);
+    transition: all 0.2s;
+}
+
+.week-banner-advance:hover,
+.week-banner-advance:focus-visible {
+    box-shadow: var(--gold-glow-md);
+    transform: translateY(-2px);
+    outline: none;
+}
+
+/* ── Gauge Tutorial Overlay ───────────────────────── */
+#gauge-tutorial {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.88);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 400ms var(--ease);
+    pointer-events: none;
+}
+#gauge-tutorial.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+.gauge-tutorial-inner {
+    background: var(--panel-gradient);
+    border: 1px solid rgba(212,175,55,0.22);
+    border-top: 2px solid rgba(212,175,55,0.4);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: var(--panel-shadow-lg), 0 0 60px rgba(212,175,55,0.08);
+}
+.gauge-tutorial-inner h2 {
+    font-family: var(--font-title);
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin-bottom: 0.4rem;
+    color: var(--text-main);
+    letter-spacing: -0.01em;
+}
+.gauge-tutorial-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-main);
+    margin-bottom: 1.8rem;
+    line-height: 1.6;
+}
+.tutorial-gauges {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    margin-bottom: 2rem;
+}
+.tg-item {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 0.8rem;
+    background: linear-gradient(165deg, rgba(255,255,255,0.03), rgba(255,255,255,0.005));
+    border: 1px solid var(--border);
+    box-shadow: var(--panel-edge);
+    border-radius: var(--radius);
+}
+.tg-icon {
+    font-size: 1.1rem;
+    width: 28px;
+    flex-shrink: 0;
+    text-align: center;
+    margin-top: 1px;
+}
+.tg-name {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+}
+.tg-desc {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.6;
+}
+.gauge-tutorial-inner .tut-btn {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid rgba(212,175,55,0.45);
+    color: var(--gold);
+    background: linear-gradient(165deg, rgba(212,175,55,0.06), rgba(212,175,55,0.01));
+    border-radius: var(--radius);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 300ms;
+    font-family: var(--font-body);
+}
+.gauge-tutorial-inner .tut-btn:hover {
+    background: linear-gradient(165deg, var(--gold-light), var(--gold));
+    color: #0A0C11;
+    border-color: var(--gold);
+    box-shadow: var(--gold-glow-md);
+}
+
+/* ── Gauge Tooltip ────────────────────────────────── */
+.gauge-tooltip-panel {
+    position: absolute;
+    top: calc(100% + 12px);
+    left: 0;
+    background: #0D0F14;
+    border: 1px solid #2D3748;
+    border-top: 2px solid #D4AF37;
+    border-radius: 4px;
+    padding: 16px 20px;
+    width: 280px;
+    font-size: 0.8rem;
+    color: #EAECEF;
+    line-height: 1.6;
+    z-index: 200;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.8);
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 200ms ease, transform 200ms ease;
+}
+.gauge-tooltip-panel.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+.gauge-tooltip-panel strong {
+    display: block;
+    color: #D4AF37;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+/* ── Pause Achievements ───────────────────────────── */
+.pause-achievements {
+    margin-top: 2rem;
+    max-width: 360px;
+    width: 100%;
+    text-align: left;
+}
+.pause-ach-title {
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+}
+.pause-ach-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-height: 160px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212, 175, 55, 0.4) transparent;
+}
+.pause-ach-list::-webkit-scrollbar {
+    width: 4px;
+}
+.pause-ach-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+.pause-ach-list::-webkit-scrollbar-thumb {
+    background: rgba(212, 175, 55, 0.4);
+    border-radius: 10px;
+}
+.pause-ach-list::-webkit-scrollbar-thumb:hover {
+    background: var(--gold);
+}
+.pause-ach-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.75rem;
+}
+.pause-ach-item:last-child { border-bottom: none; }
+.pause-ach-dot {
+    width: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-size: 0.9rem;
+    color: var(--gold);
+    text-align: center;
+    line-height: 1;
+    text-shadow: 0 0 8px rgba(212,175,55,0.5);
+}
+.pause-ach-dot.locked {
+    color: rgba(255,255,255,0.2);
+    text-shadow: none;
+}
+
+/* ── Polling Station Special State ────────────────── */
+#loc9-node.polling-unlocked {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}

@@ -4,36 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Road Remains - An interactive civic education game to improve voter knowledge and counter election misinformation in Sri Lanka. Available in English, Sinhala, and Tamil.">
-    <link rel="icon" href="data:;base64,iVBORw0KGgo="> <!-- Prevents missing favicon error -->
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Road Remains</title>
     
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Noto+Sans+Sinhala:wght@400;500;600&family=Noto+Sans+Tamil:wght@400;500;600&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="style.css">
-    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/map.css">
+    <link rel="stylesheet" href="css/dialogue.css">
+    
+    <script src="js/config.js" defer></script>
+    <script src="js/state.js" defer></script>
+    <script src="js/ui.js" defer></script>
+    <script src="js/engine.js" defer></script>
 </head>
 <body>
     <div id="game-canvas">
     <button class="skip-link" onclick="document.getElementById('btn-newgame').click();">Skip to game</button>
 
-    <!-- Screen 1: Loading -->
     <div id="screen-loading" class="screen">
         <div class="screen-bg-container" id="bg-loading"></div>
         <div class="loading-content">
             <div id="loading-logo" data-i18n="title">Road Remains</div>
             <div id="loading-tagline" data-i18n="loading.tagline">An election is coming. Alupotha is not ready. Neither are you.</div>
-    <div id="loading-prompt" data-i18n="loading.begin">Click anywhere to begin</div>
+            <div id="loading-prompt" data-i18n="loading.begin">Click anywhere to begin</div>
         </div>
         <div class="copyright-notice">Chatura Dissanayake Presents Road Remains</div>
-        <div class="game-version">v2.0.2</div>
+        <div class="game-version">v2.0.3</div>
     </div>
 
-    <!-- Screen 2: Language -->
     <div id="screen-language" class="screen">
         <div class="screen-bg-container" id="bg-language"></div>
         <div class="flex-center">
@@ -44,34 +48,39 @@
             </div>
             <div class="lang-buttons">
                 <button class="lang-btn" onclick="selectLanguage('en')">English</button>
-                <button class="lang-btn lang-btn--coming-soon" disabled lang="si" aria-label="සිංහල - Coming Soon" style="display: none; font-family: var(--font-si);">සිංහල <span class="lang-soon-badge">Soon</span></button>
-                <button class="lang-btn lang-btn--coming-soon" disabled lang="ta" aria-label="தமிழ் - Coming Soon" style="display: none; font-family: var(--font-ta);">தமிழ் <span class="lang-soon-badge">Soon</span></button>
+                <button class="lang-btn lang-btn--coming-soon" disabled lang="si" aria-label="සිංහල - Coming Soon" style="opacity: 0.6; cursor: not-allowed; border-color: rgba(255,255,255,0.05); font-family: var(--font-si);" title="Sinhala translation in progress.">සිංහල</button>
+                <button class="lang-btn lang-btn--coming-soon" disabled lang="ta" aria-label="தமிழ் - Coming Soon" style="opacity: 0.6; cursor: not-allowed; border-color: rgba(255,255,255,0.05); font-family: var(--font-ta);" title="Tamil translation in progress.">தமிழ்</button>
             </div>
         </div>
     </div>
 
-    <!-- Screen 3: Main Menu -->
     <div id="screen-mainmenu" class="screen">
-        <div class="screen-bg-container" id="bg-main-menu"></div> <!-- Background for Menu -->
+        <div class="screen-bg-container" id="bg-main-menu"></div>
         <div class="menu-center-layout">
             <div class="menu-title-block">
                 <h1 class="menu-title" data-i18n="title">Road Remains</h1>
-                <p id="menu-subtitle" class="menu-subtitle" data-i18n="menu.subtitle">Alupotha is waiting.</p>
             </div>
             <div class="menu-actions">
-                <button id="btn-continue" class="menu-btn primary" onclick="loadGame()" style="display: none;" data-i18n="menu.continue">Continue</button>
-                <button id="btn-newgame" class="menu-btn" onclick="checkNewGame()" data-i18n="menu.newgame">New Game</button>
-                <button class="menu-btn" onclick="openModal('modal-settings')" data-i18n="menu.settings">Settings</button>
+                <button id="btn-continue" class="menu-btn primary" onclick="loadGame()" style="display: none;">Continue</button>
+                <button id="btn-newgame" class="menu-btn" onclick="checkNewGame()">New Game</button>
                 <button class="menu-btn" onclick="openModal('modal-controls')">Controls</button>
-                <button class="menu-btn" onclick="openModal('modal-about')" data-i18n="menu.about">About</button>
-                <button class="menu-btn" onclick="window.gameState._creditsReturnScreen='screen-mainmenu'; openCredits();" data-i18n="menu.credits">Credits</button>
-                <button class="menu-btn" onclick="showAchievementsScreen()" data-i18n="menu.achievements">Achievements</button>
+                <button class="menu-btn" onclick="openModal('modal-about')">About</button>
+                <button class="menu-btn" onclick="window.gameState._creditsReturnScreen='screen-mainmenu'; openCredits();">Credits</button>
+                <button class="menu-btn" onclick="showAchievementsScreen()">Achievements</button>
             </div>
-            <div class="game-version">v2.0.2</div>
+            <div class="game-version">v2.0.3</div>
+        </div>
+        
+        <div class="menu-footer-right">
+            <p id="menu-subtitle" class="menu-subtitle" data-i18n="menu.subtitle">Alupotha is waiting.</p>
+            <div class="menu-footer-row">
+                <button class="menu-icon-btn" onclick="openModal('modal-settings')" aria-label="Settings" title="Settings">⚙</button>
+                <button class="menu-dlc-btn" onclick="return false;">Downloadable Content <span style="font-size: 1rem; color: var(--gold);"></span></button>
+            </div>
+            <p class="menu-support-text">Visit chaturadissanayake.com to explore more work and access support.<br>Follow us on Instagram, TikTok, and Facebook @RoadRemains</p>
         </div>
     </div>
 
-    <!-- Game Paused Overlay (Aligned with game principles) -->
     <div id="overlay-pause" class="pause-overlay" role="dialog" aria-modal="true" aria-label="Game paused">
         <div class="pause-content">
             <div style="font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); margin-bottom: 2.5rem; font-weight: 700;">Paused</div>
@@ -79,19 +88,11 @@
                 <button class="menu-btn primary" onclick="togglePause()">Resume</button>
                 <button class="menu-btn" onclick="togglePause(); openModal('modal-settings')">Settings</button>
                 <button class="menu-btn" onclick="togglePause(); openModal('modal-controls')">Controls</button>
-                <button class="menu-btn" onclick="showGaugeTutorial()">How Gauges Work</button>
                 <button class="menu-btn" onclick="exitToMainMenu()">Exit to Menu</button>
-            </div>
-            <div class="pause-achievements">
-                <div class="pause-ach-title">Achievements</div>
-                <div class="pause-ach-list" id="pause-ach-list">
-                    <div class="pause-ach-empty">No achievements yet. Keep exploring.</div>
-                </div>
             </div>
         </div>
     </div>
 
-<!-- Modals -->
     <div id="modal-controls" class="modal-overlay">
         <div class="modal-content" role="dialog" aria-labelledby="controls-title" aria-modal="true">
             <h2 id="controls-title">Controls</h2>
@@ -100,6 +101,7 @@
                 <div class="control-item"><span>Mouse / Touch</span><span>Interact &amp; Select</span></div>
                 <div class="control-item"><span>Space / Enter</span><span>Advance Dialogue</span></div>
                 <div class="control-item"><span>Numbers 1 - 9</span><span>Select Dialogue Options</span></div>
+                <div class="control-item"><span>Tab / Shift+Tab</span><span>Navigate Options</span></div>
                 <div class="control-item"><span>Escape</span><span>Pause / Back / Close</span></div>
             </div>
             <button class="modal-close" onclick="closeModal('modal-controls')">Close</button>
@@ -110,7 +112,7 @@
         <div class="modal-content" role="dialog" aria-labelledby="about-title" aria-modal="true">
             <h2 id="about-title">About</h2>
             <span class="modal-divider"></span>
-<p class="modal-text">
+            <p class="modal-text">
                 Road Remains is an isometric civic education game set in the fictional Sri Lankan village of Alupotha, six weeks before an election. You explore the village from above, visiting the Grama Sevaka Office, the Elections Commission notice board, campaign tents, and your uncle's house, navigating voter registration, misinformation, and the quiet pressure of a community making up its mind.
             </p>
             <p class="modal-text" style="margin-top: -1rem;">
@@ -124,108 +126,67 @@
         </div>
     </div>
 
-    <!-- Credits Screen (cinematic full-screen scroll) -->
-
-    <!-- Credits Screen (cinematic full-screen scroll) -->
     <div id="screen-credits" class="screen credits-screen" role="dialog" aria-modal="true" aria-label="Credits">
         <div class="credits-scroll-outer">
             <div class="credits-scroll-inner" id="credits-scroll-inner">
 
-                <!-- Title card -->
                 <div class="credits-title-card">
                     <div class="credits-game-title">Road Remains</div>
                     <div class="credits-game-sub">A civic education game</div>
                 </div>
 
-<!-- Core Creator -->
                 <div class="credits-section">
                     <div class="credits-role">Direction, Design &amp; Development</div>
                     <div class="credits-name">Chatura Dissanayake</div>
                 </div>
 
-                <!-- Writing -->
                 <div class="credits-section">
                     <div class="credits-role">Writing &amp; Narrative</div>
                     <div class="credits-name">Imalee Nillekumbura</div>
+                    <div class="credits-name">Chameera Dissanayake</div>
                     <div class="credits-name">Chatura Dissanayake</div>
-                    <div class="credits-name-small">Anya Fernando (Narrative Consultant)</div>
+                    <div class="credits-name-small">TBC (Narrative Consultant)</div>
                 </div>
 
-                <!-- Art -->
                 <div class="credits-section">
                     <div class="credits-role">Art &amp; Visual Design</div>
                     <div class="credits-name">Praveen Dissanayake</div>
                     <div class="credits-name">Chatura Dissanayake</div>
-                    <div class="credits-name-small">Ruwan Silva (Environment Assets)</div>
-                    <div class="credits-name-small">Sarah Perera (UI Illustration)</div>
+                    <div class="credits-name-small">TBC (Environment Assets)</div>
+                    <div class="credits-name-small">TBC (UI Illustration)</div>
                 </div>
 
-                <!-- Audio -->
                 <div class="credits-section">
                     <div class="credits-role">Audio &amp; Music</div>
                     <div class="credits-name">Nathan Perera (Original Music)</div>
-                    <div class="credits-name">Chatura Dissanayake (Sound Design)</div>
-                    <div class="credits-name-small">Kavindu De Silva (Audio Mixing)</div>
+                    <div class="credits-name-small">TBC (Audio Mixing)</div>
                 </div>
 
-                <!-- Consultants -->
                 <div class="credits-section">
                     <div class="credits-role">Civic &amp; Cultural Consultants</div>
                     <div class="credits-name">Mr. Wimal Dissanayake</div>
                     <div class="credits-name">Mrs. Lakshmi Wilfred</div>
                 </div>
 
-                <!-- Localisation -->
                 <div class="credits-section">
                     <div class="credits-role">Localisation</div>
-                    <div class="credits-name-small">Karthik Rajan (Tamil Translation)</div>
-                    <div class="credits-name-small">Kasun Peiris (Sinhala Translation)</div>
+                    <div class="credits-name-small">TBC (Tamil Translation)</div>
+                    <div class="credits-name-small">TBC (Sinhala Translation)</div>
                 </div>
 
-                <!-- Voice -->
                 <div class="credits-section">
                     <div class="credits-role">Voice Cast</div>
-                    <div class="credits-name">TBC (Protagonists)</div>
-                    <div class="credits-name-small">Chamath De Silva (Uncle Sirisena - Prototype)</div>
+                    <div class="credits-name">Chamath De Silva</div>
+                    <div class="credits-name-small">TBC (Supporting Characters)</div>
                 </div>
 
-                <!-- Game Testing -->
                 <div class="credits-section">
                     <div class="credits-role">Quality Assurance</div>
+                    <div class="credits-name">Sri Lanka Reddit Community</div>
                     <div class="credits-name">Praveen Dissanayake</div>
-                    <div class="credits-name-small">Shenal Ratnayake (Lead QA)</div>
-                    <div class="credits-name-small">Sri Lanka Reddit Community Playtesters</div>
+                    <div class="credits-name-small">TBC (Lead QA)</div>
                 </div>
 
-                <!-- Tools -->
-                <div class="credits-section">
-                    <div class="credits-role">Built With</div>
-                    <div class="credits-name-small">HTML5 · CSS3 · Vanilla JavaScript · Adobe Creative Suite · itch.io</div>
-                </div>
-
-                <!-- AI Assistance -->
-                <div class="credits-section">
-                    <div class="credits-role">AI Assistance</div>
-                    <div class="credits-name-small">ChatGPT Free · Claude Sonnet 4.6 · Gemini 3.1 Pro</div>
-                </div>
-
-                <!-- Special Thanks -->
-                <div class="credits-section credits-section--thanks">
-                    <div class="credits-role">Special Thanks</div>
-                    <div class="credits-name">Family &amp; Friends</div>
-                    <div class="credits-name-small">For patience, feedback, and staying up late.</div>
-                </div>
-
-                <!-- Legal -->
-                <div class="credits-section credits-section--legal">
-                    <div class="credits-legal-text">
-                        All characters, candidates, and political parties depicted are fictional.<br>
-                        The Elections Commission of Sri Lanka is referenced as a public institution only.<br>
-                        Electoral procedures reflect Sri Lankan law as of 2024.
-                    </div>
-                </div>
-
-                <!-- Final card -->
                 <div class="credits-final-card">
                     <div class="credits-final-line">The road is still not fixed.</div>
                     <div class="credits-final-sub">© 2026 Chatura Dissanayake</div>
@@ -238,7 +199,6 @@
         </button>
     </div>
 
-    <!-- Overwrite Save Modal -->
     <div id="modal-overwrite" class="modal-overlay">
         <div class="modal-content" role="dialog" aria-labelledby="overwrite-title" aria-modal="true">
             <h2 id="overwrite-title">Start New Game?</h2>
@@ -251,40 +211,74 @@
     </div>
 
     <div id="modal-settings" class="modal-overlay">
-        <div class="modal-content" role="dialog" aria-labelledby="settings-title" aria-modal="true">
-            <h2 id="settings-title">Settings</h2>
-            <span class="modal-divider"></span>
-            <div class="setting-row">
-                <span class="setting-row-label" data-i18n="settings.motion">Reduce Motion</span>
-                <label class="game-switch">
-                    <input type="checkbox" id="setting-motion" onchange="updateSettings()">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="setting-row setting-row--slider">
-                <span class="setting-row-label" data-i18n="settings.music">Music</span>
-                <div class="volume-row">
-                    <input type="range" id="setting-music" class="game-slider" min="0" max="100" value="70" oninput="updateSettings()">
-                    <span class="volume-val" id="val-music">70</span>
+        <div class="modal-content" style="background: rgba(15, 18, 26, 0.95); backdrop-filter: blur(10px); padding: 3rem 4rem; max-width: 600px;" role="dialog" aria-labelledby="settings-title" aria-modal="true">
+            
+            <div class="setting-group" style="margin-bottom: 2rem;">
+                <span class="setting-label" style="color: var(--text-muted); font-size: 0.75rem; letter-spacing: 0.2em; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 1rem;">AUDIO</span>
+                
+                <div class="setting-row" style="padding: 8px 0;">
+                    <span class="setting-row-label" style="font-size: 0.8rem; color: #fff;">Master Volume</span>
+                    <div class="volume-row" style="max-width: 250px;">
+                        <input type="range" id="setting-master" class="game-slider" min="0" max="100" value="100" oninput="updateSettings()">
+                        <span class="volume-val" id="val-master" style="width: 32px;">100</span>
+                    </div>
+                </div>
+                <div class="setting-row" style="padding: 8px 0;">
+                    <span class="setting-row-label" style="font-size: 0.8rem; color: #fff;" data-i18n="settings.music">Music</span>
+                    <div class="volume-row" style="max-width: 250px;">
+                        <input type="range" id="setting-music" class="game-slider" min="0" max="100" value="70" oninput="updateSettings()">
+                        <span class="volume-val" id="val-music" style="width: 32px;">70</span>
+                    </div>
+                </div>
+                <div class="setting-row" style="padding: 8px 0;">
+                    <span class="setting-row-label" style="font-size: 0.8rem; color: #fff;" data-i18n="settings.sfx">SFX</span>
+                    <div class="volume-row" style="max-width: 250px;">
+                        <input type="range" id="setting-sfx" class="game-slider" min="0" max="100" value="35" oninput="updateSettings(true)">
+                        <span class="volume-val" id="val-sfx" style="width: 32px;">35</span>
+                    </div>
+                </div>
+                <div class="setting-row" style="padding: 8px 0;">
+                    <span class="setting-row-label" style="font-size: 0.8rem; color: #fff;">Mute All</span>
+                    <label class="game-switch"><input type="checkbox" id="setting-mute" onchange="updateSettings()"><span class="slider"></span></label>
                 </div>
             </div>
-            <div class="setting-row setting-row--slider">
-                <span class="setting-row-label" data-i18n="settings.sfx">SFX</span>
-                <div class="volume-row">
-                    <input type="range" id="setting-sfx" class="game-slider" min="0" max="100" value="80" oninput="updateSettings(true)">
-                    <span class="volume-val" id="val-sfx">80</span>
+
+            <div class="setting-group" style="margin-bottom: 2rem;">
+                <span class="setting-label" style="color: var(--text-muted); font-size: 0.75rem; letter-spacing: 0.2em; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 1rem;">DISPLAY</span>
+                
+                <div class="setting-row" style="padding: 8px 0;">
+                    <span class="setting-row-label" style="font-size: 0.8rem; color: #fff;">Display Subtitles</span>
+                    <label class="game-switch"><input type="checkbox" id="setting-subtitles" checked onchange="updateSettings()"><span class="slider"></span></label>
+                </div>
+                <div class="setting-row" style="padding: 8px 0;">
+                    <span class="setting-row-label" style="font-size: 0.8rem; color: #fff;">Autosave</span>
+                    <label class="game-switch"><input type="checkbox" id="setting-autosave" checked onchange="updateSettings()"><span class="slider"></span></label>
+                </div>
+                <div class="setting-row" style="padding: 8px 0;">
+                    <span class="setting-row-label" style="font-size: 0.8rem; color: #fff;" data-i18n="settings.motion">Reduce Motion</span>
+                    <label class="game-switch"><input type="checkbox" id="setting-motion" onchange="updateSettings()"><span class="slider"></span></label>
+                </div>
+                <div class="setting-row setting-row--slider" style="padding: 8px 0;">
+                    <span class="setting-row-label" style="font-size: 0.8rem; color: #fff;">Brightness</span>
+                    <div class="volume-row" style="max-width: 250px;">
+                        <input type="range" id="setting-brightness" class="game-slider" min="0" max="100" value="50" oninput="updateSettings()">
+                        <span class="volume-val" id="val-brightness" style="width: 32px;">50</span>
+                    </div>
                 </div>
             </div>
-            <div class="setting-divider"></div>
-            <div class="setting-row">
-                <span class="setting-row-label" data-i18n="settings.changelang">Language</span>
-                <button class="setting-action-btn" onclick="closeModal('modal-settings'); showScreen('screen-language');" data-i18n="settings.changelang">Change</button>
+
+            <div class="setting-group" style="margin-bottom: 0;">
+                <span class="setting-label" style="color: var(--text-muted); font-size: 0.75rem; letter-spacing: 0.2em; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 1rem;">LANGUAGE</span>
+                <div class="setting-row" style="padding: 8px 0;">
+                    <span class="setting-row-label" style="font-size: 0.8rem; color: #fff;">Current Language</span>
+                    <button class="setting-action-btn" id="btn-lang-display" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); padding: 8px 24px;" onclick="closeModal('modal-settings'); showScreen('screen-language');">ENGLISH</button>
+                </div>
             </div>
-            <button class="modal-close" onclick="closeModal('modal-settings');" data-i18n="ui.close">Close</button>
+
+            <button class="modal-close" style="margin-top: 3rem; border-top: none; color: var(--gold);" onclick="closeModal('modal-settings');" data-i18n="ui.close">Return to Game</button>
         </div>
     </div>
 
-    <!-- Character Confirmation Modal -->
     <div id="modal-char-confirm" class="modal-overlay">
         <div class="modal-content char-confirm-modal" role="dialog" aria-modal="true">
             <div class="char-confirm-eyebrow">You will play as</div>
@@ -293,10 +287,8 @@
                 <span class="char-confirm-counter">6</span> weeks until election day.
             </div>
             <div class="char-confirm-traits" id="confirm-traits">
-                <!-- Populated by JS -->
             </div>
             <div class="char-confirm-gauges" id="confirm-gauges">
-                <!-- Populated by JS -->
             </div>
             <p class="char-confirm-warning">Once you enter Alupotha, you cannot switch characters.</p>
             <div class="char-confirm-actions">
@@ -306,7 +298,6 @@
         </div>
     </div>
 
-    <!-- Screen: Achievements -->
     <div id="screen-achievements" class="screen">
         <div class="screen-bg-container" id="bg-achievements"></div>
         <button class="screen-back-btn" onclick="showScreen('screen-mainmenu')" aria-label="Close">
@@ -319,12 +310,10 @@
                 <div class="achievements-counter" id="ach-counter">0 / 0 Unlocked</div>
             </div>
             <div class="achievements-grid" id="achievements-grid">
-                <!-- Populated by renderAchievementsScreen() -->
             </div>
         </div>
     </div>
 
-    <!-- Screen 4: Character Selection -->
     <div id="screen-character" class="screen">
         <div class="screen-bg-container" id="bg-char-select"></div>
         <button class="screen-back-btn" onclick="closeModal('modal-char-confirm'); showScreen('screen-mainmenu');" aria-label="Close">
@@ -337,7 +326,6 @@
         </div>
 
         <div class="char-grid">
-            <!-- Karunasena -->
             <div class="char-card clickable-card" onclick="promptCharacterConfirm('Karunasena')" role="button" tabindex="0">
                 <div class="char-img-wrapper">
                     <img src="assets/characters/char_karunasena_neutral.jpeg" alt="Karunasena" data-initials="K" onerror="imgFallback(this)">
@@ -365,7 +353,6 @@
                 </div>
             </div>
             
-            <!-- Kamala -->
             <div class="char-card char-card--locked" role="button" tabindex="0" aria-disabled="true">
                 <div class="char-img-wrapper">
                     <img src="assets/characters/char_Kamala_neutral.jpeg" alt="Kamala" data-initials="I" onerror="imgFallback(this)">
@@ -394,7 +381,6 @@
                 </div>
             </div>
             
-            <!-- Kumaran -->
             <div class="char-card char-card--locked" role="button" tabindex="0" aria-disabled="true">
                 <div class="char-img-wrapper">
                     <img src="assets/characters/char_kumaran_neutral.jpeg" alt="Kumaran" data-initials="Ku" onerror="imgFallback(this)">
@@ -425,18 +411,17 @@
         </div>
     </div>
 
-    <!-- Screen 5: Opening Sequence -->
     <div id="screen-opening" class="screen">
         <div class="screen-bg-container" id="bg-opening"></div>
         <div id="opening-container">
             <div id="opening-lines"></div>
             <button id="opening-next" onclick="startGame()" data-i18n="opening.btn">Enter Alupotha</button>
+            <div id="opening-context" style="display: none; margin-top: 1rem; font-size: 0.85rem; color: rgba(255,255,255,0.6); font-style: italic;">Your journey begins here.</div>
         </div>
         <div class="skip-prompt" id="skip-prompt-el">Hold to skip</div>
         <div id="skip-hold-bar"><div id="skip-hold-fill"></div></div>
     </div>
 
-    <!-- Screen 6: Town Map & Gameplay -->
     <div id="screen-game" class="screen" role="main">
         <div id="game-container-16x9">
             <div class="top-bar">
@@ -489,18 +474,16 @@
 
             </div>
             <div class="top-bar-controls">
-                <div class="week-indicator"><span class="week-label" data-i18n="game.week">WEEK</span> <span id="week-val"></span></div>
-<button class="pause-btn" onclick="togglePause()" aria-label="Pause Menu">
-    PAUSE
-</button>
+                <div class="week-indicator"><span id="week-val"></span> <span class="week-label" style="margin-left: 4px;">WEEKS TO ELECTION</span></div>
+                <button class="pause-btn" onclick="togglePause()" aria-label="Pause Menu">PAUSE</button>
             </div>
         </div>
         <div id="objective-bar" aria-live="polite" aria-atomic="true" aria-label="Current objective">
-            <span id="objective-icon" aria-hidden="true">OBJ</span>
+            <span id="objective-icon" aria-hidden="true">OBJECTIVE</span>
             <span id="objective-text"></span>
         </div>
 
-<div id="map-svg-container">
+        <div id="map-svg-container">
             <div id="map-inner-wrap" style="transform: translate(0px, 0px) scale(1);">
                 <img src="assets/images/fullmap.webp" class="background-map" alt="Alupotha">
 
@@ -564,7 +547,7 @@
                     <div class="radar-ripple"></div>
                 </div>
 
-                <div class="map-location" data-loc="loc9" id="loc9-node" style="left:1064.28px; top:160.28px; pointer-events:none;" role="button" tabindex="0" aria-label="Polling Station - locked until Election Day">
+                <div class="map-location map-locked-node" data-loc="loc9" id="loc9-node" style="left:1064.28px; top:160.28px; pointer-events:none; opacity: 0.6; filter: grayscale(1);" role="button" tabindex="0" aria-label="Polling Station - locked until Election Day">
                     <img src="assets/images/school.png" class="map-asset" style="width:344.57px; height:auto;" alt="">
                     <div class="base-dot"></div>
                     <div class="radar-ripple"></div>
@@ -585,20 +568,14 @@
             </div>
         </div>
 
-        <!-- Dialogue Scene Wrapper (handles VN style layouts) -->
         <div id="dialogue-scene-wrapper" class="dialogue-scene-wrapper">
             <div id="location-bg-layer" class="location-bg-layer"></div>
             <div id="dialogue-overlay"></div>
             
-            <!-- VN Portraits Container (Behind Dialogue Panel) -->
             <div id="dialogue-portrait-container" class="vn-portrait-container vn-left"></div>
             <div id="dialogue-pc-portrait-container" class="vn-portrait-container vn-right"></div>
 
-            <!-- location-back-btn removed: dialogue text already directs players back to the map -->
             <div id="dialogue-panel" role="dialog" aria-modal="true">
-                <button id="dialogue-close" onclick="closeDialoguePanel()" aria-label="Close dialogue">
-                    Close
-                </button>
                 <div class="dialogue-content-wrapper">
                     <div class="dialogue-header">
                         <div class="dialogue-meta">
@@ -611,25 +588,22 @@
                         <div id="dialogue-options" style="display:none;"></div>
                     </div>
                 </div>
-            </div> <!-- Closes dialogue-panel -->
-        </div> <!-- Closes dialogue-scene-wrapper -->
-        </div> <!-- Closes game-container-16x9 -->
-    </div> <!-- Closes screen-game -->
+            </div>
+        </div>
+        </div>
+    </div>
 
-    <!-- Screen 7: Consequence / Ending -->
     <div id="screen-consequence" class="screen" role="alertdialog" aria-modal="true">
         <div class="screen-bg-container" id="bg-consequence"></div>
 
-        <!-- Phase 1: What happened (consequence of a single choice) -->
         <div class="cons-wrapper" id="cons-phase-choice">
-            <div class="cons-eyebrow">What happened.</div>
+            <div class="cons-eyebrow">Consequence</div>
             <p class="cons-text" id="cons-text"></p>
             <div class="cons-badges" id="cons-changes"></div>
             <button class="cons-btn" onclick="returnToGame()">Return to Alupotha</button>
         </div>
 
-        <!-- Phase 2: Game Ending (final score) - shown by showEnding() -->
-<div class="ending-wrapper ending-wrapper--animated" id="cons-phase-ending" style="display:none;">
+        <div class="ending-wrapper ending-wrapper--animated" id="cons-phase-ending" style="display:none;">
 
             <div class="ending-eyebrow" id="ending-label">Ending</div>
             <h2 class="ending-title" id="ending-title">The Road Remains</h2>
@@ -662,7 +636,7 @@
                 </div>
 
             </div>
-<div class="ending-actions">
+            <div class="ending-actions">
                 <button class="cons-btn primary" onclick="window.gameState._creditsReturnScreen='screen-mainmenu'; openCredits();">
                     Roll Credits
                 </button>
@@ -677,9 +651,8 @@
         </div>
     </div>
 
-    </div><!-- end #game-canvas -->
+    </div>
     
-    <!-- Audio Element Placeholders -->
     <audio id="bgm-player" loop preload="auto"></audio>
     <audio id="sfx-player" preload="auto"></audio>
 </body>

@@ -1,0 +1,34 @@
+alupotha/
+├── index.html                  ← The single entry point
+├── map-data.json               ← Map coordinates data
+├── README.md
+│
+├── css/                        ← STYLES FOLDER (Look here to change visuals/layouts)
+│   ├── variables.css           ← Colors (--gold, --bg-card), typography (--font-title), and visual effects (glows, gradients, shadows).
+│   ├── base.css                ← Global resets, Main Screens (Menus, Character Select, Credits), Modals (Settings), and core button styles (.game-btn).
+│   ├── map.css                 ← Town Map (SVG container, hover effects, radar pulses), HUD (top bar gauges), and Overlays (Objective bar, Week banner, Pause).
+│   └── dialogue.css            ← VN Panels (dialogue box, portraits), Media Cards (WhatsApp, Voicenote), Document Cards (Notices), and Ending screen UI.
+│
+├── js/                         ← LOGIC FOLDER (Look here to fix bugs or add mechanics)
+│   ├── config.js               ← Text translations (CONTENT), starting stats, achievements, Asset Maps (ALL image/audio file paths), and Opening lines.
+│   ├── state.js                ← The Brain's Memory (`window.gameState` tracking flags, week, location) and Save/Load functionality.
+│   ├── ui.js                   ← DOM Manipulation: Screen switching, canvas scaling, menu logic, progress banners, gauge/achievement UI updates, keyboard controls.
+│   └── engine.js               ← Game Engine: Scene routing (JSON paths), JSON fetching, dialogue rendering (drawing the text/cards), choice processing, and audio triggers.
+│
+├── scenes/                     ← JSON STORY FILES (Each file = one location visit)
+│   ├── prologue.json
+│   ├── week6/
+│   ├── week5/
+│   ├── week4/
+│   ├── week3/
+│   ├── week2/
+│   ├── week1/
+│   └── week0/
+│
+└── assets/                     ← MEDIA FILES (Must be registered in config.js to work)
+    ├── audio/                  ← .ogg (ambient loops) and .wav (sfx clicks/notifications)
+    ├── backgrounds/            ← 1920x1080 JPEGs for locations and menus
+    ├── characters/             ← PC portraits (Karunasena, Kamala, Kumaran)
+    ├── npcs/                   ← NPC portraits (Uncle, Nandadasa, Sergeant, etc.)
+    ├── ui/                     ← UI chrome (WhatsApp bubbles, UI icons, EC stamps)
+    └── props/                  ← In-scene clickable objects (Manifestos, EC notices, Road file)
